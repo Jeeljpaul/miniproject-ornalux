@@ -1,0 +1,92 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background: url('https://via.placeholder.com/800x600') no-repeat center center/cover;
+    height: 100vh;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.login-box {
+    background-color: rgba(255, 192, 203, 0.8); /* Light pink with transparency */
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+    width: 350px;
+}
+
+.login-box h1 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #000;
+    margin-bottom: 20px;
+}
+
+.nav-tabs .nav-link {
+    color: #000;
+    font-weight: bold;
+    margin: 0 5px;
+    padding: 5px 10px;
+    border: none;
+    background-color: transparent;
+}
+
+.nav-tabs .nav-link.active {
+    color: #000;
+    border-bottom: 2px solid #000;
+}
+
+.form-control {
+    background-color: #f8d7da;
+    border-radius: 25px;
+    padding: 10px 20px;
+    font-size: 1rem;
+}
+
+.form-control:focus {
+    box-shadow: none;
+    border-color: #ff85a2;
+}
+
+.btn {
+    border-radius: 25px;
+    padding: 10px;
+    font-size: 1rem;
+}
+
+.social-login img {
+    width: 35px;
+    height: 35px;
+}
+
+.position-relative {
+    position: relative;
+}
+
+.position-absolute {
+    position: absolute;
+}
+
+.end-0 {
+    right: 0;
+}
+
+.top-0 {
+    top: 0;
+}
+
+.mt-2 {
+    margin-top: 0.5rem;
+}
+
+.me-3 {
+    margin-right: 1rem;
+}

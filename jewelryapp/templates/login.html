@@ -1,0 +1,206 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - ORNALUX</title>
+    <style>
+        /* General Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: url("{% static 'images/pic_6.jpg' %}") no-repeat center center/cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .login-box {
+            background-color: rgba(226, 202, 198, 0.9); 
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .login-box h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #000;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .tabs a {
+            font-size: 1.2rem;
+            text-decoration: none;
+            color: #aaa;
+            margin: 0 10px;
+            padding: 10px;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tabs a.active {
+            color: #000;
+            border-bottom: 2px solid #000;
+        }
+
+        .input-box {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .input-box input {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            background-color: #EBB9B9;
+            font-size: 1rem;
+            color: #555;
+        }
+
+        .input-box .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #888;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            background-color: #000;
+            color: #fff;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .login-btn:hover {
+            background-color: #333;
+        }
+
+        .forgot-password {
+            display: block;
+            margin-top: 15px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            color: #555;
+            transition: color 0.3s ease;
+        }
+
+        .forgot-password:hover {
+            color: #000;
+        }
+
+        .social-login {
+            margin-top: 25px;
+        }
+
+        .social-login p {
+            color: #aaa;
+            font-size: 1rem;
+        }
+
+        .social-icons {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .social-icons a {
+            margin: 0 10px;
+        }
+
+        .social-icons img {
+            width: 35px;
+            height: 35px;
+        }
+
+        @media (max-width: 480px) {
+            .login-box {
+                padding: 20px;
+            }
+
+            .login-box h1 {
+                font-size: 2rem;
+            }
+
+            .tabs a {
+                font-size: 1rem;
+                margin: 0 5px;
+            }
+
+            .input-box input {
+                padding: 12px;
+            }
+
+            .login-btn {
+                font-size: 1rem;
+                padding: 12px;
+            }
+
+            .social-icons img {
+                width: 30px;
+                height: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <h1>ORNALUX</h1>
+        <div class="tabs">
+            <a href="#" class="active">Login</a>
+            <a href="/register/">Sign up</a>
+        </div>
+        <form method="POST" action="/login/">
+            {% csrf_token %}
+            <div class="input-box">
+                <input type="email" name="email" placeholder="Enter your email" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" title="Please enter a valid email address">
+            </div>
+            <div class="input-box">
+                <input type="password" name="password" placeholder="Enter Password" required minlength="8" title="Password must be at least 8 characters long">
+                <span class="toggle-password">&#128065;</span>
+            </div>
+            <button type="submit" class="login-btn">Login</button>
+            <a href="/forgot_password/" class="forgot-password">Forgot Password?</a>
+        </form>
+        
+        <div class="social-login">
+            <p>Or</p>
+            <div class="social-icons">
+                <a href="#"><img src="{% static 'images/google-logo.png' %}" alt="Google"></a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.querySelector('.toggle-password').addEventListener('click', function () {
+            const passwordInput = document.querySelector('input[name="password"]');
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            this.textContent = type === 'password' ? '👁' : '🙈';
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ornalux - Create Account</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Istok Web', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            background-color: #D2B0A7;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            background: #E2CAC6;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .title {
+            font-family: 'Italianno', cursive;
+            font-size: 48px;
+            color: #111010;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 28px;
+            color: #000000;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .form-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-between;
+        }
+
+        .form-group {
+            flex: 0 0 48%;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            font-size: 18px;
+            color: #5F7C8D;
+            margin-bottom: 5px;
+        }
+
+        .form-group input {
+            height: 40px;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 10px;
+            background: #EBB9B9;
+            font-size: 16px;
+        }
+
+        .submit-button {
+            width: 150px;
+            height: 40px;
+            background: #000000;
+            border-radius: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px auto 0;
+        }
+
+        .submit-button span {
+            font-size: 18px;
+            color: #FFFFFF;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">ORNALUX</div>
+        <div class="subtitle">Create Account</div>
+        
+        <form method="POST" action="/register/">
+            {% csrf_token %}
+            <div class="form-container">
+                <div class="form-group">
+                    <input type="text" id="name" name="name" placeholder="Enter Your Name" value="{{ form.name.value|default_if_none:'' }}">
+                    {{ form.name.errors }}
+                </div>
+
+                <div class="form-group">
+                    <input type="date" id="dob" name="dob" value="{{ form.dob.value|default_if_none:'' }}">
+                    {{ form.dob.errors }}
+                </div>
+
+                <div class="form-group">
+                    <input type="text" id="phone_number" name="phone_number" placeholder="Enter Your Phone Number" value="{{ form.phone_number.value|default_if_none:'' }}">
+                    {{ form.phone_number.errors }}
+                </div>
+
+                <div class="form-group">
+                    <input type="email" id="email" name="email" placeholder="Enter Your Email" value="{{ form.email.value|default_if_none:'' }}">
+                    {{ form.email.errors }}
+                </div>
+
+                <div class="form-group">
+                    <input type="password" id="password" name="password" placeholder="Enter Your Password" value="{{ form.password.value|default_if_none:'' }}">
+                    {{ form.password.errors }}
+                </div>
+
+                <div class="form-group">
+                    <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm Password">
+                    {{ form.confirm_password.errors }}
+                </div>
+            </div>
+
+            <button type="submit" class="submit-button">
+                <span>Sign Up</span>
+            </button>
+        </form>
+    </div>
+</body>
+</html>
