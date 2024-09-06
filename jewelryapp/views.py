@@ -123,3 +123,12 @@ def reset_password(request, token):
             messages.error(request, 'Passwords do not match or are not long enough')
     
     return render(request, 'password_reset.html')
+
+
+
+
+
+# admin views.py--------------------------------------------------------------------------------------------
+
+def adminhome(request):
+    return render(request, 'admin/adminhome.html')

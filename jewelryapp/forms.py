@@ -96,10 +96,10 @@ class RegistrationForm(forms.ModelForm):
 
         return user
 
-
 # Password Reset Request Form should be outside the RegistrationForm class
 class PasswordResetRequestForm(forms.Form):
     email = forms.EmailField(max_length=254, required=True, widget=forms.EmailInput(attrs={
         'placeholder': 'Enter your email',
         'class': 'form-control'
     }))
+

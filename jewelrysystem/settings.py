@@ -129,6 +129,6 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'jeeljpaul2025@mca.ajce.in'
-EMAIL_HOST_PASSWORD = '143r3sdj'
+EMAIL_HOST_PASSWORD = '#####'
 DEFAULT_FROM_EMAIL = 'jeeljpaul2025@mca.ajce.in'  # Email sender's address
 

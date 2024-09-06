@@ -11,6 +11,7 @@ urlpatterns = [
     path('register/',views.register),
     path('forgot_password/', views.forgot_password),
     path('reset-password/<str:token>/', views.reset_password),
+    path('adminhome/', views.adminhome),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

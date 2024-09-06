@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Product</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="text-center">Add New Product</h2>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <!-- Product Name -->
+            <div class="form-group">
+                <label for="product_name">Product Name</label>
+                <input type="text" class="form-control" id="product_name" name="product_name" required>
+            </div>
+
+            <!-- Product Description -->
+            <div class="form-group">
+                <label for="product_description">Product Description</label>
+                <textarea class="form-control" id="product_description" name="product_description" rows="5" required></textarea>
+            </div>
+
+            <!-- Category -->
+            <div class="form-group">
+                <label for="category">Category</label>
+                <select class="form-control" id="category" name="category" required>
+                    <option value="Ring">Ring</option>
+                    <option value="Earring">Earring</option>
+                    <option value="Bracelet">Bracelet</option>
+                    <!-- Add more categories as needed -->
+                </select>
+            </div>
+
+            <!-- Subcategory -->
+            <div class="form-group">
+                <label for="subcategory">Subcategory</label>
+                <input type="text" class="form-control" id="subcategory" name="subcategory" required>
+            </div>
+
+            <!-- Price -->
+            <div class="form-group">
+                <label for="price">Price</label>
+                <input type="number" class="form-control" id="price" name="price" required>
+            </div>
+
+            <!-- Discount -->
+            <div class="form-group">
+                <label for="discount">Discount (%)</label>
+                <input type="number" class="form-control" id="discount" name="discount">
+            </div>
+
+            <!-- Stock Quantity -->
+            <div class="form-group">
+                <label for="stock_quantity">Stock Quantity</label>
+                <input type="number" class="form-control" id="stock_quantity" name="stock_quantity" required>
+            </div>
+
+            <!-- Weight -->
+            <div class="form-group">
+                <label for="weight">Weight (grams)</label>
+                <input type="number" class="form-control" id="weight" name="weight" required>
+            </div>
+
+            <!-- Material -->
+            <div class="form-group">
+                <label for="material">Material</label>
+                <input type="text" class="form-control" id="material" name="material" required>
+            </div>
+
+            <!-- Metal Type -->
+            <div class="form-group">
+                <label for="metal_type">Metal Type</label>
+                <input type="text" class="form-control" id="metal_type" name="metal_type" required>
+            </div>
+
+            <!-- Gemstones -->
+            <div class="form-group">
+                <label for="gemstones">Gemstones</label>
+                <input type="text" class="form-control" id="gemstones" name="gemstones">
+            </div>
+
+            <!-- Gender -->
+            <div class="form-group">
+                <label for="gender">Gender</label>
+                <select class="form-control" id="gender" name="gender" required>
+                    <option value="Men">Men</option>
+                    <option value="Women">Women</option>
+                    <option value="Unisex">Unisex</option>
+                </select>
+            </div>
+
+            <!-- Occasion -->
+            <div class="form-group">
+                <label for="occasion">Occasion</label>
+                <input type="text" class="form-control" id="occasion" name="occasion" required>
+            </div>
+
+            <!-- Images -->
+            <div class="form-group">
+                <label for="images">Product Images</label>
+                <input type="file" class="form-control-file" id="images" name="images" multiple required>
+            </div>
+
+            <!-- Video -->
+            <div class="form-group">
+                <label for="video">Product Video</label>
+                <input type="file" class="form-control-file" id="video" name="video">
+            </div>
+
+            <!-- SKU -->
+            <div class="form-group">
+                <label for="sku">SKU (Stock Keeping Unit)</label>
+                <input type="text" class="form-control" id="sku" name="sku" required>
+            </div>
+
+            <!-- Try at Home Option -->
+            <div class="form-group form-check">
+                <input type="checkbox" class="form-check-input" id="try_at_home" name="try_at_home">
+                <label class="form-check-label" for="try_at_home">Available for Try at Home</label>
+            </div>
+
+            <!-- Delivery Options -->
+            <div class="form-group">
+                <label for="delivery_options">Delivery Options</label>
+                <textarea class="form-control" id="delivery_options" name="delivery_options" rows="2" required></textarea>
+            </div>
+
+            <!-- Return Policy -->
+            <div class="form-group">
+                <label for="return_policy">Return Policy</label>
+                <textarea class="form-control" id="return_policy" name="return_policy" rows="2"></textarea>
+            </div>
+
+            <!-- Tags -->
+            <div class="form-group">
+                <label for="tags">Tags</label>
+                <input type="text" class="form-control" id="tags" name="tags" placeholder="e.g. gold, diamond, wedding">
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary">Add Product</button>
+        </form>
+    </div>
+</body>
+</html>
