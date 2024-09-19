@@ -132,3 +132,5 @@ def reset_password(request, token):
 
 def adminhome(request):
     return render(request, 'admin/adminhome.html')
+
+

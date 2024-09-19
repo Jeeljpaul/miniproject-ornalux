@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ornalux - Admin Panel</title>
+    <title>Enchanted Eden - Admin Panel</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         body {
@@ -68,32 +68,29 @@
     <!-- Sidebar -->
     <div class="d-flex" id="wrapper">
         <div class="bg-light border-right" id="sidebar-wrapper">
-            <div class="sidebar-heading">Ornalux Admin</div>
+            <div class="sidebar-heading">Enchanted Eden Admin</div>
             <div class="list-group list-group-flush">
                 <!-- Manage Categories -->
-                
-                    <div class="dropdown">
-                        <button class="btn btn-secondary dropdown-toggle" type="button" id="categoryDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Manage Category
-                        </button>
-                        <div class="dropdown-menu" aria-labelledby="categoryDropdown">
-                            <a class="dropdown-item" href="{% url 'add_category' %}">Add Category</a>
-                            <a class="dropdown-item" href="{% url 'update_category' %}">Update Category</a>
-                            <a class="dropdown-item" href="{% url 'delete_category' %}">Delete Category</a>
-                        </div>
+                <div class="dropdown">
+                    <a class="list-group-item list-group-item-action bg-light dropdown-toggle" href="#" id="categoryDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Manage Category
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="categoryDropdown">
+                        <a class="dropdown-item" href="{% url 'products:add_category' %}">Add Category</a>
+                        <a class="dropdown-item" href="{% url 'products:category_list' %}">View Categories</a>
                     </div>
+                </div>
                 
-                <!-- Manage Products -->
                 <div class="dropdown">
                     <a class="list-group-item list-group-item-action bg-light dropdown-toggle" href="#" id="productsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Manage Products
                     </a>
                     <div class="dropdown-menu" aria-labelledby="productsDropdown">
-                        <a class="dropdown-item" href="{% url 'add_product' %}">Add Product</a>
-                        <a class="dropdown-item" href="{% url 'update_product' %}">Update Product</a>
-                        <a class="dropdown-item" href="{% url 'delete_product' %}">Delete Product</a>
+                        <a class="dropdown-item" href="{% url 'products:add_product' %}">Add Product</a>
+                        <a class="dropdown-item" href="{% url 'products:product_list' %}">View Products</a>
                     </div>
                 </div>
+                
 
                 <!-- Manage Users -->
                 <div class="dropdown">
@@ -104,6 +101,7 @@
                         <a class="dropdown-item" href="{% url 'add_user' %}">Add User</a>
                         <a class="dropdown-item" href="{% url 'update_user' %}">Update User</a>
                         <a class="dropdown-item" href="{% url 'delete_user' %}">Delete User</a>
+                        <a class="dropdown-item" href="{% url 'delete_user' %}">View User</a>
                     </div>
                 </div>
 
@@ -179,7 +177,7 @@
 
             <div class="container-fluid">
                 <h1 class="mt-4">Dashboard</h1>
-                <p>Welcome to the admin panel of Ornalux. Manage your nursery effectively using the options in the sidebar.</p>
+                <p>Welcome to the admin panel of Enchanted Eden. Manage your nursery effectively using the options in the sidebar.</p>
                 
                 <!-- Sample dashboard content -->
                 <div class="row">
@@ -212,15 +210,28 @@
             </div>
         </div>
     </div>
+<!-- Bootstrap core JavaScript -->
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+        document.querySelectorAll('.dropdown-toggle').forEach(item => {
+            item.addEventListener('click', function() {
+                const menu = this.nextElementSibling;
+                menu.classList.toggle('show');
+            });
+        });
 
-    <!-- Bootstrap core JavaScript -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
-    <!-- Custom JavaScript -->
-    <script>
-        // Removed the toggle menu function since the sidebar is visible by default
+        document.addEventListener('click', function(e) {
+            if (!e.target.classList.contains('dropdown-toggle')) {
+                document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                    if (menu.classList.contains('show')) {
+                        menu.classList.remove('show');
+                    }
+                });
+            }
+        });
     </script>
+
 </body>
 </html>
