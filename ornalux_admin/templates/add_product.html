@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Product</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <style>
+        body {
+            background-color: #f7f7f7;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin-top: 50px;
+        }
+        h2 {
+            font-family: 'Arial', sans-serif;
+            font-weight: 600;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        .form-group label {
+            font-weight: 500;
+        }
+        .form-control, .form-control-file {
+            border-radius: 4px;
+        }
+        button {
+            border-radius: 4px;
+            padding: 10px 20px;
+        }
+        .form-check-label {
+            margin-left: 5px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-control::placeholder {
+            color: #999;
+            opacity: 0.7;
+        }
+        .form-group .form-control-file {
+            padding-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="text-center">Add New Product</h2>
+        <form id="productForm" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <!-- Product Name -->
+            <div class="form-group">
+                <label for="product_name">Product Name</label>
+                <input type="text" class="form-control" id="product_name" name="product_name" placeholder="Enter product name" required>
+            </div>
+
+            <!-- Product Description -->
+            <div class="form-group">
+                <label for="product_description">Product Description</label>
+                <textarea class="form-control" id="product_description" name="product_description" rows="4" placeholder="Describe the product in detail" required></textarea>
+            </div>
+
+            <!-- Category -->
+            <div class="form-group">
+                <label for="category">Category</label>
+                <select class="form-control" id="category" name="category" required>
+                    <option value="Ring">Ring</option>
+                    <option value="Earring">Earring</option>
+                    <option value="Bracelet">Bracelet</option>
+                </select>
+            </div>
+
+            <!-- Subcategory -->
+            <div class="form-group">
+                <label for="subcategory">Subcategory</label>
+                <input type="text" class="form-control" id="subcategory" name="subcategory" placeholder="e.g. Gold, Silver" required>
+            </div>
+
+            <!-- Price -->
+            <div class="form-group">
+                <label for="price">Price</label>
+                <input type="number" class="form-control" id="price" name="price" placeholder="Enter price in USD" required>
+            </div>
+
+            <!-- Discount -->
+            <div class="form-group">
+                <label for="discount">Discount (%)</label>
+                <input type="number" class="form-control" id="discount" name="discount" placeholder="Optional">
+            </div>
+
+            <!-- Stock Quantity -->
+            <div class="form-group">
+                <label for="stock_quantity">Stock Quantity</label>
+                <input type="number" class="form-control" id="stock_quantity" name="stock_quantity" placeholder="Enter available stock" required>
+            </div>
+
+            <!-- Weight -->
+            <div class="form-group">
+                <label for="weight">Weight (grams)</label>
+                <input type="number" class="form-control" id="weight" name="weight" placeholder="Enter product weight" required>
+            </div>
+
+            <!-- Material -->
+            <div class="form-group">
+                <label for="material">Material</label>
+                <input type="text" class="form-control" id="material" name="material" placeholder="Enter material type" required>
+            </div>
+
+            <!-- Metal Type -->
+            <div class="form-group">
+                <label for="metal_type">Metal Type</label>
+                <input type="text" class="form-control" id="metal_type" name="metal_type" placeholder="e.g. Gold, Platinum" required>
+            </div>
+
+            <!-- Gemstones -->
+            <div class="form-group">
+                <label for="gemstones">Gemstones</label>
+                <input type="text" class="form-control" id="gemstones" name="gemstones" placeholder="Optional">
+            </div>
+
+            <!-- Gender -->
+            <div class="form-group">
+                <label for="gender">Gender</label>
+                <select class="form-control" id="gender" name="gender" required>
+                    <option value="Men">Men</option>
+                    <option value="Women">Women</option>
+                    <option value="Unisex">Unisex</option>
+                </select>
+            </div>
+
+            <!-- Occasion -->
+            <div class="form-group">
+                <label for="occasion">Occasion</label>
+                <input type="text" class="form-control" id="occasion" name="occasion" placeholder="e.g. Wedding, Casual" required>
+            </div>
+
+            <!-- Images -->
+            <div class="form-group">
+                <label for="images">Product Images</label>
+                <input type="file" class="form-control-file" id="images" name="images" multiple required>
+            </div>
+
+            <!-- SKU -->
+            <div class="form-group">
+                <label for="sku">SKU (Stock Keeping Unit)</label>
+                <input type="text" class="form-control" id="sku" name="sku" placeholder="Unique product identifier" required>
+            </div>
+
+            <!-- Try at Home Option -->
+            <div class="form-group form-check">
+                <input type="checkbox" class="form-check-input" id="try_at_home" name="try_at_home">
+                <label class="form-check-label" for="try_at_home">Available for Try at Home</label>
+            </div>
+
+            <!-- Delivery Options -->
+            <div class="form-group">
+                <label for="delivery_options">Delivery Options</label>
+                <textarea class="form-control" id="delivery_options" name="delivery_options" rows="2" placeholder="e.g. Free delivery in 7 days" required></textarea>
+            </div>
+
+            <!-- Return Policy -->
+            <div class="form-group">
+                <label for="return_policy">Return Policy</label>
+                <textarea class="form-control" id="return_policy" name="return_policy" rows="2" placeholder="e.g. 30-day return policy"></textarea>
+            </div>
+
+            <!-- Tags -->
+            <div class="form-group">
+                <label for="tags">Tags</label>
+                <input type="text" class="form-control" id="tags" name="tags" placeholder="e.g. gold, diamond, wedding">
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary btn-block">Add Product</button>
+        </form>
+    </div>
+
+    <script>
+        // JavaScript validation for the form
+        function validateForm() {
+            var productName = document.getElementById("product_name").value;
+            var price = document.getElementById("price").value;
+            var stockQuantity = document.getElementById("stock_quantity").value;
+
+            if (productName == "") {
+                alert("Product name must be filled out");
+                return false;
+            }
+            if (price <= 0) {
+                alert("Price must be a positive number");
+                return false;
+            }
+            if (stockQuantity <= 0) {
+                alert("Stock quantity must be a positive number");
+                return false;
+            }
+
+            return true; // All validations passed
+        }
+
+        // Show a success message after form submission
+        function showSuccessMessage(event) {
+            event.preventDefault(); // Prevent the default form submission behavior
+            if (validateForm()) {
+                var formData = new FormData(document.getElementById('productForm'));
+
+                fetch("{% url 'add_product' %}", {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        document.getElementById('productForm').reset(); // Clear the form fields
+                    } else {
+                        alert('An error occurred: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            }
+        }
+
+        // Attach the showSuccessMessage function to the form submit event
+        document.getElementById('productForm').addEventListener('submit', showSuccessMessage);
+    </script>
+</body>
+</html>
