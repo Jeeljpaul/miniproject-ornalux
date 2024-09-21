@@ -32,7 +32,14 @@ class Product(models.Model):
     delivery_options = models.TextField()
     return_policy = models.TextField(blank=True)
     tags = models.CharField(max_length=255, blank=True)
-    images = models.ImageField(upload_to='product_images/')
 
     def __str__(self):
         return self.product_name
+
+class ProductImage(models.Model):
+    pimage_id = models.AutoField(primary_key=True)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
+    image = models.ImageField(upload_to='product_images/')
+
+    def __str__(self):
+        return f"Image for {self.product.product_name}"

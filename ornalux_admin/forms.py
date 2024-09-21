@@ -1,5 +1,5 @@
 from django import forms
-from .models import Product
+from .models import *
 from django.core.exceptions import ValidationError
 import re
 
@@ -10,15 +10,15 @@ class ProductForm(forms.ModelForm):
         fields = [
             'product_name', 'product_description', 'category', 'subcategory', 'price',
             'discount', 'stock_quantity', 'weight', 'material', 'metal_type', 'gemstones',
-            'gender', 'occasion', 'sku', 'try_at_home', 'delivery_options', 'return_policy', 'tags', 'images'
+            'gender', 'occasion', 'sku', 'try_at_home', 'delivery_options', 'return_policy', 'tags'
         ]
-        widgets = {
-            'product_description': forms.Textarea(attrs={'rows': 4}),
-            'delivery_options': forms.Textarea(attrs={'rows': 2}),
-            'return_policy': forms.Textarea(attrs={'rows': 2}),
-            'images': forms.ClearableFileInput(attrs={'multiple': True}),
-        }
 
+class ProductImageForm(forms.ModelForm):
+    images = forms.FileField(widget=forms.FileInput(attrs={'multiple': True}), required=False)
+    class Meta:
+        model = ProductImage
+        fields = ['images']
+        
     def clean_product_name(self):
         product_name = self.cleaned_data.get('product_name')
         if re.search(r'\d|[^a-zA-Z\s]', product_name):

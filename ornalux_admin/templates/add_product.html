@@ -52,8 +52,11 @@
 <body>
     <div class="container mt-5">
         <h2 class="text-center">Add New Product</h2>
-        <form id="productForm" method="POST" enctype="multipart/form-data">
+        <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
+            {{ form.as_p }}
+            {{ image_form.as_p }}
+        
             
             <!-- Product Name -->
             <div class="form-group">
@@ -228,12 +231,14 @@
                     }
                 })
                 .catch(error => {
+                    // Catch statement continued
                     console.error('Error:', error);
+                    alert('An unexpected error occurred. Please try again later.');
                 });
             }
         }
 
-        // Attach the showSuccessMessage function to the form submit event
+        // Attach event listener to the form submission
         document.getElementById('productForm').addEventListener('submit', showSuccessMessage);
     </script>
 </body>
