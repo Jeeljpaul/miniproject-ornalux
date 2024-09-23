@@ -19,4 +19,15 @@ class Tbl_user(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Tbl_staff(models.Model):
+    staff_id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100)
+    role = models.CharField(max_length=50)
+    contact_details = models.CharField(max_length=15)  # Assuming contact details like phone number
+    login = models.ForeignKey(Tbl_login, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
  

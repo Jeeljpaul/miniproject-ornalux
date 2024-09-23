@@ -24,8 +24,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'jewelryapp',
-    'ornalux_admin'
+    'jewelryapp'
 ]
 
 MIDDLEWARE = [

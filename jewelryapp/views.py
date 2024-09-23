@@ -58,18 +58,37 @@ def login(request):
             messages.error(request, 'Password must be at least 8 characters long')
             return redirect('/login/')
 
-        # Authentication logic
+        # Check if the user is admin
+        if email == 'admin123@gmail.com' and password == 'admin123':
+            # Admin login success
+            request.session['user_type'] = 'admin'
+            request.session['email'] = email
+            return redirect('/adminhome/')  # Redirect to admin home page
+
+        # Check if the user is staff
+        try:
+            staff = Staff.objects.get(login__email=email, login__password=password)
+            # Staff login success
+            request.session['user_type'] = 'staff'
+            request.session['staff_id'] = staff.staff_id
+            request.session['email'] = staff.login.email
+            return redirect('/staff_home/')  # Redirect to staff dashboard
+        except Staff.DoesNotExist:
+            pass
+
+        # Check if the user is a regular user
         try:
             user = Tbl_login.objects.get(email=email, password=password)
             # Set session data after successful login
             request.session['user_id'] = user.login_id
             request.session['email'] = user.email
-            return redirect('/base_home/')  # Redirect to home page or dashboard after login
+            return redirect('/base_home/')  # Redirect to user home page or dashboard
         except Tbl_login.DoesNotExist:
             messages.error(request, 'Invalid email or password')
             return redirect('/login/')
-
+    
     return render(request, 'login.html')
+
 
 def forgot_password(request):
     if request.method == 'POST':
@@ -133,4 +152,5 @@ def reset_password(request, token):
 def adminhome(request):
     return render(request, 'admin/adminhome.html')
 
-
+def staffhome(request):
+    return render(request, 'staffhome.html')

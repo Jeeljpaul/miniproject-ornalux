@@ -3,157 +3,187 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enchanted Eden - Admin Panel</title>
+    <title>Ornalux - Admin Panel</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            overflow-x: hidden; /* Remove horizontal scrollbar */
-        }
+       body {
+    font-family: 'Arial', sans-serif;
+    overflow-x: hidden; /* Remove horizontal scrollbar */
+    background-color: #f5f5f5; /* Add subtle background color */
+}
 
-        #sidebar-wrapper {
-            min-height: 100vh;
-            margin-left: 0;
-            transition: margin 0.25s ease-out;
-        }
+#sidebar-wrapper {
+    min-height: 100vh;
+    margin-left: 0;
+    transition: margin 0.25s ease-out;
+    background-color: #343a40; /* Dark sidebar */
+}
 
-        #page-content-wrapper {
-            width: 100vw;
-            padding: 20px;
-        }
+#sidebar-wrapper .sidebar-heading {
+    padding: 1rem;
+    font-size: 1.5rem;
+    background-color: #212529; /* Darker heading for contrast */
+    color: #fff;
+    text-align: center;
+}
 
-        .navbar {
-            padding-left: 0;
-        }
+.list-group-item {
+    border: none;
+    background-color: transparent;
+    color: #0a0a0a; /* Light text color */
+}
 
-        .list-group-item {
-            border: none;
-            background-color: transparent;
-            color: #333;
-        }
+.list-group-item:hover, .list-group-item:focus {
+    background-color: #495057; /* Darker hover effect */
+    color: #fff;
+}
 
-        .list-group-item:hover, .list-group-item:focus {
-            background-color: #e7e7e7;
-            color: #333;
-        }
+#page-content-wrapper {
+    width: 100vw;
+    padding: 20px;
+}
 
-        .card {
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
+.navbar {
+    padding-left: 0;
+}
 
-        .card-title {
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
-        }
+.navbar-light {
+    background-color: #e9ecef; /* Light navbar background */
+}
 
-        .card-text {
-            font-size: 1rem;
-        }
+.card {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Softer shadow for cards */
+    border: none; /* Remove card borders */
+}
 
-        .dropdown-menu {
-            width: 100%;
-            background-color: #f8f9fa;
-        }
+.card-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
 
-        .dropdown-item {
-            color: #333;
-        }
+.card-text {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
 
-        .dropdown-item:hover, .dropdown-item:focus {
-            background-color: #e7e7e7;
-        }
+.card-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.card-success {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.card-warning {
+    background-color: #ffc107;
+    border-color: #ffc107;
+}
+
+.card-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.dropdown-menu {
+    background-color: #343a40;
+    color: #fff;
+}
+
+.dropdown-item {
+    color: #fff;
+}
+
+.dropdown-item:hover, .dropdown-item:focus {
+    background-color: #495057;
+}
+
+.container-fluid h1 {
+    color: #343a40;
+    font-weight: 600;
+}
+
+.container-fluid p {
+    color: #6c757d;
+}
+
+@media (max-width: 768px) {
+    #sidebar-wrapper {
+        margin-left: -250px;
+        transition: margin 0.25s ease-out;
+    }
+
+    #wrapper.toggled #sidebar-wrapper {
+        margin-left: 0;
+    }
+}
+
     </style>
 </head>
 <body>
     <!-- Sidebar -->
     <div class="d-flex" id="wrapper">
         <div class="bg-light border-right" id="sidebar-wrapper">
-            <div class="sidebar-heading">Enchanted Eden Admin</div>
+            <div class="sidebar-heading">Ornalux Admin</div>
             <div class="list-group list-group-flush">
-                <!-- Manage Categories -->
-                <div class="dropdown">
-                    <a class="list-group-item list-group-item-action bg-light dropdown-toggle" href="#" id="categoryDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Manage Category
-                    </a>
-                    <div class="dropdown-menu" aria-labelledby="categoryDropdown">
-                        <a class="dropdown-item" href="{% url 'products:add_category' %}">Add Category</a>
-                        <a class="dropdown-item" href="{% url 'products:category_list' %}">View Categories</a>
-                    </div>
-                </div>
-                
-                <div class="dropdown">
-                    <a class="list-group-item list-group-item-action bg-light dropdown-toggle" href="#" id="productsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Manage Products
-                    </a>
-                    <div class="dropdown-menu" aria-labelledby="productsDropdown">
-                        <a class="dropdown-item" href="{% url 'products:add_product' %}">Add Product</a>
-                        <a class="dropdown-item" href="{% url 'products:product_list' %}">View Products</a>
-                    </div>
-                </div>
-                
-
                 <!-- Manage Users -->
                 <div class="dropdown">
                     <a class="list-group-item list-group-item-action bg-light dropdown-toggle" href="#" id="usersDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Manage Users
                     </a>
                     <div class="dropdown-menu" aria-labelledby="usersDropdown">
-                        <a class="dropdown-item" href="{% url 'add_user' %}">Add User</a>
-                        <a class="dropdown-item" href="{% url 'update_user' %}">Update User</a>
-                        <a class="dropdown-item" href="{% url 'delete_user' %}">Delete User</a>
-                        <a class="dropdown-item" href="{% url 'delete_user' %}">View User</a>
+                        <a class="dropdown-item" href="#">View Registered Users</a>
                     </div>
                 </div>
 
-                <!-- Manage Orders -->
+                <!-- Manage Staff -->
                 <div class="dropdown">
-                    <a class="list-group-item list-group-item-action bg-light dropdown-toggle" href="#" id="ordersDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Manage Orders
+                    <a class="list-group-item list-group-item-action bg-light dropdown-toggle" href="#" id="staffDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Manage Staff
                     </a>
-                    <div class="dropdown-menu" aria-labelledby="ordersDropdown">
-                        <a class="dropdown-item" href="{% url 'view_orders' %}">View Orders</a>
-                        <a class="dropdown-item" href="{% url 'update_order_status' %}">Update Order Status</a>
-                        <a class="dropdown-item" href="{% url 'cancel_order' %}">Cancel Order</a>
+                    <div class="dropdown-menu" aria-labelledby="staffDropdown">
+                        <a class="dropdown-item" href="#">View Staff</a>
+                        <a class="dropdown-item" href="#">Add Staff</a>
+                        <a class="dropdown-item" href="#">Update Staff</a>
+                        <a class="dropdown-item" href="#">Delete Staff</a>
+
+
+
                     </div>
                 </div>
 
-                <!-- Inventory Reports -->
+                <!-- Manage Products -->
                 <div class="dropdown">
-                    <a class="list-group-item list-group-item-action bg-light dropdown-toggle" href="#" id="reportsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Inventory Reports
+                    <a class="list-group-item list-group-item-action bg-light dropdown-toggle" href="#" id="productsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Manage Products
                     </a>
-                    <div class="dropdown-menu" aria-labelledby="reportsDropdown">
-                        <a class="dropdown-item" href="{% url 'view_reports' %}">View Reports</a>
-                        <a class="dropdown-item" href="{% url 'generate_report' %}">Generate Report</a>
+                    <div class="dropdown-menu" aria-labelledby="productsDropdown">
+                        <a class="dropdown-item" href="#">View Products</a>
+                        <a class="dropdown-item" href="#">Add Product</a>
+                        <a class="dropdown-item" href="#">Update Products</a>
+                        <a class="dropdown-item" href="#">Delete Products</a>
+
                     </div>
                 </div>
 
-                <!-- Plant Care Specialists -->
-                <div class="dropdown">
-                    <a class="list-group-item list-group-item-action bg-light dropdown-toggle" href="#" id="specialistsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Plant Care Specialists
-                    </a>
-                    <div class="dropdown-menu" aria-labelledby="specialistsDropdown">
-                        <a class="dropdown-item" href="{% url 'assign_specialist' %}">Assign Specialist</a>
-                        <a class="dropdown-item" href="{% url 'update_specialist' %}">Update Specialist</a>
-                        <a class="dropdown-item" href="{% url 'remove_specialist' %}">Remove Specialist</a>
-                    </div>
-                </div>
+                <!-- View Order Details -->
+                <a href="#" class="list-group-item list-group-item-action bg-light">View Orders</a>
 
-                <!-- Delivery Management -->
-                <div class="dropdown">
-                    <a class="list-group-item list-group-item-action bg-light dropdown-toggle" href="#" id="deliveryDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Delivery Management
-                    </a>
-                    <div class="dropdown-menu" aria-labelledby="deliveryDropdown">
-                        <a class="dropdown-item" href="{% url 'assign_delivery' %}">Assign Delivery</a>
-                        <a class="dropdown-item" href="{% url 'update_delivery_status' %}">Update Delivery Status</a>
-                        <a class="dropdown-item" href="{% url 'view_delivery_history' %}">View Delivery History</a>
-                    </div>
-                </div>
+                <!-- View Payment Details -->
+                <a href="#" class="list-group-item list-group-item-action bg-light">View Payments</a>
+
+                <!-- View Return Details -->
+                <a href="#" class="list-group-item list-group-item-action bg-light">View Return Details</a>
+
+                <!-- View Booking Schedule -->
+                <a href="#" class="list-group-item list-group-item-action bg-light">View Booking Schedule</a>
+
+                <!-- Manage Feedback and Reviews -->
+                <a href="#" class="list-group-item list-group-item-action bg-light">Manage Feedback & Reviews</a>
 
                 <!-- Logout -->
-                <a href="{% url 'logout' %}" class="list-group-item list-group-item-action bg-light">Logout</a>
+                <a href="#" class="list-group-item list-group-item-action bg-light">Logout</a>
             </div>
         </div>
 
@@ -163,21 +193,21 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav ml-auto mt-2 mt-lg-0">
                         <li class="nav-item active">
-                            <a class="nav-link" href="{% url 'home' %}">Home</a>
+                            <a class="nav-link" href="#">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'profile' %}">Profile</a>
+                            <a class="nav-link" href="#">Profile</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'settings' %}">Settings</a>
+                            <a class="nav-link" href="#">Settings</a>
                         </li>
                     </ul>
                 </div>
             </nav>
 
             <div class="container-fluid">
-                <h1 class="mt-4">Dashboard</h1>
-                <p>Welcome to the admin panel of Enchanted Eden. Manage your nursery effectively using the options in the sidebar.</p>
+                <h1 class="mt-4">Admin Dashboard</h1>
+                <p>Welcome to the Ornalux admin panel. Manage your jewelry store operations using the options in the sidebar.</p>
                 
                 <!-- Sample dashboard content -->
                 <div class="row">
@@ -185,7 +215,7 @@
                         <div class="card text-white bg-primary mb-3">
                             <div class="card-body">
                                 <h5 class="card-title">Total Products</h5>
-                                <p class="card-text">Manage all your plants and accessories.</p>
+                                <p class="card-text">Manage all the jewelry items in the store.</p>
                             </div>
                         </div>
                     </div>
@@ -193,7 +223,7 @@
                         <div class="card text-white bg-success mb-3">
                             <div class="card-body">
                                 <h5 class="card-title">Users</h5>
-                                <p class="card-text">Manage registered users and their activities.</p>
+                                <p class="card-text">Monitor registered users and their activities.</p>
                             </div>
                         </div>
                     </div>
@@ -201,11 +231,18 @@
                         <div class="card text-white bg-warning mb-3">
                             <div class="card-body">
                                 <h5 class="card-title">Orders</h5>
-                                <p class="card-text">Track and manage customer orders.</p>
+                                <p class="card-text">View and manage customer orders.</p>
                             </div>
                         </div>
                     </div>
-                    
+                    <div class="col-lg-3 col-md-6">
+                        <div class="card text-white bg-danger mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">Returns</h5>
+                                <p class="card-text">View and handle product returns.</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

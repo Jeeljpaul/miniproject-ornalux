@@ -8,10 +8,11 @@ urlpatterns = [
     path('', views.index),
     path('base_home/',views.base),
     path('login/',views.login),
+    path('adminhome/',views.adminhome),
+    path('staffhome/',views.staffhome),
     path('register/',views.register),
     path('forgot_password/', views.forgot_password),
-    path('reset-password/<str:token>/', views.reset_password),
-    path('adminhome/', views.adminhome),
+    path('reset-password/<str:token>/', views.reset_password)
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
