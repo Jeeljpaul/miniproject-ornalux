@@ -5,87 +5,119 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Product</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f0f0f0;
+            font-family: 'Poppins', sans-serif;
+        }
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin-top: 60px;
+        }
+        h2 {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .form-group label {
+            font-weight: 500;
+            color: #555;
+        }
+        .form-control, .form-control-file, .btn {
+            border-radius: 6px;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+        }
+        .form-control::placeholder {
+            color: #aaa;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 25px;
+            font-weight: 500;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .required {
+            color: red;
+        }
+        .form-group input[type="file"] {
+            padding-top: 8px;
+        }
+    </style>
 </head>
 <body>
     <div class="container mt-5">
-        <h2 class="text-center">Add New Product</h2>
-        <form method="POST" enctype="multipart/form-data">
+        <h2>Add New Product</h2>
+        <form id="productForm" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
-            
+
             <!-- Product Name -->
             <div class="form-group">
-                <label for="product_name">Product Name</label>
-                <input type="text" class="form-control" id="product_name" name="product_name" required>
+                <label for="product_name">Product Name <span class="required">*</span></label>
+                <input type="text" class="form-control" id="product_name" name="product_name" placeholder="Enter product name" required>
             </div>
 
             <!-- Product Description -->
             <div class="form-group">
-                <label for="product_description">Product Description</label>
-                <textarea class="form-control" id="product_description" name="product_description" rows="5" required></textarea>
+                <label for="product_description">Product Description <span class="required">*</span></label>
+                <textarea class="form-control" id="product_description" name="product_description" rows="4" placeholder="Describe the product in detail" required></textarea>
             </div>
 
-            <!-- Category -->
+            <!-- Category (changed to a textbox) -->
             <div class="form-group">
-                <label for="category">Category</label>
-                <select class="form-control" id="category" name="category" required>
-                    <option value="Ring">Ring</option>
-                    <option value="Earring">Earring</option>
-                    <option value="Bracelet">Bracelet</option>
-                    <!-- Add more categories as needed -->
-                </select>
+                <label for="category">Category <span class="required">*</span></label>
+                <input type="text" class="form-control" id="category" name="category" placeholder="Enter product category (e.g. Ring, Bracelet)" required>
             </div>
 
             <!-- Subcategory -->
             <div class="form-group">
-                <label for="subcategory">Subcategory</label>
-                <input type="text" class="form-control" id="subcategory" name="subcategory" required>
+                <label for="subcategory">Subcategory <span class="required">*</span></label>
+                <input type="text" class="form-control" id="subcategory" name="subcategory" placeholder="e.g. Gold, Silver" required>
             </div>
 
             <!-- Price -->
             <div class="form-group">
-                <label for="price">Price</label>
-                <input type="number" class="form-control" id="price" name="price" required>
-            </div>
-
-            <!-- Discount -->
-            <div class="form-group">
-                <label for="discount">Discount (%)</label>
-                <input type="number" class="form-control" id="discount" name="discount">
+                <label for="price">Price <span class="required">*</span></label>
+                <input type="number" class="form-control" id="price" name="price" placeholder="Enter price in USD" required>
             </div>
 
             <!-- Stock Quantity -->
             <div class="form-group">
-                <label for="stock_quantity">Stock Quantity</label>
-                <input type="number" class="form-control" id="stock_quantity" name="stock_quantity" required>
+                <label for="stock_quantity">Stock Quantity <span class="required">*</span></label>
+                <input type="number" class="form-control" id="stock_quantity" name="stock_quantity" placeholder="Enter available stock" required>
             </div>
 
             <!-- Weight -->
             <div class="form-group">
-                <label for="weight">Weight (grams)</label>
-                <input type="number" class="form-control" id="weight" name="weight" required>
+                <label for="weight">Weight (grams) <span class="required">*</span></label>
+                <input type="number" class="form-control" id="weight" name="weight" placeholder="Enter product weight" required>
             </div>
 
             <!-- Material -->
             <div class="form-group">
-                <label for="material">Material</label>
-                <input type="text" class="form-control" id="material" name="material" required>
+                <label for="material">Material <span class="required">*</span></label>
+                <input type="text" class="form-control" id="material" name="material" placeholder="Enter material type" required>
             </div>
 
             <!-- Metal Type -->
             <div class="form-group">
-                <label for="metal_type">Metal Type</label>
-                <input type="text" class="form-control" id="metal_type" name="metal_type" required>
-            </div>
-
-            <!-- Gemstones -->
-            <div class="form-group">
-                <label for="gemstones">Gemstones</label>
-                <input type="text" class="form-control" id="gemstones" name="gemstones">
+                <label for="metal_type">Metal Type <span class="required">*</span></label>
+                <input type="text" class="form-control" id="metal_type" name="metal_type" placeholder="e.g. Gold, Platinum" required>
             </div>
 
             <!-- Gender -->
             <div class="form-group">
-                <label for="gender">Gender</label>
+                <label for="gender">Gender <span class="required">*</span></label>
                 <select class="form-control" id="gender" name="gender" required>
                     <option value="Men">Men</option>
                     <option value="Women">Women</option>
@@ -95,49 +127,87 @@
 
             <!-- Occasion -->
             <div class="form-group">
-                <label for="occasion">Occasion</label>
-                <input type="text" class="form-control" id="occasion" name="occasion" required>
+                <label for="occasion">Occasion <span class="required">*</span></label>
+                <input type="text" class="form-control" id="occasion" name="occasion" placeholder="e.g. Wedding, Casual" required>
             </div>
 
             <!-- Images -->
             <div class="form-group">
-                <label for="images">Product Images</label>
+                <label for="images">Product Images <span class="required">*</span></label>
                 <input type="file" class="form-control-file" id="images" name="images" multiple required>
             </div>
 
             <!-- SKU -->
             <div class="form-group">
-                <label for="sku">SKU (Stock Keeping Unit)</label>
-                <input type="text" class="form-control" id="sku" name="sku" required>
-            </div>
-
-            <!-- Try at Home Option -->
-            <div class="form-group form-check">
-                <input type="checkbox" class="form-check-input" id="try_at_home" name="try_at_home">
-                <label class="form-check-label" for="try_at_home">Available for Try at Home</label>
+                <label for="sku">SKU (Stock Keeping Unit) <span class="required">*</span></label>
+                <input type="text" class="form-control" id="sku" name="sku" placeholder="Unique product identifier" required>
             </div>
 
             <!-- Delivery Options -->
             <div class="form-group">
-                <label for="delivery_options">Delivery Options</label>
-                <textarea class="form-control" id="delivery_options" name="delivery_options" rows="2" required></textarea>
-            </div>
-
-            <!-- Return Policy -->
-            <div class="form-group">
-                <label for="return_policy">Return Policy</label>
-                <textarea class="form-control" id="return_policy" name="return_policy" rows="2"></textarea>
-            </div>
-
-            <!-- Tags -->
-            <div class="form-group">
-                <label for="tags">Tags</label>
-                <input type="text" class="form-control" id="tags" name="tags" placeholder="e.g. gold, diamond, wedding">
+                <label for="delivery_options">Delivery Options <span class="required">*</span></label>
+                <textarea class="form-control" id="delivery_options" name="delivery_options" rows="2" placeholder="e.g. Free delivery in 7 days" required></textarea>
             </div>
 
             <!-- Submit Button -->
-            <button type="submit" class="btn btn-primary">Add Product</button>
+            <button type="submit" class="btn btn-primary btn-block">Add Product</button>
         </form>
     </div>
+
+    <script>
+        // JavaScript validation for the form
+        function validateForm() {
+            var productName = document.getElementById("product_name").value;
+            var price = document.getElementById("price").value;
+            var stockQuantity = document.getElementById("stock_quantity").value;
+
+            if (productName == "") {
+                alert("Product name must be filled out");
+                return false;
+            }
+            if (price <= 0) {
+                alert("Price must be a positive number");
+                return false;
+            }
+            if (stockQuantity <= 0) {
+                alert("Stock quantity must be a positive number");
+                return false;
+            }
+
+            return true; // All validations passed
+        }
+
+        // Show a success message after form submission
+        function showSuccessMessage(event) {
+            event.preventDefault(); // Prevent the default form submission behavior
+            if (validateForm()) {
+                var formData = new FormData(document.getElementById('productForm'));
+
+                fetch("add_product/", {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        document.getElementById('productForm').reset(); // Clear the form fields
+                    } else {
+                        alert('An error occurred: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An unexpected error occurred. Please try again later.');
+                });
+            }
+        }
+
+        // Attach event listener to the form submission
+        document.getElementById('productForm').addEventListener('submit', showSuccessMessage);
+    </script>
 </body>
 </html>

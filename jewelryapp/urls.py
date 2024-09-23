@@ -12,7 +12,11 @@ urlpatterns = [
     path('staffhome/',views.staffhome),
     path('register/',views.register),
     path('forgot_password/', views.forgot_password),
-    path('reset-password/<str:token>/', views.reset_password)
+    path('reset-password/<str:token>/', views.reset_password),
+    path('adminhome/add_product/', views.add_product),
+    path('adminhome/view_products/',views.view_products),
+    path('view_product_details/<int:product_id>/', views.view_product_details),
+    path('delete_product/<int:product_id>/', views.delete_product),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

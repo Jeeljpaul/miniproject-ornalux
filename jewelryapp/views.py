@@ -1,12 +1,12 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .models import Tbl_login, Tbl_user
+from .models import *
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from .forms import RegistrationForm, PasswordResetRequestForm  # Import both forms
 from django.utils.crypto import get_random_string
 from django.core.mail import send_mail
-
+from .forms import ProductForm
 
 def index(request):
     return render(request, 'index.html')
@@ -151,6 +151,60 @@ def reset_password(request, token):
 
 def adminhome(request):
     return render(request, 'admin/adminhome.html')
+
+def add_product(request):
+    if request.method == 'POST':
+        # Handle the form submission
+        form = ProductForm(request.POST, request.FILES)
+        if form.is_valid():
+            product = form.save(commit=False)  # Do not save to DB yet
+            product.save()  # Save the product first
+            images = request.FILES.getlist('images')  # Handle multiple image uploads
+            
+            # Save each image in the `ProductImage` model
+            for image in images:
+                Product.objects.create(product=product, image=image)
+                
+            messages.success(request, 'Product has been added successfully!')
+            return redirect('add_product')  # Redirect back to the form after successful submission
+        else:
+            messages.error(request, 'There was an error in the form. Please check the details.')
+    else:
+        # If the request is GET, display the form
+        form = ProductForm()
+    
+    return render(request, 'admin/add_product.html', {'form': form})
+
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Product
+from django.db.models import Q
+
+# View products and filter by category
+def view_products(request):
+    query = request.GET.get('category', '')  # Get the category from search input
+    if query:
+        products = Product.objects.filter(Q(category__icontains=query))  # Search by category
+    else:
+        products = Product.objects.all()  # Display all products if no search query
+
+    return render(request, 'admin/view_products.html', {'products': products})
+
+# View product details
+def view_product_details(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    return render(request, 'admin/product_details.html', {'product': product})
+
+# Delete a product
+def delete_product(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    if request.method == 'POST':
+        product.delete()
+        return redirect('view_products')
+    return render(request, 'admin/view_products.html')
+
+
+
+#staff viws.py-------------------------------------------------------------------------------------------------
 
 def staffhome(request):
     return render(request, 'staffhome.html')
