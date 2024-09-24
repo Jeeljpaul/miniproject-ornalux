@@ -5,6 +5,18 @@ class Tbl_login(models.Model):
     email = models.CharField(max_length=30, unique=True)  # Ensure email is unique
     password = models.CharField(max_length=30)
     reset_token = models.CharField(max_length=100, blank=True, null=True)
+    status = models.BooleanField(default=True)
+    last_login = models.DateTimeField(null=True, blank=True)
+    last_logout = models.DateTimeField(null=True, blank=True)
+    login_count = models.IntegerField(default=0)
+
+    def login(self):
+        """ Logs the user in by updating the login timestamp, status, and login count. """
+        self.status = True  # Set status to True on login
+        self.last_login = timezone.now()
+        self.login_count += 1
+        self.save()
+
 
     def __str__(self):
         return self.email
@@ -16,6 +28,8 @@ class Tbl_user(models.Model):
     dob = models.DateField()
     phone = models.CharField(max_length=15)
     login = models.OneToOneField(Tbl_login, on_delete=models.CASCADE)  # One-to-One relationship
+    status = models.BooleanField(default=True)
+
 
     def __str__(self):
         return self.name
@@ -27,6 +41,8 @@ class Tbl_staff(models.Model):
     role = models.CharField(max_length=50)
     contact_details = models.CharField(max_length=15)  # Assuming contact details like phone number
     login = models.ForeignKey(Tbl_login, on_delete=models.CASCADE)
+    status = models.BooleanField(default=True)
+
 
     def __str__(self):
         return self.name
@@ -67,6 +83,8 @@ class Product(models.Model):
     delivery_options = models.TextField()
     return_policy = models.TextField(null=True, blank=True)  # Optional return policy
     tags = models.CharField(max_length=255, null=True, blank=True)  # Optional tags
+    status = models.BooleanField(default=True)
+
 
     def __str__(self):
         return self.product_name

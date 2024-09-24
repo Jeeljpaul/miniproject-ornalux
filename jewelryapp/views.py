@@ -40,6 +40,11 @@ def register(request):
         form = RegistrationForm()
     
     return render(request, 'register.html', {'form': form})
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
+from .models import Tbl_login, Tbl_user, Tbl_staff
 
 def login(request):
     if request.method == 'POST':
@@ -58,37 +63,61 @@ def login(request):
             messages.error(request, 'Password must be at least 8 characters long')
             return redirect('/login/')
 
-        # Check if the user is admin
-        if email == 'admin123@gmail.com' and password == 'admin123':
-            # Admin login success
-            request.session['user_type'] = 'admin'
-            request.session['email'] = email
-            return redirect('/adminhome/')  # Redirect to admin home page
-
+        # Check if the user is admin (fetch from Tbl_login table)
+        try:
+            admin = Tbl_login.objects.get(email=email, password=password)
+            if email == 'admin123@gmail.com':  # Assuming admin email is known
+                # Admin login success
+                request.session['user_type'] = 'admin'
+                request.session['user_id'] = admin.login_id
+                request.session['email'] = admin.email
+                request.session['name'] = 'Admin'  # Static name for admin
+                return redirect('/adminhome/')  # Redirect to admin home page
+        except Tbl_login.DoesNotExist:
+            pass
+        
         # Check if the user is staff
         try:
-            staff = Staff.objects.get(login__email=email, login__password=password)
+            staff = Tbl_staff.objects.get(login__email=email, login__password=password)
             # Staff login success
             request.session['user_type'] = 'staff'
             request.session['staff_id'] = staff.staff_id
             request.session['email'] = staff.login.email
+            request.session['name'] = staff.name  # Fetch the staff's name
             return redirect('/staff_home/')  # Redirect to staff dashboard
-        except Staff.DoesNotExist:
+        except Tbl_staff.DoesNotExist:
             pass
 
         # Check if the user is a regular user
         try:
-            user = Tbl_login.objects.get(email=email, password=password)
-            # Set session data after successful login
-            request.session['user_id'] = user.login_id
-            request.session['email'] = user.email
-            return redirect('/base_home/')  # Redirect to user home page or dashboard
-        except Tbl_login.DoesNotExist:
+            user_login = Tbl_login.objects.get(email=email, password=password)
+            # Fetch the corresponding user details from Tbl_user
+            user = Tbl_user.objects.get(login_id=user_login.login_id)
+            # Regular user login success
+            request.session['user_type'] = 'user'
+            request.session['user_id'] = user_login.login_id
+            request.session['email'] = user_login.email
+            request.session['name'] = user.name  # Fetch the user's name
+            print(f"User found: {user.email}")
+            print(f"Login ID: {user.login_id}")
+            return redirect('/base_home/')  # Redirect to user dashboard
+        except (Tbl_login.DoesNotExist, Tbl_user.DoesNotExist):
             messages.error(request, 'Invalid email or password')
             return redirect('/login/')
-    
+
     return render(request, 'login.html')
 
+
+def logout_view(request):
+    # Clear the session to log the user out
+    request.session.flush()  # This will remove all session data
+
+    # Optionally, you can add a message to inform the user
+    from django.contrib import messages
+    messages.success(request, 'You have been logged out successfully.')
+
+    # Redirect to the login page
+    return redirect('/login/')
 
 def forgot_password(request):
     if request.method == 'POST':
@@ -151,6 +180,7 @@ def reset_password(request, token):
 
 def adminhome(request):
     return render(request, 'admin/adminhome.html')
+
 
 def add_product(request):
     if request.method == 'POST':
@@ -230,6 +260,73 @@ def delete_user(request, user_id):
         return redirect('view_registered_users')  # Redirect back to the users list
 
     return render(request, 'confirm_delete_user.html', {'user': user})
+
+
+ #---------------------------------------------------------------
+from .forms import StaffForm
+
+def add_staff(request):
+    if request.method == 'POST':
+        form = AddStaffForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('admin/view_staff')  # Redirect to a view after successful staff addition
+    else:
+        form = StaffForm()
+
+    return render(request, 'admin/add_staff.html', {'form': form})
+
+
+def view_staff(request):
+    # Fetch all staff from the database
+    staff_members = Tbl_staff.objects.all()
+    # Pass the staff members to the template
+    return render(request, 'admin/view_staff.html', {'staff_members': staff_members})
+
+
+
+
+def update_staff(request, staff_id):
+    staff = get_object_or_404(Tbl_staff, id=staff_id)
+
+    if request.method == 'POST':
+        form = StaffForm(request.POST)
+        if form.is_valid():
+            # Update login details
+            login = get_object_or_404(Tbl_login, id=staff.login.id)
+            login.email = form.cleaned_data['email']
+            login.save()
+
+            # Update staff details
+            staff.name = form.cleaned_data['name']
+            staff.role = form.cleaned_data['role']
+            staff.contact_details = form.cleaned_data['contact_details']
+            staff.save()
+
+            return redirect('view_staff')  # Redirect to the staff view page
+    else:
+        form = StaffForm(initial={
+            'name': staff.name,
+            'email': staff.login.email,
+            'role': staff.role,
+            'contact_details': staff.contact_details,
+        })
+
+    return render(request, 'admin/update_staff.html', {'form': form, 'staff': staff})
+
+
+def delete_staff(request, staff_id):
+    staff = get_object_or_404(Tbl_staff, id=staff_id)
+    
+    if request.method == 'POST':
+        # Delete associated login details
+        login = get_object_or_404(Tbl_login, id=staff.login.id)
+        login.delete()  # Delete the login entry
+        staff.delete()  # Delete the staff entry
+        return redirect('view_staff')  # Redirect to the staff view page
+
+    return render(request, 'confirm_delete.html', {'staff': staff})
+
 
 #staff viws.py-------------------------------------------------------------------------------------------------
 

@@ -1,9 +1,11 @@
 from datetime import date
 from django import forms
-from .models import Tbl_login, Tbl_user, Product
+from .models import Tbl_login, Tbl_user, Product, Tbl_staff
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
+from django.core.validators import EmailValidator
 import re
+
 
 class RegistrationForm(forms.ModelForm):
     email = forms.EmailField()
@@ -165,3 +167,29 @@ class ProductForm(forms.ModelForm):
         if re.search(r'[^a-zA-Z0-9]', sku):
             raise ValidationError("SKU can only contain letters and numbers.")
         return sku
+
+
+from django import forms
+from .models import Tbl_login, Tbl_staff
+
+class StaffForm(forms.Form):
+    name = forms.CharField(max_length=255)
+    email = forms.EmailField()
+    password = forms.CharField(widget=forms.PasswordInput)
+    role = forms.CharField(max_length=100)
+    contact_details = forms.CharField(max_length=255)
+    
+    def save(self):
+        # Save login details
+        login = Tbl_login.objects.create(
+            email=self.cleaned_data['email'],
+            password=self.cleaned_data['password']
+        )
+
+        # Save staff details
+        Tbl_staff.objects.create(
+            name=self.cleaned_data['name'],
+            role=self.cleaned_data['role'],
+            contact_details=self.cleaned_data['contact_details'],
+            login=login
+        )

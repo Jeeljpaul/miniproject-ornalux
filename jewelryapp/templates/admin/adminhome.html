@@ -143,8 +143,8 @@
                         Manage Staff
                     </a>
                     <div class="dropdown-menu" aria-labelledby="staffDropdown">
-                        <a class="dropdown-item" href="#">View Staff</a>
-                        <a class="dropdown-item" href="#">Add Staff</a>
+                        <a class="dropdown-item" href="{% url 'view_staff' %}">View Staff</a>
+                        <a class="dropdown-item" href="{% url 'add_staff' %}">Add Staff</a>
                     </div>
                 </div>
 
@@ -174,8 +174,6 @@
                 <!-- Manage Feedback and Reviews -->
                 <a href="#" class="list-group-item list-group-item-action bg-light">Manage Feedback & Reviews</a>
 
-                <!-- Logout -->
-                <a href="#" class="list-group-item list-group-item-action bg-light">Logout</a>
             </div>
         </div>
 
@@ -188,10 +186,7 @@
                             <a class="nav-link" href="#">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Profile</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Settings</a>
+                            <a class="nav-link" href="{% url 'logout' %}">Logout</a>
                         </li>
                     </ul>
                 </div>
