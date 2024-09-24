@@ -191,18 +191,45 @@ def view_products(request):
 
 # View product details
 def view_product_details(request, product_id):
-    product = get_object_or_404(Product, id=product_id)
+    product = get_object_or_404(Product, product_id=product_id)
     return render(request, 'admin/product_details.html', {'product': product})
 
 # Delete a product
 def delete_product(request, product_id):
-    product = get_object_or_404(Product, id=product_id)
+    product = get_object_or_404(Product, product_id=product_id)
     if request.method == 'POST':
         product.delete()
         return redirect('view_products')
     return render(request, 'admin/view_products.html')
 
+#update a product
+def update_product(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    
+    if request.method == 'POST':
+        form = ProductForm(request.POST, request.FILES, instance=product)
+        if form.is_valid():
+            form.save()
+            return redirect('product_detail', product_id=product.id)
+    else:
+        form = ProductForm(instance=product)
 
+    return render(request, 'update_product.html', {'form': form, 'product': product})
+
+     #--------------------------------------------------------------------------------------#
+def view_registered_users(request):
+    users = Tbl_user.objects.all()  # Fetch all users
+    return render(request, 'admin/view_registered_users.html', {'users': users})
+
+
+def delete_user(request, user_id):
+    user = get_object_or_404(Tbl_user, pk=user_id)
+    
+    if request.method == 'POST':  # Check if the form was submitted
+        user.delete()
+        return redirect('view_registered_users')  # Redirect back to the users list
+
+    return render(request, 'confirm_delete_user.html', {'user': user})
 
 #staff viws.py-------------------------------------------------------------------------------------------------
 

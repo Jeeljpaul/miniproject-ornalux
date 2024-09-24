@@ -1,0 +1,66 @@
+<!-- update_product.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Product - {{ product.product_name }}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f0f0f0;
+            font-family: 'Poppins', sans-serif;
+        }
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin-top: 60px;
+        }
+        h2 {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .form-group label {
+            font-weight: 500;
+            color: #555;
+        }
+        .form-control, .form-control-file, .btn {
+            border-radius: 6px;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+        }
+        .form-control::placeholder {
+            color: #aaa;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 25px;
+            font-weight: 500;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .required {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Update Product</h2>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary btn-block">Update Product</button>
+        </form>
+        <a href="{% url 'product_detail' product.id %}" class="btn btn-secondary btn-block mt-3">Cancel</a>
+    </div>
+</body>
+</html>
