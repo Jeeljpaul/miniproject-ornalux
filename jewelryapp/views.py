@@ -6,7 +6,6 @@ from django.core.exceptions import ValidationError
 from .forms import RegistrationForm, PasswordResetRequestForm  # Import both forms
 from django.utils.crypto import get_random_string
 from django.core.mail import send_mail
-from .forms import ProductForm
 
 def index(request):
     return render(request, 'index.html')
@@ -184,26 +183,52 @@ def adminhome(request):
 
 def add_product(request):
     if request.method == 'POST':
-        # Handle the form submission
-        form = ProductForm(request.POST, request.FILES)
-        if form.is_valid():
-            product = form.save(commit=False)  # Do not save to DB yet
-            product.save()  # Save the product first
-            images = request.FILES.getlist('images')  # Handle multiple image uploads
-            
-            # Save each image in the `ProductImage` model
-            for image in images:
-                Product.objects.create(product=product, image=image)
-                
+        # Fetch data from POST request
+        product_name = request.POST.get('product_name')
+        product_description = request.POST.get('product_description')
+        category = request.POST.get('category')
+        price = request.POST.get('price')
+        stock_quantity = request.POST.get('stock_quantity')
+        weight = request.POST.get('weight')
+        metal_type = request.POST.get('metal_type')
+        stone_type = request.POST.get('stone_type', '')  # Optional field
+        gender = request.POST.get('gender')
+        occasion = request.POST.get('occasion')
+        delivery_options = request.POST.get('delivery_options', '')  # Optional field
+        image = request.FILES.get('image')  # Single image upload
+
+        # Basic validation
+        if not all([product_name, product_description, category, price, stock_quantity, weight, metal_type, gender, occasion, image]):
+            messages.error(request, 'Please fill in all required fields, including the image.')
+            return render(request, 'admin/add_product.html')
+
+        try:
+            # Create the product object and save it to the database
+            product = Product.objects.create(
+                product_name=product_name,
+                product_description=product_description,
+                category=category,
+                price=price,
+                stock_quantity=stock_quantity,
+                weight=weight,
+                metal_type=metal_type,
+                stone_type=stone_type,
+                gender=gender,
+                occasion=occasion,
+                delivery_options=delivery_options,
+                images=image  # Save the uploaded image
+            )
+
+            # Success message
             messages.success(request, 'Product has been added successfully!')
             return redirect('add_product')  # Redirect back to the form after successful submission
-        else:
-            messages.error(request, 'There was an error in the form. Please check the details.')
-    else:
-        # If the request is GET, display the form
-        form = ProductForm()
-    
-    return render(request, 'admin/add_product.html', {'form': form})
+
+        except Exception as e:
+            messages.error(request, f'An error occurred: {e}')
+            return render(request, 'admin/add_product.html')
+
+    # If it's a GET request, render the form
+    return render(request, 'admin/add_product.html')
 
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Product
