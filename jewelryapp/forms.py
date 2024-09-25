@@ -15,13 +15,20 @@ class RegistrationForm(forms.ModelForm):
 
     class Meta:
         model = Tbl_user
-        fields = ['name', 'dob', 'phone_number']
+        fields = ['name', 'dob', 'phone']
 
     # Name validation: only letters allowed
     def clean_name(self):
         name = self.cleaned_data.get('name')
-        if not name.isalpha():
-            raise forms.ValidationError("Invalid format.")
+    
+    # Check if name contains only alphabetic characters and spaces
+        if not all(char.isalpha() or char.isspace() for char in name):
+            raise forms.ValidationError("Name can only contain letters")
+    
+    # Ensure name doesn't consist of just spaces
+        if not name.strip():
+            raise forms.ValidationError("Name cannot be empty or just spaces.")
+    
         return name
 
     # Date of birth validation: not current or future year, and age must be at least 18
@@ -43,18 +50,18 @@ class RegistrationForm(forms.ModelForm):
         
         return dob
 
-    def clean_phone_number(self):
-        phone_number = self.cleaned_data.get('phone_number')
+    def clean_phone(self):
+        phone = self.cleaned_data.get('phone')
         # Check if the phone number contains only digits
-        if not phone_number.isdigit():
+        if not phone.isdigit():
             raise forms.ValidationError("Invalid format.")
             # Check if the phone number is exactly 10 digits long
-            if len(phone_number) != 10:
+            if len(phone) != 10:
                 raise forms.ValidationError("Invalid format.")
                 # Check if the phone number starts with either 6 or 9
-                if phone_number[0] not in ['6', '9']:
+                if phone[0] not in ['6', '9']:
                     raise forms.ValidationError("Invalid.")
-                    return phone_number
+                return phone
 
 
     # Email validation: check for uniqueness and format

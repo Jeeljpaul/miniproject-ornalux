@@ -27,7 +27,7 @@ def register(request):
             Tbl_user.objects.create(
                 name=form.cleaned_data['name'],
                 dob=form.cleaned_data['dob'],
-                phone=form.cleaned_data['phone_number'],
+                phone=form.cleaned_data['phone'],
                 login=login
             )
             
