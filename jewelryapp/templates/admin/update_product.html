@@ -1,66 +1,97 @@
-<!-- update_product.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Update Product - {{ product.product_name }}</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>Update {{ product.product_name }}</title>
+    <script type="text/javascript">
+        function preventBack() {
+            window.history.forward(); 
+        }
+          
+        setTimeout("preventBack()", 0);
+          
+        window.onunload = function () { null };
+    </script>
     <style>
         body {
-            background-color: #f0f0f0;
-            font-family: 'Poppins', sans-serif;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f8f8;
         }
-        .container {
-            background-color: white;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
+
+        .form-container {
             max-width: 800px;
-            margin-top: 60px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-        h2 {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 30px;
-            text-align: center;
+
+        label {
+            font-weight: bold;
         }
-        .form-group label {
-            font-weight: 500;
-            color: #555;
+
+        input[type="text"], input[type="number"], textarea, select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
         }
-        .form-control, .form-control-file, .btn {
-            border-radius: 6px;
-            padding: 10px 12px;
-            border: 1px solid #ddd;
-            font-size: 14px;
-        }
-        .form-control::placeholder {
-            color: #aaa;
-        }
+
         button {
-            background-color: #007bff;
+            padding: 10px 15px;
+            background-color: #28a745;
             color: white;
-            padding: 10px 25px;
-            font-weight: 500;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
         }
+
         button:hover {
-            background-color: #0056b3;
-        }
-        .required {
-            color: red;
+            background-color: #218838;
         }
     </style>
+    
 </head>
 <body>
-    <div class="container mt-5">
-        <h2>Update Product</h2>
-        <form method="POST" enctype="multipart/form-data">
+
+    <div class="form-container">
+        <h1>Update Product: {{ product.product_name }}</h1>
+
+        <form method="post" action="{% url 'update_product' product.product_id %}">
             {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit" class="btn btn-primary btn-block">Update Product</button>
+
+            <label for="product_name">Product Name</label>
+            <input type="text" id="product_name" name="product_name" value="{{ product.product_name }}" required>
+
+            <label for="description">Description</label>
+            <textarea id="description" name="description" required>{{ product.description }}</textarea>
+
+            <label for="category">Category</label>
+            <input type="text" id="category" name="category" value="{{ product.category }}" required>
+
+            <label for="price">Price ($)</label>
+            <input type="number" id="price" name="price" value="{{ product.price }}" required>
+
+            <label for="weight">Weight (g)</label>
+            <input type="number" id="weight" name="weight" value="{{ product.weight }}" required>
+
+            <label for="metal_type">Metal Type</label>
+            <input type="text" id="metal_type" name="metal_type" value="{{ product.metal_type }}" required>
+
+            <label for="stone_type">Stone Type</label>
+            <input type="text" id="stone_type" name="stone_type" value="{{ product.stone_type }}" required>
+
+            <label for="occasion">Occasion</label>
+            <input type="text" id="occasion" name="occasion" value="{{ product.occasion }}" required>
+
+
+            <button type="submit">Update Product</button>
         </form>
-        <a href="{% url 'product_detail' product.id %}" class="btn btn-secondary btn-block mt-3">Cancel</a>
     </div>
+
 </body>
 </html>

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Product</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #e9ecef;
+            font-family: 'Poppins', sans-serif;
+        }
+        .container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            max-width: 700px;
+            margin: 60px auto;
+            transition: transform 0.2s;
+        }
+        .container:hover {
+            transform: scale(1.02);
+        }
+        h2 {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .form-group label {
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 10px;
+        }
+        .form-control {
+            border-radius: 10px;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            background-color: #f9f9f9;
+            height: 50px;
+        }
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+            background-color: #ffffff;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 25px;
+            font-weight: 500;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            width: 100%;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
+        .required {
+            color: red;
+        }
+        .error-message {
+            color: red;
+            font-size: 0.875rem;
+        }
+    </style>
+    <script>
+        function validateForm(event) {
+            let isValid = true;
+            const errors = [];
+
+            const productName = document.getElementById('id_product_name').value;
+            const category = document.getElementById('id_category').value;
+            const description = document.getElementById('id_product_description').value;
+            const deliveryOptions = document.getElementById('id_delivery_options').value;
+            const price = parseFloat(document.getElementById('id_price').value);
+            const stockQuantity = parseInt(document.getElementById('id_stock_quantity').value);
+            const weight = parseFloat(document.getElementById('id_weight').value);
+            const metalType = document.getElementById('id_metal_type').value;
+            const stoneType = document.getElementById('id_stone_type').value;
+            const occasion = document.getElementById('id_occasion').value;
+            const gender = document.getElementById('id_gender').value;
+
+            // Validation for product name and category
+            const validateNameCategory = (value) => {
+                return value[0].toUpperCase() === value[0] && value.length >= 3;
+            };
+            if (!validateNameCategory(productName)) {
+                errors.push("Product name must start with a capital letter and be at least 3 characters long.");
+                isValid = false;
+            }
+            if (!validateNameCategory(category)) {
+                errors.push("Category must start with a capital letter and be at least 3 characters long.");
+                isValid = false;
+            }
+
+            // Validation for description and delivery options
+            const validateDescriptionDelivery = (value) => {
+                return value[0].toUpperCase() === value[0] && value.endsWith('.') && value.length >= 10 && value.length <= 100;
+            };
+            if (!validateDescriptionDelivery(description)) {
+                errors.push("Description must start with a capital letter, end with a full stop, and be between 10 and 100 characters long.");
+                isValid = false;
+            }
+            if (!validateDescriptionDelivery(deliveryOptions)) {
+                errors.push("Delivery options must start with a capital letter, end with a full stop, and be between 10 and 100 characters long.");
+                isValid = false;
+            }
+
+            // Validation for price
+            if (isNaN(price) || price < 100 || price > 10000000) {
+                errors.push("Price must be a decimal value between 100 and 10,000,000.");
+                isValid = false;
+            }
+
+            // Validation for stock quantity
+            if (stockQuantity < 0 || stockQuantity > 50) {
+                errors.push("Stock quantity must be between 0 and 50.");
+                isValid = false;
+            }
+
+            // Validation for weight
+            if (weight < 1 || weight > 100) {
+                errors.push("Weight must be between 1 and 100.");
+                isValid = false;
+            }
+
+            // Validation for metal type, stone type, and occasion
+            const validateMetalStoneOccasion = (value) => {
+                return value[0].toUpperCase() === value[0] && value.length >= 3;
+            };
+            if (!validateMetalStoneOccasion(metalType)) {
+                errors.push("Metal type must start with a capital letter and be at least 3 characters long.");
+                isValid = false;
+            }
+            if (!validateMetalStoneOccasion(stoneType)) {
+                errors.push("Stone type must start with a capital letter and be at least 3 characters long.");
+                isValid = false;
+            }
+            if (!validateMetalStoneOccasion(occasion)) {
+                errors.push("Occasion must start with a capital letter and be at least 3 characters long.");
+                isValid = false;
+            }
+
+            // Validation for gender
+            const validGenders = ['Men', 'Women', 'Unisex'];
+            if (!validGenders.includes(gender)) {
+                errors.push("Gender must be either 'Men', 'Women', or 'Unisex'.");
+                isValid = false;
+            }
+
+            // Display errors if any
+            const errorContainer = document.getElementById('error-messages');
+            errorContainer.innerHTML = '';
+            if (!isValid) {
+                errors.forEach(error => {
+                    const div = document.createElement('div');
+                    div.className = 'error-message';
+                    div.innerText = error;
+                    errorContainer.appendChild(div);
+                });
+                event.preventDefault();
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Add New Product</h2>
+        <div id="error-messages"></div>
+        <form method="POST" enctype="multipart/form-data" onsubmit="validateForm(event)">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="product_name">Product Name <span class="required">*</span></label>
+                {{ form.product_name }}
+                {{ form.product_name.errors }}
+            </div>
+            <div class="form-group">
+                <label for="product_description">Description <span class="required">*</span></label>
+                {{ form.product_description }}
+                {{ form.product_description.errors }}
+            </div>
+            <div class="form-group">
+                <label for="category">Category <span class="required">*</span></label>
+                {{ form.category }}
+                {{ form.category.errors }}
+            </div>
+            <div class="form-group">
+                <label for="price">Price <span class="required">*</span></label>
+                {{ form.price }}
+                {{ form.price.errors }}
+            </div>
+            <div class="form-group">
+                <label for="stock_quantity">Stock Quantity <span class="required">*</span></label>
+                {{ form.stock_quantity }}
+                {{ form.stock_quantity.errors }}
+            </div>
+            <div class="form-group">
+                <label for="weight">Weight <span class="required">*</span></label>
+                {{ form.weight }}
+                {{ form.weight.errors }}
+            </div>
+            <div class="form-group">
+                <label for="metal_type">Metal Type</label>
+                {{ form.metal_type }}
+                {{ form.metal_type.errors }}
+            </div>
+            <div class="form-group">
+                <label for="stone_type">Stone Type</label>
+                {{ form.stone_type }}
+                {{ form.stone_type.errors }}
+            </div>
+            <div class="form-group">
+                <label for="gender">Gender <span class="required">*</span></label>
+                {{ form.gender }}
+                {{ form.gender.errors }}
+            </div>
+            <div class="form-group">
+                <label for="occasion">Occasion</label>
+                {{ form.occasion }}
+                {{ form.occasion.errors }}
+            </div>
+            <div class="form-group">
+                <label for="images">Product Images</label>
+                {{ form.images }}
+                {{ form.images.errors }}
+            </div>
+            <div class="form-group">
+                <label for="delivery_options">Delivery Options</label>
+                {{ form.delivery_options }}
+                {{ form.delivery_options.errors }}
+            </div>
+            <button type="submit">Add Product</button>
+        </form>
+    </div>
+</body>
+</html>

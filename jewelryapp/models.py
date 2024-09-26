@@ -68,6 +68,8 @@ class Product(models.Model):
     occasion = models.CharField(max_length=255)
     images = models.ImageField(upload_to='pic/', default='')
     delivery_options = models.TextField()
+    
+    is_active = models.BooleanField(default=True)
 
     def __str__(self):
         return self.product_name

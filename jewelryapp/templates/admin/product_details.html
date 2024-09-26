@@ -3,55 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ product.name }} - Details</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>{{ product.product_name }} Details</title>
     <style>
-        .product-image {
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f8f8;
+        }
+
+        .product-detail {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-detail img {
             max-width: 100%;
             height: auto;
-            object-fit: cover;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
         }
-        .product-details {
-            margin-top: 20px;
+
+        .product-detail h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
         }
-        .product-price {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #007bff;
+
+        .product-detail p {
+            margin-bottom: 10px;
+            font-size: 18px;
         }
-        .btn-back {
-            margin-top: 20px;
+
+        .button {
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+
+        .button:hover {
+            background-color: #0056b3;
+        }
+
+        .disable-button {
+            background-color: #dc3545;
+        }
+
+        .disable-button:hover {
+            background-color: #c82333;
         }
     </style>
 </head>
 <body>
-    <div class="container mt-4">
-        <h1>{{ product.name }}</h1>
-        
-        <div class="row">
-            <!-- Product Image -->
-            <div class="col-md-6">
-                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-image">
-            </div>
 
-            <!-- Product Details -->
-            <div class="col-md-6 product-details">
-                <h3>Category: {{ product.category }}</h3>
-                <p class="product-price">${{ product.price }}</p>
-                <p>{{ product.description }}</p>
-                
-                <!-- Add additional fields as needed -->
-                
-                <a href="{% url 'view_products' %}" class="btn btn-secondary btn-back">Back to Products</a>
-                <a href="{% url 'update_product' product.id %}" class="btn btn-primary btn-update">Update Product</a>
-            </div>
-        </div>
+    <div class="product-detail">
+        <img src="{{ product.images.url }}" alt="{{ product.product_name }}">
+        <h1>{{ product.product_name }}</h1>
+        <p><strong>Price:</strong> ${{ product.price }}</p>
+        <p><strong>Weight:</strong> {{ product.weight }}g</p>
+        <p><strong>Metal Type:</strong> {{ product.metal_type }}</p>
+        <p><strong>Gemstone Type:</strong> {{ product.gemstone_type }}</p>
+        <p><strong>Description:</strong> {{ product.description }}</p>
+        <p><strong>Status:</strong> 
+            {% if product.is_enabled %}
+                Enabled
+            {% else %}
+                Disabled
+            {% endif %}
+        </p>
+    
+
+        <!-- Back Button -->
+        <a href="/products_list/" class="button">Back to Products</a>
+
+        <!-- Enable/Disable Button -->
+        <form method="post" action="{% url 'toggle_product_status' product.product_id %}">
+            {% csrf_token %}
+            <button type="submit" class="button disable-button">
+                {% if product.is_enabled %}
+                    Deactivate
+                {% else %}
+                    Activate
+                {% endif %}
+            </button>
+        </form>
+        <!-- Update Button -->
+        <a href="{% url 'update_product' product.product_id %}" class="button">Update Product</a>
     </div>
 
-    <!-- Bootstrap JS and dependencies -->
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Product</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        /* Add your styles here */
+        body {
+            background-color: #e9ecef;
+            font-family: 'Poppins', sans-serif;
+        }
+        .container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            max-width: 700px;
+            margin: 60px auto;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .error-message {
+            color: red;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Update Product: {{ product.product_name }}</h2>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="product_name">Product Name <span class="required">*</span></label>
+                {{ form.product_name }}
+                {{ form.product_name.errors }}
+            </div>
+            <div class="form-group">
+                <label for="product_description">Description <span class="required">*</span></label>
+                {{ form.product_description }}
+                {{ form.product_description.errors }}
+            </div>
+            <div class="form-group">
+                <label for="category">Category <span class="required">*</span></label>
+                {{ form.category }}
+                {{ form.category.errors }}
+            </div>
+            <div class="form-group">
+                <label for="price">Price <span class="required">*</span></label>
+                {{ form.price }}
+                {{ form.price.errors }}
+            </div>
+            <div class="form-group">
+                <label for="stock_quantity">Stock Quantity <span class="required">*</span></label>
+                {{ form.stock_quantity }}
+                {{ form.stock_quantity.errors }}
+            </div>
+            <div class="form-group">
+                <label for="weight">Weight <span class="required">*</span></label>
+                {{ form.weight }}
+                {{ form.weight.errors }}
+            </div>
+            <div class="form-group">
+                <label for="metal_type">Metal Type</label>
+                {{ form.metal_type }}
+                {{ form.metal_type.errors }}
+            </div>
+            <div class="form-group">
+                <label for="stone_type">Stone Type</label>
+                {{ form.stone_type }}
+                {{ form.stone_type.errors }}
+            </div>
+            <div class="form-group">
+                <label for="gender">Gender <span class="required">*</span></label>
+                {{ form.gender }}
+                {{ form.gender.errors }}
+            </div>
+            <div class="form-group">
+                <label for="occasion">Occasion</label>
+                {{ form.occasion }}
+                {{ form.occasion.errors }}
+            </div>
+            <div class="form-group">
+                <label for="images">Product Images</label>
+                {{ form.images }}
+                {{ form.images.errors }}
+            </div>
+            <div class="form-group">
+                <label for="delivery_options">Delivery Options</label>
+                {{ form.delivery_options }}
+                {{ form.delivery_options.errors }}
+            </div>
+            <button type="submit" class="btn btn-primary">Update Product</button>
+        </form>
+    </div>
+</body>
+</html>

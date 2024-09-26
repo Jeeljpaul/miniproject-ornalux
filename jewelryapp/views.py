@@ -3,7 +3,7 @@ from django.contrib import messages
 from .models import *
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
-from .forms import RegistrationForm, PasswordResetRequestForm  # Import both forms
+from .forms import PasswordResetRequestForm  # Import both forms
 from django.utils.crypto import get_random_string
 from django.core.mail import send_mail
 
@@ -13,30 +13,93 @@ def index(request):
 def base(request):
     return render(request, 'base.html')
 
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.utils import timezone
+from .models import Tbl_login, Tbl_user
+from django.core.exceptions import ValidationError
+from django.db import transaction
+import datetime
+
 def register(request):
     if request.method == 'POST':
-        form = RegistrationForm(request.POST)
-        if form.is_valid():
-            # Create a new Tbl_login instance
-            login = Tbl_login.objects.create(
-                email=form.cleaned_data['email'],
-                password=form.cleaned_data['password']  # Assuming the password is already validated and hashed
-            )
-            
-            # Create a new Tbl_user instance linked to the Tbl_login instance
-            Tbl_user.objects.create(
-                name=form.cleaned_data['name'],
-                dob=form.cleaned_data['dob'],
-                phone=form.cleaned_data['phone'],
-                login=login
-            )
-            
-            messages.success(request, 'Registration successful! You can now log in')
-            return redirect('/login/')
-        else:
-            messages.error(request, 'Please correct the errors below')
+        name = request.POST['name']
+        dob = request.POST['dob']
+        phone = request.POST['phone']
+        email = request.POST['email']
+        password = request.POST['password']
+        confirm_password = request.POST['confirm_password']
+
+        # Basic server-side validations
+        errors = []
+
+        # Name validation - only letters and spaces
+        if not name.replace(" ", "").isalpha():
+            errors.append("Name should only contain letters and spaces.")
+        
+        # Date of birth validation - age 18+
+        dob_date = datetime.datetime.strptime(dob, '%Y-%m-%d').date()
+        current_date = datetime.date.today()
+        age = current_date.year - dob_date.year - ((current_date.month, current_date.day) < (dob_date.month, dob_date.day))
+        
+        if age < 18:
+            errors.append("You must be at least 18 years old.")
+        elif dob_date >= current_date:
+            errors.append("Please enter a valid date of birth.")
+
+        # Phone number validation - 10 digits
+        if not phone.isdigit() or len(phone) != 10:
+            errors.append("Phone number must be exactly 10 digits.")
+        
+        # Email validation
+        if Tbl_login.objects.filter(email=email).exists():
+            errors.append("Email is already registered.")
+
+        # Password validation
+        if len(password) < 8 or not any(char.isdigit() for char in password) or not any(char.isalpha() for char in password) or not any(char in '@$!%*#?&' for char in password):
+            errors.append("Password must be at least 8 characters long, include a letter, a number, and a special character.")
+        
+        # Confirm password validation
+        if password != confirm_password:
+            errors.append("Passwords do not match.")
+
+        # Check for errors
+        if errors:
+            for error in errors:
+                messages.error(request, error)
+            return render(request, 'register.html', {'form': request.POST})
+
+        # If no errors, save user data
+        try:
+            with transaction.atomic():
+                # Create login entry
+                login = Tbl_login.objects.create(
+                    email=email,
+                    password=password,
+                    status=True,
+                    last_login=None,
+                    login_count=0
+                )
+
+                # Create user entry
+                Tbl_user.objects.create(
+                    name=name,
+                    dob=dob_date,
+                    phone=phone,
+                    login=login,
+                    status=True
+                )
+
+                messages.success(request, "Account created successfully. Please login.")
+                return redirect('login')  # Redirect to login page after successful registration
+
+        except Exception as e:
+            messages.error(request, f"An error occurred: {str(e)}")
+            return render(request, 'register.html', {'form': request.POST})
+
     else:
-        form = RegistrationForm()
+        return render(request, 'register.html')
+
     
     return render(request, 'register.html', {'form': form})
 from django.shortcuts import render, redirect
@@ -245,9 +308,45 @@ def view_products(request):
     return render(request, 'admin/view_products.html', {'products': products})
 
 # View product details
-def view_product_details(request, product_id):
+def product_details(request, product_id):
     product = get_object_or_404(Product, product_id=product_id)
-    return render(request, 'admin/product_details.html', {'product': product})
+    context = {'product': product}
+    return render(request, 'admin/product_details.html', context)
+
+def toggle_product_status(request, product_id):
+    # Get the product object using product_id, or return 404 if not found
+    product = get_object_or_404(Product, product_id=product_id)
+    
+    # Toggle the status field (assuming it's a BooleanField)
+    product.status = not product.status  # If status is True, set it to False, and vice versa
+    
+    # Save the updated product object to the database
+    product.save()
+    
+    # Redirect back to the product details page after toggling
+    return redirect('product_details', product_id=product_id)
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from .models import Product
+from .forms import ProductForm  # Assuming you have a form class for the product
+
+def update_product(request, product_id):
+    product = get_object_or_404(Product, product_id=product_id)
+
+    if request.method == "POST":
+        form = ProductForm(request.POST, instance=product)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Product updated successfully!')
+            return redirect('product_list')  # Redirect to product list or detail page
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = ProductForm(instance=product)
+
+    return render(request, 'admin/update_product.html', {'form': form, 'product': product})
+
 
 # Delete a product
 def delete_product(request, product_id):
@@ -258,18 +357,18 @@ def delete_product(request, product_id):
     return render(request, 'admin/view_products.html')
 
 #update a product
-def update_product(request, product_id):
-    product = get_object_or_404(Product, id=product_id)
+# def update_product(request, product_id):
+#     product = get_object_or_404(Product, id=product_id)
     
-    if request.method == 'POST':
-        form = ProductForm(request.POST, request.FILES, instance=product)
-        if form.is_valid():
-            form.save()
-            return redirect('product_detail', product_id=product.id)
-    else:
-        form = ProductForm(instance=product)
+#     if request.method == 'POST':
+#         form = ProductForm(request.POST, request.FILES, instance=product)
+#         if form.is_valid():
+#             form.save()
+#             return redirect('product_detail', product_id=product.id)
+#     else:
+#         form = ProductForm(instance=product)
 
-    return render(request, 'update_product.html', {'form': form, 'product': product})
+#     return render(request, 'update_product.html', {'form': form, 'product': product})
 
      #--------------------------------------------------------------------------------------#
 def view_registered_users(request):
@@ -357,3 +456,57 @@ def delete_staff(request, staff_id):
 
 def staffhome(request):
     return render(request, 'staffhome.html')
+
+
+
+from django.shortcuts import render, redirect
+from .models import Product
+from .forms import ProductForm
+
+def add_p(request):
+    if request.method == "POST":
+        form = ProductForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('product_list')  # Ensure 'product_list' is defined in your URLs
+    else:
+        form = ProductForm()
+    return render(request, 'admin/add_p.html', {'form': form})
+
+
+
+def add_product(request):
+    if request.method == "POST":
+        form = ProductForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('product_list')  # Ensure 'product_list' is defined in your URLs
+    else:
+        form = ProductForm()
+    return render(request, 'admin/add_product.html', {'form': form})
+
+
+
+from django.shortcuts import render
+from .models import Product
+
+def product_list(request):
+    products = Product.objects.all()  # Fetch all products
+    return render(request, 'admin/product_list.html', {'products': products})
+
+
+
+from django.shortcuts import get_object_or_404
+
+def update_p(request, product_id):
+    product = get_object_or_404(Product, pk=product_id)
+    
+    if request.method == "POST":
+        form = ProductForm(request.POST, request.FILES, instance=product)
+        if form.is_valid():
+            form.save()
+            return redirect('product_list')  # Make sure 'product_list' is defined in your URLs
+    else:
+        form = ProductForm(instance=product)
+
+    return render(request, 'admin/update_p.html', {'form': form, 'product': product})

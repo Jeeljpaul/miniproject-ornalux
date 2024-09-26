@@ -14,13 +14,21 @@ urlpatterns = [
     path('register/',views.register),
     path('forgot_password/', views.forgot_password),
     path('reset-password/<str:token>/', views.reset_password),
+
+
+    path('adminhome/add_p/', views.add_p, name='add_p'),
+    path('update_p/<int:product_id>/', views.update_p, name='update_p'),  # New URL pattern
+   
     path('adminhome/add_product/', views.add_product, name='add_product'),
+    path('adminhome/product_list/', views.product_list, name='product_list'),  # Make sure this line exists   
     path('adminhome/view_products/',views.view_products, name='view_products'),
-    path('view_product_details/<int:product_id>/', views.view_product_details, name='view_product_details'),
-    path('delete_product/<int:product_id>/', views.delete_product, name='delete_product'),
-    path('update_product/<int:product_id>/', views.update_product, name='update_product'),
+    path('product_details/<int:product_id>/', views.product_details, name='product_details'),
+    path('product/<int:product_id>/toggle_status/', views.toggle_product_status, name='toggle_product_status'),
+    path('product/<int:product_id>/update/', views.update_product, name='update_product'),
+
     path('view_registered_users/', views.view_registered_users,),
     path('delete_user/<int:user_id>/', views.delete_user, name='delete_user'),
+
     path('add_staff/', views.add_staff, name='add_staff'),
     path('view_staff/', views.view_staff, name='view_staff'),
     path('update_staff/<int:staff_id>/', views.update_staff, name='update_staff'),

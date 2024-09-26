@@ -83,6 +83,7 @@
 <div class="container">
     <h2>Add Staff</h2>
     <form method="post">
+        {% csrf_token %} <!-- This is important for CSRF protection -->
         <div class="form-group">
             <label for="name">Name</label>
             <input type="text" class="form-control" id="name" name="name" required>
