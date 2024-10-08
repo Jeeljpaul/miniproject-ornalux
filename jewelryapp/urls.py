@@ -26,15 +26,14 @@ urlpatterns = [
     path('product/<int:product_id>/toggle_status/', views.toggle_product_status, name='toggle_product_status'),
     path('product/<int:product_id>/update/', views.update_product, name='update_product'),
 
-    path('view_registered_users/', views.view_registered_users,),
-    path('delete_user/<int:user_id>/', views.delete_user, name='delete_user'),
+    path('view_registered_users/', views.view_registered_users, name='view_registered_users'),
+    path('toggle_user_status/<int:user_id>/', views.toggle_user_status, name='toggle_user_status'),
 
     path('add_staff/', views.add_staff, name='add_staff'),
     path('view_staff/', views.view_staff, name='view_staff'),
     path('update_staff/<int:staff_id>/', views.update_staff, name='update_staff'),
     path('staff/delete/<int:staff_id>/', views.delete_staff, name='delete_staff'),
 
-    path('add_category',views.add_category, name='add_category'),
 
 ]
 if settings.DEBUG:

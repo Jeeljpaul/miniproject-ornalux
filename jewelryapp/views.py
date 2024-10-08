@@ -131,9 +131,11 @@ def login(request):
             if email == 'admin123@gmail.com':  # Assuming admin email is known
                 # Admin login success
                 request.session['user_type'] = 'admin'
-                request.session['user_id'] = admin.login_id
+                request.session['login_id'] = admin.login_id  # Store login_id in session
                 request.session['email'] = admin.email
                 request.session['name'] = 'Admin'  # Static name for admin
+                   # Increment login count and update login timestamp
+                admin.login()  # Call the method to update login info
                 return redirect('/adminhome/')  # Redirect to admin home page
         except Tbl_login.DoesNotExist:
             pass
@@ -143,9 +145,14 @@ def login(request):
             staff = Tbl_staff.objects.get(login__email=email, login__password=password)
             # Staff login success
             request.session['user_type'] = 'staff'
+            request.session['login_id'] = staff.login.login_id  # Store login_id in session
             request.session['staff_id'] = staff.staff_id
             request.session['email'] = staff.login.email
             request.session['name'] = staff.name  # Fetch the staff's name
+
+            # Increment login count and update login timestamp for staff
+            staff.login.login()  # Increment login count for staff's login
+
             return redirect('/staff_home/')  # Redirect to staff dashboard
         except Tbl_staff.DoesNotExist:
             pass
@@ -157,11 +164,14 @@ def login(request):
             user = Tbl_user.objects.get(login_id=user_login.login_id)
             # Regular user login success
             request.session['user_type'] = 'user'
-            request.session['user_id'] = user_login.login_id
+            request.session['login_id'] = user_login.login_id  # Store login_id in session
+            request.session['user_id'] = user.user_id  # User-specific ID
             request.session['email'] = user_login.email
             request.session['name'] = user.name  # Fetch the user's name
-            print(f"User found: {user.email}")
-            print(f"Login ID: {user.login_id}")
+              # Increment login count and update login timestamp
+            user_login.login()  # Call the method to update login info
+
+            
             return redirect('/base_home/')  # Redirect to user dashboard
         except (Tbl_login.DoesNotExist, Tbl_user.DoesNotExist):
             messages.error(request, 'Invalid email or password')
@@ -239,9 +249,27 @@ def reset_password(request, token):
 
 
 # admin views.py--------------------------------------------------------------------------------------------
+from django.utils.decorators import decorator_from_middleware
+from django.middleware.cache import CacheMiddleware
+from django.shortcuts import render, redirect
+from django.contrib import messages
 
+@decorator_from_middleware(CacheMiddleware)
 def adminhome(request):
-    return render(request, 'admin/adminhome.html')
+    # Check if the user is logged in and is an admin
+    if not request.session.get('user_type') == 'admin':
+        # If not an admin, redirect to the login page
+        messages.error(request, 'You need to log in as admin to access the admin dashboard.')
+        # Redirect to login page
+        response = redirect('/login/')
+    else:
+        # If admin, allow access to the admin dashboard
+        response = render(request, 'admin/adminhome.html')
+
+    # Set Cache-Control headers to prevent caching of the page
+    response['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    return response
+
 
 
 def add_product(request):
@@ -376,15 +404,27 @@ def view_registered_users(request):
     return render(request, 'admin/view_registered_users.html', {'users': users})
 
 
-def delete_user(request, user_id):
-    user = get_object_or_404(Tbl_user, user_id=user_id)
-    
-    if request.method == 'POST':  # Check if the form was submitted
-        user.delete()
-        return redirect('view_registered_users')  # Redirect back to the users list
+from django.shortcuts import redirect, get_object_or_404
+from django.urls import reverse
+from django.contrib import messages
+from .models import Tbl_user, Tbl_login
 
-    return render(request, 'confirm_delete_user.html', {'user': user})
+def toggle_user_status(request, user_id):
+    if request.method == 'POST':
+        user = get_object_or_404(Tbl_user, user_id=user_id)
+        action = request.POST.get('action')
 
+        if action == 'deactivate':
+            user.status = False
+            user.login.status = False
+        elif action == 'activate':
+            user.status = True
+            user.login.status = True
+
+        user.login.save()
+        user.save()
+
+    return redirect(reverse('view_registered_users'))
 
  #---------------------------------------------------------------
 from .forms import StaffForm
@@ -451,18 +491,15 @@ def delete_staff(request, staff_id):
 
     return render(request, 'confirm_delete.html', {'staff': staff})
 
-
-#staff viws.py-------------------------------------------------------------------------------------------------
-
 def staffhome(request):
     return render(request, 'staffhome.html')
 
-
+#staff views.py-------------------------------------------------------------------------------------------------
 
 from django.shortcuts import render, redirect
 from .models import Product
 from .forms import ProductForm
-
+ 
 def add_p(request):
     if request.method == "POST":
         form = ProductForm(request.POST, request.FILES)
@@ -510,27 +547,3 @@ def update_p(request, product_id):
         form = ProductForm(instance=product)
 
     return render(request, 'admin/update_p.html', {'form': form, 'product': product})
-
-
-
-from django.shortcuts import render, redirect
-
-
-def add_category(request):
-    if request.method == 'POST':
-        category_name = request.POST.get('name')
-        
-        # Collect the dynamic fields
-        field_names = request.POST.getlist('field_names[]')
-        field_types = request.POST.getlist('field_types[]')
-
-        fields = {}
-        for name, ftype in zip(field_names, field_types):
-            fields[name] = ftype
-        
-        # Save the category with its fields
-        Category.objects.create(name=category_name, fields=fields)
-        
-        return redirect('add_p')  # Redirect after saving
-    
-    return render(request, 'admin/add_cat.html')

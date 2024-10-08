@@ -92,6 +92,7 @@
                         <th>Date of Birth</th>
                         <th>Phone Number</th>
                         <th>Email</th>
+                        <th>Status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -104,12 +105,26 @@
                         <td>{{ user.phone }}</td>
                         <td>{{ user.login.email }}</td>
                         <td>
-                            <a href="{% url 'delete_user' user.user_id %}" class="btn btn-danger btn-sm">Delete</a>
+                            {% if user.status %}
+                                <span class="text-success">Active</span>
+                            {% else %}
+                                <span class="text-danger">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <form method="POST" action="{% url 'toggle_user_status' user.user_id %}">
+                                {% csrf_token %}
+                                {% if user.status %}
+                                    <button type="submit" name="action" value="deactivate" class="btn btn-warning btn-sm">Deactivate</button>
+                                {% else %}
+                                    <button type="submit" name="action" value="activate" class="btn btn-success btn-sm">Activate</button>
+                                {% endif %}
+                            </form>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="6" class="no-users">No users found</td>
+                        <td colspan="7" class="no-users">No users found</td>
                     </tr>
                     {% endfor %}
                 </tbody>
