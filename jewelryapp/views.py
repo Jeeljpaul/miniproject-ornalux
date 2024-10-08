@@ -377,7 +377,7 @@ def view_registered_users(request):
 
 
 def delete_user(request, user_id):
-    user = get_object_or_404(Tbl_user, pk=user_id)
+    user = get_object_or_404(Tbl_user, user_id=user_id)
     
     if request.method == 'POST':  # Check if the form was submitted
         user.delete()
@@ -391,10 +391,10 @@ from .forms import StaffForm
 
 def add_staff(request):
     if request.method == 'POST':
-        form = AddStaffForm(request.POST)
+        form = StaffForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('admin/view_staff')  # Redirect to a view after successful staff addition
+            return redirect('/adminhome/')  # Redirect to a view after successful staff addition
     else:
         form = StaffForm()
 
@@ -411,13 +411,13 @@ def view_staff(request):
 
 
 def update_staff(request, staff_id):
-    staff = get_object_or_404(Tbl_staff, id=staff_id)
+    staff = get_object_or_404(Tbl_staff, staff_id=staff_id)
 
     if request.method == 'POST':
         form = StaffForm(request.POST)
         if form.is_valid():
             # Update login details
-            login = get_object_or_404(Tbl_login, id=staff.login.id)
+            login = get_object_or_404(Tbl_login, login_id=staff.login.login_id)
             login.email = form.cleaned_data['email']
             login.save()
 
@@ -510,3 +510,27 @@ def update_p(request, product_id):
         form = ProductForm(instance=product)
 
     return render(request, 'admin/update_p.html', {'form': form, 'product': product})
+
+
+
+from django.shortcuts import render, redirect
+
+
+def add_category(request):
+    if request.method == 'POST':
+        category_name = request.POST.get('name')
+        
+        # Collect the dynamic fields
+        field_names = request.POST.getlist('field_names[]')
+        field_types = request.POST.getlist('field_types[]')
+
+        fields = {}
+        for name, ftype in zip(field_names, field_types):
+            fields[name] = ftype
+        
+        # Save the category with its fields
+        Category.objects.create(name=category_name, fields=fields)
+        
+        return redirect('add_p')  # Redirect after saving
+    
+    return render(request, 'admin/add_cat.html')

@@ -34,6 +34,8 @@ urlpatterns = [
     path('update_staff/<int:staff_id>/', views.update_staff, name='update_staff'),
     path('staff/delete/<int:staff_id>/', views.delete_staff, name='delete_staff'),
 
+    path('add_category',views.add_category, name='add_category'),
+
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

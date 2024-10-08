@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 class Tbl_login(models.Model):
     login_id = models.AutoField(primary_key=True)

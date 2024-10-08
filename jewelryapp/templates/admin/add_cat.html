@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Category</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
+        .btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            width: 100%;
+        }
+
+        .btn:hover {
+            background-color: #45a049;
+        }
+
+        .fields-group {
+            margin-bottom: 20px;
+        }
+
+        .fields-group div {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .remove-btn {
+            background-color: red;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .remove-btn:hover {
+            background-color: darkred;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Add New Category</h2>
+
+    <form method="post" action="{% url 'add_category' %}">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="name">Category Name</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+
+        <h3>Category Fields</h3>
+
+        <div class="fields-group" id="fields-group">
+            <!-- Fields will be added here dynamically -->
+            <div>
+                <input type="text" name="field_names[]" placeholder="Field Name" required>
+                <select name="field_types[]" required>
+                    <option value="text">Text</option>
+                    <option value="number">Number</option>
+                    <option value="date">Date</option>
+                    <option value="select">Dropdown</option>
+                </select>
+                <button type="button" class="remove-btn" onclick="removeField(this)">Remove</button>
+            </div>
+        </div>
+
+        <button type="button" class="btn" onclick="addField()">Add More Fields</button>
+
+        <br><br>
+
+        <button type="submit" class="btn">Save Category</button>
+    </form>
+</div>
+
+<script>
+    function addField() {
+        const fieldsGroup = document.getElementById('fields-group');
+        const fieldHtml = `
+            <div>
+                <input type="text" name="field_names[]" placeholder="Field Name" required>
+                <select name="field_types[]" required>
+                    <option value="text">Text</option>
+                    <option value="number">Number</option>
+                    <option value="date">Date</option>
+                    <option value="select">Dropdown</option>
+                </select>
+                <button type="button" class="remove-btn" onclick="removeField(this)">Remove</button>
+            </div>
+        `;
+        fieldsGroup.insertAdjacentHTML('beforeend', fieldHtml);
+    }
+
+    function removeField(button) {
+        const fieldDiv = button.parentElement;
+        fieldDiv.remove();
+    }
+</script>
+
+</body>
+</html>
