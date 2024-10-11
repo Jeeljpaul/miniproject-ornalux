@@ -189,7 +189,7 @@
         <div class="social-login">
             <p>Or</p>
             <div class="social-icons">
-                <a href="#"><img src="{% static 'images/google-logo.png' %}" alt="Google"></a>
+                <a href="{% url 'social:begin' 'google-oauth2' %}"><img src="{% static 'images/google-logo.png' %}" alt="Google"></a>
             </div>
         </div>
     </div>

@@ -48,6 +48,35 @@ class Tbl_staff(models.Model):
     def __str__(self):
         return self.name
 
+class Category(models.Model):
+    category_id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+class CategoryAttribute(models.Model):
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='attributes')
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f"{self.name} ({self.category.name})"
+    
+class Metaltype(models.Model):
+    metaltype_id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+class Stonetype(models.Model):
+    stonetype_id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+
 # Model for Product
 class Product(models.Model):
     GENDER_CHOICES = [
@@ -59,12 +88,9 @@ class Product(models.Model):
     product_id = models.AutoField(primary_key=True)
     product_name = models.CharField(max_length=255)
     product_description = models.TextField()
-    category = models.CharField(max_length=255)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     stock_quantity = models.PositiveIntegerField()
     weight = models.DecimalField(max_digits=5, decimal_places=2)
-    metal_type = models.CharField(max_length=255)
-    stone_type = models.CharField(max_length=255)
     gender = models.CharField(max_length=6, choices=GENDER_CHOICES, default='Unisex')
     occasion = models.CharField(max_length=255)
     images = models.ImageField(upload_to='pic/', default='')
@@ -74,5 +100,27 @@ class Product(models.Model):
 
     def __str__(self):
         return self.product_name
+    
+class ProductAttribute(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='attributes')
+    attribute_name = models.CharField(max_length=100)
+    attribute_value = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"{self.attribute_name}: {self.attribute_value} for {self.product.name}"
+    
+
+class Cart(models.Model):
+    cart_id = models.AutoField(primary_key=True)
+    login = models.OneToOneField(Tbl_login, on_delete=models.CASCADE, related_name='cart')
+    product = models.ManyToManyField(Product, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Cart for {self.login.email}"
+
+    def total_price(self):
+        return sum(product.price for product in self.products.all())
 
  

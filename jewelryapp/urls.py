@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from . import views
 from django.conf import settings
 from django.conf.urls.static import static
@@ -11,10 +11,10 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('adminhome/',views.adminhome),
     path('staffhome/',views.staffhome),
-    path('register/',views.register),
+    path('register/',views.register, name='register'),
     path('forgot_password/', views.forgot_password),
     path('reset-password/<str:token>/', views.reset_password),
-
+    path('social-auth/', include('social_django.urls', namespace='social')),
 
     path('adminhome/add_p/', views.add_p, name='add_p'),
     path('update_p/<int:product_id>/', views.update_p, name='update_p'),  # New URL pattern
@@ -25,6 +25,13 @@ urlpatterns = [
     path('product_details/<int:product_id>/', views.product_details, name='product_details'),
     path('product/<int:product_id>/toggle_status/', views.toggle_product_status, name='toggle_product_status'),
     path('product/<int:product_id>/update/', views.update_product, name='update_product'),
+    path('adminhome/add-category/', views.add_category, name='add_category'),
+    path('get_category_attributes/<int:category_id>/', views.get_category_attributes, name='get_category_attributes'),
+    path('adminhome/add_metaltype/', views.add_metaltype, name='add_metaltype'),
+    path('adminhome/add_stonetype/', views.add_stonetype, name='add_stonetype'),
+
+
+
 
     path('view_registered_users/', views.view_registered_users, name='view_registered_users'),
     path('toggle_user_status/<int:user_id>/', views.toggle_user_status, name='toggle_user_status'),
@@ -33,6 +40,16 @@ urlpatterns = [
     path('view_staff/', views.view_staff, name='view_staff'),
     path('update_staff/<int:staff_id>/', views.update_staff, name='update_staff'),
     path('staff/delete/<int:staff_id>/', views.delete_staff, name='delete_staff'),
+
+
+    path('product/', views.product, name='product'),
+    path('ring_list/', views.ring_list, name='ring_list'),
+    path('earring_list/', views.earring_list, name='earring_list'),
+    path('bracelet_list/', views.bracelet_list, name='bracelet_list'),
+    path('ring_detail/<int:product_id>/', views.ring_detail, name='ring_detail'),
+    path('add-to-cart/<int:product_id>/', views.add_to_cart, name='add_to_cart'),
+
+
 
 
 ]

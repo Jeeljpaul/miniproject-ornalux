@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Product</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        body {
+            background-color: #e9ecef;
+            font-family: 'Poppins', sans-serif;
+        }
+        .container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            max-width: 700px;
+            margin: 60px auto;
+            transition: transform 0.2s;
+        }
+        .container:hover {
+            transform: scale(1.02);
+        }
+        h2 {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .form-group label {
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 10px;
+        }
+        .form-control {
+            border-radius: 10px;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            background-color: #f9f9f9;
+            height: 50px;
+        }
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+            background-color: #ffffff;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 25px;
+            font-weight: 500;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            width: 100%;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
+        .required {
+            color: red;
+        }
+        .error-message {
+            color: red;
+            font-size: 0.875rem;
+        }
+    </style>
+    <script>
+        function validateForm(event) {
+            let isValid = true;
+            const errors = [];
+
+            const productName = document.getElementById('id_product_name').value;
+            const category = document.getElementById('id_category').value;
+            const description = document.getElementById('id_product_description').value;
+            const deliveryOptions = document.getElementById('id_delivery_options').value;
+            const price = parseFloat(document.getElementById('id_price').value);
+            const stockQuantity = parseInt(document.getElementById('id_stock_quantity').value);
+            const weight = parseFloat(document.getElementById('id_weight').value);
+            const metalType = document.getElementById('id_metal_type').value;
+            const stoneType = document.getElementById('id_stone_type').value;
+            const occasion = document.getElementById('id_occasion').value;
+            const gender = document.getElementById('id_gender').value;
+
+            // Validation for product name and category
+            const validateNameCategory = (value) => {
+                return value[0].toUpperCase() === value[0] && value.length >= 3;
+            };
+            if (!validateNameCategory(productName)) {
+                errors.push("Product name must start with a capital letter and be at least 3 characters long.");
+                isValid = false;
+            }
+            if (!validateNameCategory(category)) {
+                errors.push("Category must start with a capital letter and be at least 3 characters long.");
+                isValid = false;
+            }
+
+            // Validation for description and delivery options
+            const validateDescriptionDelivery = (value) => {
+                return value[0].toUpperCase() === value[0] && value.endsWith('.') && value.length >= 10 && value.length <= 100;
+            };
+            if (!validateDescriptionDelivery(description)) {
+                errors.push("Description must start with a capital letter, end with a full stop, and be between 10 and 100 characters long.");
+                isValid = false;
+            }
+            if (!validateDescriptionDelivery(deliveryOptions)) {
+                errors.push("Delivery options must start with a capital letter, end with a full stop, and be between 10 and 100 characters long.");
+                isValid = false;
+            }
+
+            // Validation for price
+            if (isNaN(price) || price < 100 || price > 10000000) {
+                errors.push("Price must be a decimal value between 100 and 10,000,000.");
+                isValid = false;
+            }
+
+            // Validation for stock quantity
+            if (stockQuantity < 0 || stockQuantity > 50) {
+                errors.push("Stock quantity must be between 0 and 50.");
+                isValid = false;
+            }
+
+            // Validation for weight
+            if (weight < 1 || weight > 100) {
+                errors.push("Weight must be between 1 and 100.");
+                isValid = false;
+            }
+
+            // Validation for metal type, stone type, and occasion
+            const validateMetalStoneOccasion = (value) => {
+                return value[0].toUpperCase() === value[0] && value.length >= 3;
+            };
+            if (!validateMetalStoneOccasion(metalType)) {
+                errors.push("Metal type must start with a capital letter and be at least 3 characters long.");
+                isValid = false;
+            }
+            if (!validateMetalStoneOccasion(stoneType)) {
+                errors.push("Stone type must start with a capital letter and be at least 3 characters long.");
+                isValid = false;
+            }
+            if (!validateMetalStoneOccasion(occasion)) {
+                errors.push("Occasion must start with a capital letter and be at least 3 characters long.");
+                isValid = false;
+            }
+
+            // Validation for gender
+            const validGenders = ['Men', 'Women', 'Unisex'];
+            if (!validGenders.includes(gender)) {
+                errors.push("Gender must be either 'Men', 'Women', or 'Unisex'.");
+                isValid = false;
+            }
+
+            // Display errors if any
+            const errorContainer = document.getElementById('error-messages');
+            errorContainer.innerHTML = '';
+            if (!isValid) {
+                errors.forEach(error => {
+                    const div = document.createElement('div');
+                    div.className = 'error-message';
+                    div.innerText = error;
+                    errorContainer.appendChild(div);
+                });
+                event.preventDefault();
+            }
+        }
+
+        function showRelevantFields() {
+            const category = document.getElementById('id_category').value;
+            const attributesSection = document.getElementById('attributes-section');
+
+            // Clear the attributes section
+            attributesSection.innerHTML = '';
+
+            // Static method to show fields based on the selected category
+            switch (category) {
+                case '1': // Example: Rings
+                    attributesSection.innerHTML += `
+                        <div class="form-group">
+                            <label for="ring_size">Ring Size</label>
+                            <select class="form-control" id="id_ring_size" name="ring_size">
+                                <option value="">Select Ring Size</option>
+                                <option value="Small">Small</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Large">Large</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="ring_type">Ring Type</label>
+                            <select class="form-control" id="id_ring_type" name="ring_type">
+                                <option value="">Select Ring Type</option>
+                                <option value="Solitaire">Solitaire</option>
+                                <option value="Band">Band</option>
+                                <option value="Engagement">Engagement</option>
+                            </select>
+                        </div>`;
+                    break;
+                case '2': // Example: Bangles
+                    attributesSection.innerHTML += `
+                        <div class="form-group">
+                            <label for="bangle_size">Bangle Size</label>
+                            <select class="form-control" id="id_bangle_size" name="bangle_size">
+                                <option value="">Select Bangle Size</option>
+                                <option value="Small">Small</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Large">Large</option>
+                            </select>
+                        </div>`;
+                    break;
+                case '3': // Example: Earrings
+                    attributesSection.innerHTML += `
+                        <div class="form-group">
+                            <label for="earring_type">Earring Type</label>
+                            <select class="form-control" id="id_earring_type" name="earring_type">
+                                <option value="">Select Earring Type</option>
+                                <option value="Stud">Stud</option>
+                                <option value="Hoop">Hoop</option>
+                                <option value="Dangle">Dangle</option>
+                            </select>
+                        </div>`;
+                    break;
+                // Add more categories as needed
+                default:
+                    break;
+            }
+        }
+
+        $(document).ready(function() {
+            // Show relevant fields on category change
+            $('#id_category').change(showRelevantFields);
+        });
+    </script>
+</head>
+<body>
+
+<div class="container">
+    <h2>Add Product</h2>
+    <div id="error-messages"></div>
+    <form method="POST" onsubmit="validateForm(event)">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="id_product_name">Product Name <span class="required">*</span></label>
+            <input type="text" class="form-control" id="id_product_name" name="product_name" required>
+        </div>
+
+        <div class="form-group">
+            <label for="category">Category:</label>
+            <select class="form-control" id="id_category" name="category" required>
+                <option value="">Select Category</option>
+                {% for category in categories %}
+                <option value="{{ category.category_id }}">{{ category.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="id_product_description">Product Description <span class="required">*</span></label>
+            <textarea class="form-control" id="id_product_description" name="product_description" required></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="id_delivery_options">Delivery Options <span class="required">*</span></label>
+            <textarea class="form-control" id="id_delivery_options" name="delivery_options" required></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="id_price">Price <span class="required">*</span></label>
+            <input type="number" class="form-control" id="id_price" name="price" required>
+        </div>
+
+        <div class="form-group">
+            <label for="id_stock_quantity">Stock Quantity <span class="required">*</span></label>
+            <input type="number" class="form-control" id="id_stock_quantity" name="stock_quantity" required>
+        </div>
+
+        <div class="form-group">
+            <label for="id_weight">Weight (grams) <span class="required">*</span></label>
+            <input type="number" class="form-control" id="id_weight" name="weight" required>
+        </div>
+
+        <div class="form-group">
+            <label for="id_metal_type">Metal Type </label>
+            <select class="form-control" id="id_metal_type" name="metal_type" required>
+                <option value="">Select Metal Type</option>
+                {% for metal_type in metal_types %}
+                <option value="{{ metal_type.metaltype_id }}">{{ metal_type.name }}</option>
+                {% endfor %}
+            </select>
+            
+        </div>
+
+        <div class="form-group">
+            <label for="id_stone_type">Stone Type </label>
+            <select class="form-control" id="id_stone_type" name="stone_type" required>
+                <option value="">Select Stone Type</option>
+                {% for stone_type in stone_types %}
+                <option value="{{ stone_type.stonetype_id }}">{{ stone_type.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="id_occasion">Occasion <span class="required">*</span></label>
+            <select class="form-control" id="id_occasion" name="occasion" required>
+                <option value="">Select Occasion</option>
+                <option value="Birthday">Birthday</option>
+                <option value="Wedding">Wedding</option>
+                <option value="Anniversary">Anniversary</option>
+                <!-- Add more occasions as needed -->
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="id_gender">Gender <span class="required">*</span></label>
+            <select class="form-control" id="id_gender" name="gender" required>
+                <option value="">Select Gender</option>
+                <option value="Men">Men</option>
+                <option value="Women">Women</option>
+                <option value="Unisex">Unisex</option>
+            </select>
+        </div>
+
+        <div id="attributes-section"></div>
+
+        <button type="submit">Add Product</button>
+    </form>
+</div>
+
+</body>
+</html>

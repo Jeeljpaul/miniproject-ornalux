@@ -5,14 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product List</title>
     <script type="text/javascript">
+        // Function to disable the back button
         function preventBack() {
-            window.history.forward(); 
+            history.pushState(null, null, location.href); // Add a new state to the history
+            window.addEventListener('popstate', function (event) {
+                history.pushState(null, null, location.href); // Keep adding a new state to block the back action
+            });
         }
-          
-        setTimeout("preventBack()", 0);
-          
-        window.onunload = function () { null };
+
+        // Call the function to prevent back navigation
+        window.onload = preventBack;
     </script>
+    
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -123,15 +127,7 @@
             gap: 10px;
         }
     </style>
-    <script type="text/javascript">
-        function preventBack() {
-            window.history.forward(); 
-        }
-          
-        setTimeout("preventBack()", 0);
-          
-        window.onunload = function () { null };
-    </script>
+
 </head>
 <body>
 
@@ -250,6 +246,6 @@
             checkbox.addEventListener('change', filterProducts);
         });
     </script>
-
+    
 </body>
 </html>

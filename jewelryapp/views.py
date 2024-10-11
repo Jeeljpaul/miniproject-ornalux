@@ -142,7 +142,7 @@ def login(request):
         
         # Check if the user is staff
         try:
-            staff = Tbl_staff.objects.get(login__email=email, login__password=password)
+            staff = Tbl_staff.objects.get(login_email=email, login_password=password)
             # Staff login success
             request.session['user_type'] = 'staff'
             request.session['login_id'] = staff.login.login_id  # Store login_id in session
@@ -508,7 +508,8 @@ def add_p(request):
             return redirect('product_list')  # Ensure 'product_list' is defined in your URLs
     else:
         form = ProductForm()
-    return render(request, 'admin/add_p.html', {'form': form})
+    categories = Category.objects.all() 
+    return render(request, 'admin/add_p.html', {'form': form, 'categories': categories})
 
 
 
@@ -547,3 +548,190 @@ def update_p(request, product_id):
         form = ProductForm(instance=product)
 
     return render(request, 'admin/update_p.html', {'form': form, 'product': product})
+
+
+# -----------------------------------------------------------------------------------------------------
+
+def product(request):
+    return render(request, 'user/product.html')
+
+
+
+def ring_list(request):
+    # Fetch all products with the category 'Rings'
+    rings = Product.objects.filter(category='Ring', is_active=True)
+
+    # Get filter criteria from the request
+    ring_size = request.GET.get('ring_size')
+    ring_type = request.GET.get('ring_type')
+    stone_type = request.GET.get('stone_type')
+    metal_type = request.GET.get('metal_type')
+
+    # Apply filters if they are present
+    if ring_size:
+        rings = rings.filter(size=ring_size)
+    if ring_type:
+        rings = rings.filter(ring_type=ring_type)
+    if stone_type:
+        rings = rings.filter(gemstone=stone_type)
+    if metal_type:
+        rings = rings.filter(metal_type=metal_type)
+
+
+    return render(request, 'user/ring_list.html', {'rings': rings})
+
+
+def earring_list(request):
+    # Fetch all products with the category 'Earrings'
+    earrings = Product.objects.filter(category='Earring', is_active=True)
+
+    # Get filter criteria from the request
+    earring_style = request.GET.get('earring_style')
+    shop_for = request.GET.get('shop_for')
+    stone_type = request.GET.get('stone_type')
+    metal_type = request.GET.get('metal_type')
+
+    # Apply filters if they are present
+    if earring_style:
+        earrings = earrings.filter(earring_style__iexact=earring_style)
+    if shop_for:
+        earrings = earrings.filter(shop_for__iexact=shop_for)
+    if stone_type:
+        earrings = earrings.filter(stone_type__iexact=stone_type)
+    if metal_type:
+        earrings = earrings.filter(metal_type__iexact=metal_type)
+
+    return render(request, 'user/earring_list.html', {'earrings': earrings})
+
+
+
+def bracelet_list(request):
+    # Fetch all products with the category 'Bracelet'
+    bracelets = Product.objects.filter(category='Bracelet', is_active=True)
+
+    # Get filter criteria from the request
+    bracelet_style = request.GET.get('bracelet_style')
+    shop_for = request.GET.get('shop_for')
+    stone_type = request.GET.get('stone_type')
+    metal_type = request.GET.get('metal_type')
+
+    # Apply filters if they are present
+    if bracelet_style:
+        bracelets = bracelets.filter(bracelet_style__iexact=bracelet_style)
+    if shop_for:
+        bracelets = bracelets.filter(shop_for__iexact=shop_for)
+    if stone_type:
+        bracelets = bracelets.filter(stone_type__iexact=stone_type)
+    if metal_type:
+        bracelets = bracelets.filter(metal_type__iexact=metal_type)
+
+    return render(request, 'user/bracelet.html', {'bracelets': bracelets})
+
+from django.shortcuts import render, get_object_or_404
+
+def ring_detail(request, product_id):
+    product = get_object_or_404(Product, product_id=product_id, category='Ring')
+    return render(request, 'user/ring_detail.html', {'product': product})
+
+
+
+from django.shortcuts import get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from .models import Cart, Product, Tbl_login
+
+def add_to_cart(request, product_id):
+    # Check if the user is authenticated
+    if not request.user.is_authenticated:
+        return JsonResponse({'success': False, 'message': 'You need to register or log in to add items to the cart.'})
+    
+    # If the user is authenticated, proceed to add the product to the cart
+    product = get_object_or_404(Product, id=product_id)
+    user_login = request.user.tbl_login  # Assuming you have a way to link the user to Tbl_login
+    cart, created = Cart.objects.get_or_create(login=user_login)
+
+    if product not in cart.products.all():
+        cart.products.add(product)
+
+    cart.save()
+    return redirect('ring_detail')
+
+
+from django.shortcuts import render, redirect
+from .models import Category, CategoryAttribute
+
+def add_category(request):
+    if request.method == 'POST':
+        category_name = request.POST.get('category_name')
+        attribute_names = request.POST.getlist('attribute_names')
+
+        # Create a new category
+        category = Category.objects.create(name=category_name)
+
+        # Add attributes to the category
+        for attribute_name in attribute_names:
+            if attribute_name.strip():  # Ensure it's not empty
+                CategoryAttribute.objects.create(category=category, name=attribute_name)
+
+        return redirect('add_category')  # Redirect to the same page after saving
+
+    return render(request, 'admin/add_category.html')
+
+from django.http import JsonResponse
+from .models import CategoryAttribute
+from django.http import JsonResponse
+from .models import Category, CategoryAttribute
+
+def get_category_attributes(request, category_id):
+    print("hello")
+    try:
+        # Get the category by its ID
+        category = Category.objects.get(category_id=category_id)
+
+        # Retrieve attributes associated with this category
+        attributes = CategoryAttribute.objects.filter(category=category)
+
+        # Prepare the response data in the expected format
+        response_data = {
+            'attributes': [{'name': attribute.name} for attribute in attributes]
+        }
+
+        return JsonResponse(response_data, safe=False)
+    except Category.DoesNotExist:
+        # If the category doesn't exist, return an empty list with a 404 status code
+        return JsonResponse({'error': 'Category not found'}, status=404)
+    except Exception as e:
+        # Handle other errors
+        return JsonResponse({'error': str(e)}, status=500)
+    
+from django.shortcuts import render, redirect
+from .models import Metaltype
+from django.http import HttpResponse
+
+def add_metaltype(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        if name:
+            Metaltype.objects.create(name=name)
+            return redirect('add_metaltype')  # Redirect after successful creation
+        else:
+            return HttpResponse("Name field cannot be empty.")
+
+    return render(request, 'admin/add_metaltype.html')
+
+    
+from django.shortcuts import render, redirect
+from .models import Metaltype
+from django.http import HttpResponse
+
+def add_stonetype(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        if name:
+            Stonetype.objects.create(name=name)
+            return redirect('add_stonetype')  # Redirect after successful creation
+        else:
+            return HttpResponse("Name field cannot be empty.")
+
+    return render(request, 'admin/add_stonetype.html')
+

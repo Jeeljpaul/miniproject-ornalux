@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bracelets Collection</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            margin: 0;
+        }
+
+        /* Sidebar Styling */
+        .filters {
+            width: 250px;
+            background-color: #f4f4f4;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            height: 100vh;
+            position: fixed;
+            overflow-y: auto;
+        }
+
+        h2 {
+            margin-left: 280px;
+            padding: 20px;
+        }
+
+        /* Main content section */
+        .product-list {
+            margin-left: 280px;
+            padding: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+        }
+
+        /* Product card styling */
+        .product {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px;
+            width: 200px;
+            text-align: center;
+            box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .product:hover {
+            transform: scale(1.05);
+        }
+
+        .product img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Button styling */
+        .button {
+            display: inline-block;
+            padding: 8px 12px;
+            margin: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            background-color: #28a745;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Filter Section -->
+    <div class="filters">
+        <h4>Filter by</h4>
+
+        <!-- Bracelet Style Filter -->
+        <div class="filter-category">
+            <label><strong>Bracelet Style</strong></label><br>
+            <input type="checkbox" name="bracelet_style" value="flexible" onchange="filterProducts()"> Flexible<br>
+            <input type="checkbox" name="bracelet_style" value="dailywear bracelet" onchange="filterProducts()"> Daily Wear Bracelet<br>
+            <input type="checkbox" name="bracelet_style" value="gold rakhi" onchange="filterProducts()"> Gold Rakhi<br>
+            <input type="checkbox" name="bracelet_style" value="bracelets unisex" onchange="filterProducts()"> Bracelets Unisex<br>
+            <input type="checkbox" name="bracelet_style" value="stone bracelet" onchange="filterProducts()"> Stone Bracelet<br>
+            <input type="checkbox" name="bracelet_style" value="oval bracelet" onchange="filterProducts()"> Oval Bracelet
+        </div>
+
+        <br>
+        <!-- Shop For Filter -->
+        <div class="filter-category">
+            <label><strong>Shop For</strong></label><br>
+            <input type="checkbox" name="shop_for" value="women" onchange="filterProducts()"> Women<br>
+            <input type="checkbox" name="shop_for" value="men" onchange="filterProducts()"> Men<br>
+            <input type="checkbox" name="shop_for" value="kids" onchange="filterProducts()"> Kids<br>
+            <input type="checkbox" name="shop_for" value="baby" onchange="filterProducts()"> Baby
+        </div>
+
+        <br>
+        <!-- Gemstone Filter -->
+        <div class="filter-category">
+            <label><strong>Gemstone</strong></label><br>
+            <input type="checkbox" name="gemstone" value="ruby" onchange="filterProducts()"> Ruby<br>
+            <input type="checkbox" name="gemstone" value="pearl" onchange="filterProducts()"> Pearl<br>
+            <input type="checkbox" name="gemstone" value="emerald" onchange="filterProducts()"> Emerald<br>
+            <input type="checkbox" name="gemstone" value="citrine" onchange="filterProducts()"> Citrine
+        </div>
+
+        <br>
+        <!-- Metal Type Filter -->
+        <div class="filter-category">
+            <label><strong>Metal Type</strong></label><br>
+            <input type="checkbox" name="metal_type" value="gold" onchange="filterProducts()"> Gold<br>
+            <input type="checkbox" name="metal_type" value="silver" onchange="filterProducts()"> Silver<br>
+            <input type="checkbox" name="metal_type" value="platinum" onchange="filterProducts()"> Platinum
+        </div>
+        <button class="button" onclick="clearFilters()">Clear Filters</button>
+    </div>
+
+    <!-- Main Product List Section -->
+    <div class="product-list">
+        <h2>Bracelets Collection</h2>
+        <div class="row">
+            {% if bracelets %}
+                {% for bracelet in bracelets %}
+                    <div class="product" data-braceletstyle="{{ bracelet.bracelet_style }}" data-shopfor="{{ bracelet.shop_for }}" data-gemstone="{{ bracelet.stone_type }}" data-material="{{ bracelet.metal_type }}">
+                        <img src="{{ bracelet.images.url }}" alt="{{ bracelet.product_name }}">
+                        <h5>{{ bracelet.product_name }}</h5>
+                        <p>{{ bracelet.product_description|truncatewords:15 }}</p>
+                        <p><strong>Price:</strong> Rs:{{ bracelet.price }}</p>
+                        <a href="#" class="button">View Details</a>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-center">No bracelets available at the moment.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- JavaScript Filter Function -->
+    <script>
+        function filterProducts() {
+            const selectedStyles = Array.from(document.querySelectorAll('input[name="bracelet_style"]:checked')).map(cb => cb.value.toLowerCase().replace(/\s+/g, ''));
+            const selectedShops = Array.from(document.querySelectorAll('input[name="shop_for"]:checked')).map(cb => cb.value.toLowerCase());
+            const selectedGemstones = Array.from(document.querySelectorAll('input[name="gemstone"]:checked')).map(cb => cb.value.toLowerCase());
+            const selectedMaterials = Array.from(document.querySelectorAll('input[name="metal_type"]:checked')).map(cb => cb.value.toLowerCase());
+
+            const productCards = document.querySelectorAll('.product');
+
+            productCards.forEach(card => {
+                const cardStyle = card.getAttribute('data-braceletstyle').toLowerCase().replace(/\s+/g, '');
+                const cardShopFor = card.getAttribute('data-shopfor').toLowerCase().replace(/\s+/g, '');
+                const cardGemstone = card.getAttribute('data-gemstone').toLowerCase().replace(/\s+/g, '');
+                const cardMaterial = card.getAttribute('data-material').toLowerCase().replace(/\s+/g, '');
+
+                const styleMatch = selectedStyles.length === 0 || selectedStyles.includes(cardStyle);
+                const shopMatch = selectedShops.length === 0 || selectedShops.includes(cardShopFor);
+                const gemstoneMatch = selectedGemstones.length === 0 || selectedGemstones.includes(cardGemstone);
+                const materialMatch = selectedMaterials.length === 0 || selectedMaterials.includes(cardMaterial);
+
+                if (styleMatch && shopMatch && gemstoneMatch && materialMatch) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        function clearFilters() {
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            filterProducts(); // Reapply filter logic after clearing
+        }
+    </script>
+</body>
+</html>

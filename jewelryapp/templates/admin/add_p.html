@@ -6,6 +6,7 @@
     <title>Add Product</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <style>
         body {
             background-color: #e9ecef;
@@ -172,6 +173,57 @@
                 event.preventDefault();
             }
         }
+
+    
+            // Function to fetch category attributes when a category is selected
+function loadAttributes() {
+                const categoryId = document.getElementById('id_category').value;// Get the selected category ID
+                console.log("category",categoryId)
+                // Perform the AJAX request to fetch category attributes
+                if (!categoryId) {
+    console.error('Category ID is not defined.');
+    $('#attributes-container').html('<p style="color:red;">Invalid category ID. Please select a valid category.</p>');
+    return; // Exit the function if categoryId is not valid
+}
+
+$.ajax({
+    url: `/get_category_attributes/${categoryId}/`,
+    type: 'GET',
+    dataType: 'json',
+    success: function (response) {
+        console.log(response);
+        displayAttributes(response);
+    },
+    error: function (xhr, status, error) {
+        console.error('Error fetching category attributes:', error);
+        $('#attributes-container').html(`<p style="color:red;">Error fetching attributes. Please try again.</p>`);
+    }
+});
+
+            };
+
+            // Function to display category attributes on the page
+            function displayAttributes(data) {
+    const attributesContainer = $('#attributes-container'); // Select the attributes container
+    attributesContainer.empty(); // Clear previous attributes
+
+    if (data && data.attributes && data.attributes.length > 0) {
+        let attributesHtml = '';
+        data.attributes.forEach(function (attribute) {
+            attributesHtml += `
+                <div class="form-group">
+                    <label>${attribute.name}</label>
+                    <input type="text" value="${attribute.value}" readonly /> <!-- Assuming attribute.value holds the value -->
+                </div>
+            `; // Create a read-only input for each attribute
+        });
+        attributesContainer.html(attributesHtml); // Insert the generated HTML into the attributes container
+    } else {
+        attributesContainer.html('<p>No attributes found for this category.</p>'); // Message when no attributes are found
+    }
+}
+
+        
     </script>
 </head>
 <body>
@@ -181,64 +233,74 @@
         <form method="POST" enctype="multipart/form-data" onsubmit="validateForm(event)">
             {% csrf_token %}
             <div class="form-group">
-                <label for="product_name">Product Name <span class="required">*</span></label>
-                {{ form.product_name }}
-                {{ form.product_name.errors }}
+                <label for="id_product_name">Product Name <span class="required">*</span></label>
+                <input type="text" class="form-control" id="id_product_name" name="product_name" required>
             </div>
             <div class="form-group">
-                <label for="product_description">Description <span class="required">*</span></label>
-                {{ form.product_description }}
-                {{ form.product_description.errors }}
+                <label for="id_category">Category <span class="required">*</span></label>
+                <select class="form-control" id="id_category" name="id_category" required onchange="loadAttributes()">
+                    <option value="">Select a category</option>
+                    {% for category in categories %}
+                        <option value="{{ category.category_id }}">{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div id="attributes-container" class="form-group"></div> <!-- Container for category attributes -->
+            <div class="form-group">
+                <label for="id_product_description">Product Description <span class="required">*</span></label>
+                <textarea class="form-control" id="id_product_description" name="product_description" rows="3" required></textarea>
             </div>
             <div class="form-group">
-                <label for="category">Category <span class="required">*</span></label>
-                {{ form.category }}
-                {{ form.category.errors }}
+                <label for="id_delivery_options">Delivery Options <span class="required">*</span></label>
+                <textarea class="form-control" id="id_delivery_options" name="delivery_options" rows="3" required></textarea>
             </div>
             <div class="form-group">
-                <label for="price">Price <span class="required">*</span></label>
-                {{ form.price }}
-                {{ form.price.errors }}
+                <label for="id_price">Price <span class="required">*</span></label>
+                <input type="number" class="form-control" id="id_price" name="price" min="100" max="10000000" step="0.01" required>
             </div>
             <div class="form-group">
-                <label for="stock_quantity">Stock Quantity <span class="required">*</span></label>
-                {{ form.stock_quantity }}
-                {{ form.stock_quantity.errors }}
+                <label for="id_stock_quantity">Stock Quantity <span class="required">*</span></label>
+                <input type="number" class="form-control" id="id_stock_quantity" name="stock_quantity" min="0" max="50" required>
             </div>
             <div class="form-group">
-                <label for="weight">Weight <span class="required">*</span></label>
-                {{ form.weight }}
-                {{ form.weight.errors }}
+                <label for="id_weight">Weight (grams) <span class="required">*</span></label>
+                <input type="number" class="form-control" id="id_weight" name="weight" min="1" max="100" required>
+            </div>
+
+            <div class="form-group">
+                <label for="id_metal_type">Metal Type </label>
+                <select class="form-control" id="id_metal_type" name="metal_type" required>
+                    <option value="">Select Metal Type</option>
+                    {% for metal_type in metal_types %}
+                    <option value="{{ metal_type.metaltype_id }}">{{ metal_type.name }}</option>
+                    {% endfor %}
+                </select>
+                
+            </div>
+
+
+            <div class="form-group">
+                <label for="id_stone_type">Stone Type </label>
+                <select class="form-control" id="id_stone_type" name="stone_type" required>
+                    <option value="">Select Stone Type</option>
+                    {% for stone_type in stone_types %}
+                    <option value="{{ stone_type.stonetype_id }}">{{ stone_type.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="id_occasion">Occasion <span class="required">*</span></label>
+                <input type="text" class="form-control" id="id_occasion" name="occasion" required>
             </div>
             <div class="form-group">
-                <label for="metal_type">Metal Type</label>
-                {{ form.metal_type }}
-                {{ form.metal_type.errors }}
-            </div>
-            <div class="form-group">
-                <label for="stone_type">Stone Type</label>
-                {{ form.stone_type }}
-                {{ form.stone_type.errors }}
-            </div>
-            <div class="form-group">
-                <label for="gender">Gender <span class="required">*</span></label>
-                {{ form.gender }}
-                {{ form.gender.errors }}
-            </div>
-            <div class="form-group">
-                <label for="occasion">Occasion</label>
-                {{ form.occasion }}
-                {{ form.occasion.errors }}
-            </div>
-            <div class="form-group">
-                <label for="images">Product Images</label>
-                {{ form.images }}
-                {{ form.images.errors }}
-            </div>
-            <div class="form-group">
-                <label for="delivery_options">Delivery Options</label>
-                {{ form.delivery_options }}
-                {{ form.delivery_options.errors }}
+                <label for="id_gender">Gender <span class="required">*</span></label>
+                <select class="form-control" id="id_gender" name="gender" required>
+                    <option value="">Select Gender</option>
+                    <option value="Men">Men</option>
+                    <option value="Women">Women</option>
+                    <option value="Unisex">Unisex</option>
+                </select>
             </div>
             <button type="submit">Add Product</button>
         </form>
