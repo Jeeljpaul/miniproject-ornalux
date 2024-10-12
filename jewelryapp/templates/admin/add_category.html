@@ -102,7 +102,7 @@
                 <label>Attributes:</label>
                 <div id="attribute-container">
                     <div class="attribute-group">
-                        <input type="text" name="attribute_names" placeholder="Attribute Name">
+                        <input type="text" name="attribute_names" placeholder="Attribute Name" oninput="validateAttributeName(this)">
                         <select name="attribute_datatypes">
                             <option value="string">String</option>
                             <option value="number">Number</option>
@@ -126,7 +126,7 @@
             const newField = document.createElement('div');
             newField.classList.add('attribute-group');
             newField.innerHTML = `
-                <input type="text" name="attribute_names" placeholder="Attribute Name">
+                <input type="text" name="attribute_names" placeholder="Attribute Name" oninput="validateAttributeName(this)">
                 <select name="attribute_datatypes">
                     <option value="string">String</option>
                     <option value="number">Number</option>
@@ -135,6 +135,12 @@
                 </select>
             `;
             container.appendChild(newField);
+        }
+
+        // Function to validate the attribute name input
+        function validateAttributeName(input) {
+            // Regular expression to allow only alphabets and spaces
+            input.value = input.value.replace(/[^a-zA-Z\s]/g, '');
         }
     </script>
 

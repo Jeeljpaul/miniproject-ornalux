@@ -272,55 +272,6 @@ def adminhome(request):
 
 
 
-def add_product(request):
-    if request.method == 'POST':
-        # Fetch data from POST request
-        product_name = request.POST.get('product_name')
-        product_description = request.POST.get('product_description')
-        category = request.POST.get('category')
-        price = request.POST.get('price')
-        stock_quantity = request.POST.get('stock_quantity')
-        weight = request.POST.get('weight')
-        metal_type = request.POST.get('metal_type')
-        stone_type = request.POST.get('stone_type', '')  # Optional field
-        gender = request.POST.get('gender')
-        occasion = request.POST.get('occasion')
-        delivery_options = request.POST.get('delivery_options', '')  # Optional field
-        image = request.FILES.get('image')  # Single image upload
-
-        # Basic validation
-        if not all([product_name, product_description, category, price, stock_quantity, weight, metal_type, gender, occasion, image]):
-            messages.error(request, 'Please fill in all required fields, including the image.')
-            return render(request, 'admin/add_product.html')
-
-        try:
-            # Create the product object and save it to the database
-            product = Product.objects.create(
-                product_name=product_name,
-                product_description=product_description,
-                category=category,
-                price=price,
-                stock_quantity=stock_quantity,
-                weight=weight,
-                metal_type=metal_type,
-                stone_type=stone_type,
-                gender=gender,
-                occasion=occasion,
-                delivery_options=delivery_options,
-                images=image  # Save the uploaded image
-            )
-
-            # Success message
-            messages.success(request, 'Product has been added successfully!')
-            return redirect('add_product')  # Redirect back to the form after successful submission
-
-        except Exception as e:
-            messages.error(request, f'An error occurred: {e}')
-            return render(request, 'admin/add_product.html')
-
-    # If it's a GET request, render the form
-    return render(request, 'admin/add_product.html')
-
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Product
 from django.db.models import Q
@@ -496,32 +447,32 @@ def staffhome(request):
 
 #staff views.py-------------------------------------------------------------------------------------------------
 
-from django.shortcuts import render, redirect
-from .models import Product
-from .forms import ProductForm
+# from django.shortcuts import render, redirect
+# from .models import Product
+# from .forms import ProductForm
  
-def add_p(request):
-    if request.method == "POST":
-        form = ProductForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-            return redirect('product_list')  # Ensure 'product_list' is defined in your URLs
-    else:
-        form = ProductForm()
-    categories = Category.objects.all() 
-    return render(request, 'admin/add_p.html', {'form': form, 'categories': categories})
+# def add_p(request):
+#     if request.method == "POST":
+#         form = ProductForm(request.POST, request.FILES)
+#         if form.is_valid():
+#             form.save()
+#             return redirect('product_list')  
+#     else:
+#         form = ProductForm()
+#     categories = Category.objects.all() 
+#     return render(request, 'admin/add_p.html', {'form': form, 'categories': categories})
 
 
 
-def add_product(request):
-    if request.method == "POST":
-        form = ProductForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-            return redirect('product_list')  # Ensure 'product_list' is defined in your URLs
-    else:
-        form = ProductForm()
-    return render(request, 'admin/add_product.html', {'form': form})
+# def add_product(request):
+#     if request.method == "POST":
+#         form = ProductForm(request.POST, request.FILES)
+#         if form.is_valid():
+#             form.save()
+#             return redirect('product_list')  
+#     else:
+#         form = ProductForm()
+#     return render(request, 'admin/add_product.html', {'form': form})
 
 
 
@@ -800,12 +751,17 @@ def add_pro(request):
             for attribute_id in attributes_data:
                 if attribute_id:  # Only proceed if the ID is not empty
                     try:
+                        # Debug print statement to check the attribute ID being processed
+                        print(f"Processing attribute ID: {attribute_id}")
+
                         # Fetch the attribute name from CategoryAttribute using the attribute_id
                         category_attribute = CategoryAttribute.objects.get(id=attribute_id)
                         attribute_name = category_attribute.name
 
                         # Fetch the attribute value from the form using the attribute ID
                         attribute_value = request.POST.get(f'attribute_{attribute_id}', '')
+                        print(f"Processing attribute {attribute_name} with value: {attribute_value}")
+
 
                         # Check if attribute value is provided
                         if attribute_value:
@@ -859,7 +815,7 @@ def get_category_attributes(request, category_id):
 
         # Prepare the response data in the expected format
         response_data = {
-            'attributes': [{'name': attribute.name} for attribute in attributes]
+            'attributes': [{'id': attribute.id, 'name': attribute.name} for attribute in attributes]
         }
 
         return JsonResponse(response_data, safe=False)

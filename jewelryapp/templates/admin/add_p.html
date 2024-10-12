@@ -233,24 +233,25 @@ $.ajax({
 
             // Function to display category attributes on the page
             function displayAttributes(data) {
-    const attributesContainer = $('#attributes-container'); // Select the attributes container
-    attributesContainer.empty(); // Clear previous attributes
+                const attributesContainer = $('#attributes-container'); // Select the attributes container
+                attributesContainer.empty(); // Clear previous attributes
 
-    if (data && data.attributes && data.attributes.length > 0) {
-        let attributesHtml = '';
-        data.attributes.forEach(function (attribute) {
-            attributesHtml += `
-                <div class="form-group">
-                    <label>${attribute.name}</label>
-                    <input type="text" class="form-control" name="attribute_${attribute.id}" value="${attribute.value}" /> <!-- Assuming attribute.value holds the value -->
-                </div>
-            `; // Create a read-only input for each attribute
-        });
-        attributesContainer.html(attributesHtml); // Insert the generated HTML into the attributes container
-    } else {
-        attributesContainer.html('<p>No attributes found for this category.</p>'); // Message when no attributes are found
-    }
-}
+                if (data && data.attributes && data.attributes.length > 0) {
+                    let attributesHtml = '';
+                    data.attributes.forEach(function (attribute) {
+                        attributesHtml += `
+                            <div class="form-group">
+                                <label>${attribute.name}</label>
+                                <input type="text" class="form-control" name="attribute_${attribute.id}" value="${attribute.value || ''}" /> <!-- Assuming attribute.value holds the value -->
+                                <input type="hidden" name="attributes" value="${attribute.id}" /> <!-- Hidden input to store attribute ID -->
+                            </div>
+                        `; // Create a read-only input for each attribute
+                     });
+                     attributesContainer.html(attributesHtml); // Insert the generated HTML into the attributes container
+                } else {
+                    attributesContainer.html('<p>No attributes found for this category.</p>'); // Message when no attributes are found
+                }
+            }
 
         
     </script>

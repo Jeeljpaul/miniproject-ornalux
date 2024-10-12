@@ -61,9 +61,17 @@
         <form method="POST">
             {% csrf_token %}
             <label for="name">Metal Type Name:</label>
-            <input type="text" id="name" name="name" required>
+            <input type="text" id="name" name="name" required oninput="validateMetalTypeName(this)">
             <button type="submit">Add Metal Type</button>
         </form>
     </div>
+
+    <script>
+        // JavaScript function to validate the input field for alphabets and spaces only
+        function validateMetalTypeName(input) {
+            // Regular expression to allow only alphabets and spaces
+            input.value = input.value.replace(/[^a-zA-Z\s]/g, '');
+        }
+    </script>
 </body>
 </html>
