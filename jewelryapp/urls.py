@@ -25,10 +25,12 @@ urlpatterns = [
     path('product_details/<int:product_id>/', views.product_details, name='product_details'),
     path('product/<int:product_id>/toggle_status/', views.toggle_product_status, name='toggle_product_status'),
     path('product/<int:product_id>/update/', views.update_product, name='update_product'),
+
     path('adminhome/add-category/', views.add_category, name='add_category'),
     path('get_category_attributes/<int:category_id>/', views.get_category_attributes, name='get_category_attributes'),
     path('adminhome/add_metaltype/', views.add_metaltype, name='add_metaltype'),
     path('adminhome/add_stonetype/', views.add_stonetype, name='add_stonetype'),
+    path('adminhome/add_pro/', views.add_pro, name='add_pro'),
 
 
 

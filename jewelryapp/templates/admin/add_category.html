@@ -38,7 +38,8 @@
         }
 
         .form-group input[type="text"],
-        .form-group textarea {
+        .form-group textarea,
+        .form-group select {
             width: 100%;
             padding: 8px;
             border: 1px solid #ccc;
@@ -65,6 +66,10 @@
         }
 
         .attribute-group input[type="text"] {
+            flex: 2;
+        }
+
+        .attribute-group select {
             flex: 1;
         }
 
@@ -98,6 +103,12 @@
                 <div id="attribute-container">
                     <div class="attribute-group">
                         <input type="text" name="attribute_names" placeholder="Attribute Name">
+                        <select name="attribute_datatypes">
+                            <option value="string">String</option>
+                            <option value="number">Number</option>
+                            <option value="date">Date</option>
+                            <option value="boolean">Boolean</option>
+                        </select>
                     </div>
                 </div>
                 <button type="button" class="add-attribute-btn" onclick="addAttributeField()">+ Add Attribute</button>
@@ -116,6 +127,12 @@
             newField.classList.add('attribute-group');
             newField.innerHTML = `
                 <input type="text" name="attribute_names" placeholder="Attribute Name">
+                <select name="attribute_datatypes">
+                    <option value="string">String</option>
+                    <option value="number">Number</option>
+                    <option value="date">Date</option>
+                    <option value="boolean">Boolean</option>
+                </select>
             `;
             container.appendChild(newField);
         }

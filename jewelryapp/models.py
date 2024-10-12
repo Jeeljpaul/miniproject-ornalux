@@ -51,6 +51,7 @@ class Tbl_staff(models.Model):
 class Category(models.Model):
     category_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
+    
 
     def __str__(self):
         return self.name
@@ -58,9 +59,19 @@ class Category(models.Model):
 class CategoryAttribute(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='attributes')
     name = models.CharField(max_length=100)
+    datatype = models.CharField(max_length=50, choices=[
+        ('string', 'String'),
+        ('number', 'Number'),
+        ('date', 'Date'),
+        ('boolean', 'Boolean'),
+    ],
+     default='string'
+    )
+
+
 
     def __str__(self):
-        return f"{self.name} ({self.category.name})"
+        return f"{self.name} ({self.category.name}) ({self.datatype})"
     
 class Metaltype(models.Model):
     metaltype_id = models.AutoField(primary_key=True)
@@ -82,11 +93,14 @@ class Product(models.Model):
     GENDER_CHOICES = [
         ('Men', 'Men'),
         ('Women', 'Women'),
-        ('Unisex', 'Unisex')
+        ('Unisex', 'Unisex'),
+        ('Kids', 'Kids'),
+        ('Baby', 'Baby')
     ]
 
     product_id = models.AutoField(primary_key=True)
     product_name = models.CharField(max_length=255)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, blank=True)
     product_description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
     stock_quantity = models.PositiveIntegerField()
@@ -94,7 +108,12 @@ class Product(models.Model):
     gender = models.CharField(max_length=6, choices=GENDER_CHOICES, default='Unisex')
     occasion = models.CharField(max_length=255)
     images = models.ImageField(upload_to='pic/', default='')
-    delivery_options = models.TextField()
+    metaltype = models.ForeignKey(Metaltype, on_delete=models.CASCADE, null=True, blank=True)
+    stonetype = models.ForeignKey(Stonetype, on_delete=models.CASCADE, null=True, blank=True)
+    home_delivery = models.BooleanField(default=False)
+    store_pickup = models.BooleanField(default=False)
+    bestselling = models.BooleanField(default=False)
+
     
     is_active = models.BooleanField(default=True)
 
@@ -107,7 +126,7 @@ class ProductAttribute(models.Model):
     attribute_value = models.CharField(max_length=255)
 
     def __str__(self):
-        return f"{self.attribute_name}: {self.attribute_value} for {self.product.name}"
+        return f"{self.attribute_name}: {self.attribute_value} for {self.product.product_name}"
     
 
 class Cart(models.Model):

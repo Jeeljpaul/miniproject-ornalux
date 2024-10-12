@@ -552,6 +552,8 @@ def update_p(request, product_id):
 
 # -----------------------------------------------------------------------------------------------------
 
+#userpage
+
 def product(request):
     return render(request, 'user/product.html')
 
@@ -656,6 +658,9 @@ def add_to_cart(request, product_id):
     cart.save()
     return redirect('ring_detail')
 
+#----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#adminpage
 
 from django.shortcuts import render, redirect
 from .models import Category, CategoryAttribute
@@ -664,45 +669,21 @@ def add_category(request):
     if request.method == 'POST':
         category_name = request.POST.get('category_name')
         attribute_names = request.POST.getlist('attribute_names')
+        attribute_datatypes = request.POST.getlist('attribute_datatypes')
 
-        # Create a new category
-        category = Category.objects.create(name=category_name)
 
-        # Add attributes to the category
-        for attribute_name in attribute_names:
-            if attribute_name.strip():  # Ensure it's not empty
-                CategoryAttribute.objects.create(category=category, name=attribute_name)
+        if category_name and attribute_names and attribute_datatypes:
+            # Create a new Category
+            category = Category.objects.create(name=category_name)
 
-        return redirect('add_category')  # Redirect to the same page after saving
+            # Add each attribute to the category
+            for name, datatype in zip(attribute_names, attribute_datatypes):
+                if name:  # Make sure the attribute name is not empty
+                    CategoryAttribute.objects.create(category=category, name=name, datatype=datatype)
+            return redirect('add_category')  # Redirect to the same page after saving
 
     return render(request, 'admin/add_category.html')
 
-from django.http import JsonResponse
-from .models import CategoryAttribute
-from django.http import JsonResponse
-from .models import Category, CategoryAttribute
-
-def get_category_attributes(request, category_id):
-    print("hello")
-    try:
-        # Get the category by its ID
-        category = Category.objects.get(category_id=category_id)
-
-        # Retrieve attributes associated with this category
-        attributes = CategoryAttribute.objects.filter(category=category)
-
-        # Prepare the response data in the expected format
-        response_data = {
-            'attributes': [{'name': attribute.name} for attribute in attributes]
-        }
-
-        return JsonResponse(response_data, safe=False)
-    except Category.DoesNotExist:
-        # If the category doesn't exist, return an empty list with a 404 status code
-        return JsonResponse({'error': 'Category not found'}, status=404)
-    except Exception as e:
-        # Handle other errors
-        return JsonResponse({'error': str(e)}, status=500)
     
 from django.shortcuts import render, redirect
 from .models import Metaltype
@@ -734,4 +715,158 @@ def add_stonetype(request):
             return HttpResponse("Name field cannot be empty.")
 
     return render(request, 'admin/add_stonetype.html')
+
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .models import Product, Category, Metaltype, Stonetype, ProductAttribute, CategoryAttribute
+
+def add_pro(request):
+    if request.method == 'POST':
+        product_name = request.POST.get('product_name')
+        category_id = request.POST.get('id_category')
+        product_description = request.POST.get('product_description')
+        price = request.POST.get('price')
+        stock_quantity = request.POST.get('stock_quantity')
+        weight = request.POST.get('weight')
+        metaltype_id = request.POST.get('metaltype', None)
+        stonetype_id = request.POST.get('stonetype', None)
+        gender = request.POST.get('gender','Unisex')
+        image = request.FILES.get('image') 
+
+        # Handling delivery options (checkboxes)
+        delivery_options = request.POST.getlist('delivery_options[]')
+        home_delivery = 'Home Delivery' in delivery_options
+        store_pickup = 'Store Pickup' in delivery_options
+        
+        # Handling bestselling checkbox
+        bestseller = request.POST.get('bestselling', 'off') == 'Yes'  # Checkbox for bestselling item
+
+        # Validate the inputs
+        try:
+            price = float(price)
+            stock_quantity = int(stock_quantity)
+            weight = float(weight)
+        except ValueError:
+            messages.error(request, "Invalid input values.")
+            return redirect('add_pro')
+
+        if not (100 <= price <= 10000000):
+            messages.error(request, "Price must be between 100 and 10,000,000.")
+            return redirect('add_pro')
+
+        if not (0 <= stock_quantity <= 50):
+            messages.error(request, "Stock quantity must be between 0 and 50.")
+            return redirect('add_pro')
+
+        if not (1 <= weight <= 100):
+            messages.error(request, "Weight must be between 1 and 100 grams.")
+            return redirect('add_pro')
+
+        # Check if the product already exists
+        try:
+            category = Category.objects.get(category_id=category_id)  # Ensure category is fetched correctly
+            if Product.objects.filter(product_name=product_name, category=category).exists():
+                messages.error(request, "Product with this name already exists in the selected category.")
+                return redirect('add_pro')
+        except Category.DoesNotExist:
+            messages.error(request, "Selected category does not exist.")
+            return redirect('add_pro')
+
+        # Create the product instance and save it
+        try:
+            metaltype = Metaltype.objects.get(metaltype_id=metaltype_id) if metaltype_id else None
+            stonetype = Stonetype.objects.get(stonetype_id=stonetype_id) if stonetype_id else None
+            
+            product = Product(
+                product_name=product_name,
+                category=category,
+                product_description=product_description,
+                price=price,
+                stock_quantity=stock_quantity,
+                weight=weight,
+                gender=gender,
+                images=image,
+                metaltype=metaltype,
+                stonetype=stonetype,
+                home_delivery=home_delivery,
+                store_pickup=store_pickup,
+                bestselling=bestseller
+            )
+            product.save()
+            messages.success(request, "Product added successfully!")
+
+            # Now handle product attributes
+            attributes_data = request.POST.getlist('attributes')
+            for attribute_id in attributes_data:
+                if attribute_id:  # Only proceed if the ID is not empty
+                    try:
+                        # Fetch the attribute name from CategoryAttribute using the attribute_id
+                        category_attribute = CategoryAttribute.objects.get(id=attribute_id)
+                        attribute_name = category_attribute.name
+
+                        # Fetch the attribute value from the form using the attribute ID
+                        attribute_value = request.POST.get(f'attribute_{attribute_id}', '')
+
+                        # Check if attribute value is provided
+                        if attribute_value:
+                            # Create a ProductAttribute object with the product, attribute name, and value
+                            ProductAttribute.objects.create(
+                                product=product,
+                                attribute_name=attribute_name,
+                                attribute_value=attribute_value
+                            )
+                        else:
+                            messages.warning(request, f"Attribute value for {attribute_name} is missing. Skipping.")
+                    except CategoryAttribute.DoesNotExist:
+                        messages.error(request, f"Attribute with ID {attribute_id} does not exist.")
+                    except Exception as e:
+                        messages.error(request, f"Error saving attribute: {str(e)}")
+
+            return redirect('add_pro')  # Redirect after success
+
+        except (Metaltype.DoesNotExist, Stonetype.DoesNotExist) as e:
+            messages.error(request, f"Error: {str(e)}")
+            return redirect('add_pro')
+
+    # GET request to render the page
+    categories = Category.objects.all()
+    metaltypes = Metaltype.objects.all()
+    stonetypes = Stonetype.objects.all()
+    context = {
+        'categories': categories,
+        'metaltypes': metaltypes,
+        'stonetypes': stonetypes,
+    }
+    return render(request, 'admin/add_p.html', context)
+
+
+
+
+
+from django.http import JsonResponse
+from .models import CategoryAttribute
+from django.http import JsonResponse
+from .models import Category, CategoryAttribute
+
+def get_category_attributes(request, category_id):
+    print("hello")
+    try:
+        # Get the category by its ID
+        category = Category.objects.get(category_id=category_id)
+
+        # Retrieve attributes associated with this category
+        attributes = CategoryAttribute.objects.filter(category=category)
+
+        # Prepare the response data in the expected format
+        response_data = {
+            'attributes': [{'name': attribute.name} for attribute in attributes]
+        }
+
+        return JsonResponse(response_data, safe=False)
+    except Category.DoesNotExist:
+        # If the category doesn't exist, return an empty list with a 404 status code
+        return JsonResponse({'error': 'Category not found'}, status=404)
+    except Exception as e:
+        # Handle other errors
+        return JsonResponse({'error': str(e)}, status=500)
 
