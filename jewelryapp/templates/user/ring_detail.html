@@ -90,14 +90,21 @@
             <h3>{{ product.product_name }}</h3>
             <p><strong>Price:</strong> Rs:{{ product.price }}</p>
             <p><strong>Description:</strong> {{ product.product_description }}</p>
-            <p><strong>Metal Type:</strong> {{ product.metal_type }}</p>
-            <p><strong>Stone Type:</strong> {{ product.stone_type }}</p>
+
+            {% if product.metaltype %}
+            <p><strong>Metal Type:</strong> {{ product.metaltype.name }}</p>
+            {% endif %}
+
+            {% if product.stonetype %}
+            <p><strong>Stone Type:</strong> {{ product.stonetype.name }}</p>
+            {% endif %}
+
             <p><strong>Weight:</strong> {{ product.weight }} grams</p>
-            <p><strong>Occasion:</strong> {{ product.occasion }}</p>
         </div>
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 
         <!-- Buttons for adding to cart, wishlist, and going back -->
-        <a href="#" class="button add-to-cart" data-product-id="{{ product.product_id }}">Add to Cart</a>
+        <a href="{% url 'add_to_cart' product.product_id %}" class="button add_to_cart" data-product-id="{{ product.product_id }}">Add to Cart</a>
         <a href="#" class="button wishlist-button add-to-wishlist" data-product-id="{{ product.product_id }}">Add to Wishlist</a>
         <a href="{% url 'ring_list' %}" class="button back-button">Back</a>
     </div>
@@ -107,15 +114,16 @@
     <script>
         $(document).ready(function () {
             // Add to Cart functionality
-            $('.add-to-cart').click(function (e) {
+            $('.add_to_cart').click(function (e) {
                 e.preventDefault();
                 var productId = $(this).data('product-id');
+                var csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
                 
                 $.ajax({
-                    url: '/add-to-cart/' + productId + '/',
+                    url: '/add_to_cart/' + productId + '/',
                     type: 'POST',
-                    data: {
-                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    headers: {
+                        'X-CSRFToken': csrfToken  // Setting the CSRF token in the request header
                     },
                     success: function (response) {
                         if (response.success) {

@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -82,51 +83,63 @@
     <!-- Sidebar Filter Section -->
     <div class="filters">
         <h4>Filter by</h4>
-
-        <!-- Ring Size Filter -->
-        <div class="filter-category">
-            <label><strong>Ring Size</strong></label><br>
-            <input type="checkbox" name="ring_size" value="15" onchange="filterProducts()"> 15<br>
-            <input type="checkbox" name="ring_size" value="16" onchange="filterProducts()"> 16<br>
-            <input type="checkbox" name="ring_size" value="17" onchange="filterProducts()"> 17<br>
-            <input type="checkbox" name="ring_size" value="18" onchange="filterProducts()"> 18<br>
-            <input type="checkbox" name="ring_size" value="19" onchange="filterProducts()"> 19
-        </div>
-
-        <br>
-        <!-- Ring Type Filter -->
-        <div class="filter-category">
-            <label><strong>Ring Type</strong></label><br>
-            <input type="checkbox" name="ring_type" value="adjustable" onchange="filterProducts()"> Adjustable<br>
-            <input type="checkbox" name="ring_type" value="wedding" onchange="filterProducts()"> Wedding<br>
-            <input type="checkbox" name="ring_type" value="band" onchange="filterProducts()"> Band<br>
-            <input type="checkbox" name="ring_type" value="simple" onchange="filterProducts()"> Simple<br>
-            <input type="checkbox" name="ring_type" value="regular wear" onchange="filterProducts()"> Regular Wear
-        </div>
-
-        <br>
-        <!-- Gemstone Filter -->
-        <div class="filter-category">
-            <label><strong>Gemstone</strong></label><br>
-            <input type="checkbox" name="stone_type" value="ruby" onchange="filterProducts()"> Ruby<br>
-            <input type="checkbox" name="stone_type" value="diamond" onchange="filterProducts()"> Diamond<br>
-            <input type="checkbox" name="stone_type" value="emerald" onchange="filterProducts()"> Emerald<br>
-            <input type="checkbox" name="stone_type" value="aquamarine" onchange="filterProducts()"> Aquamarine<br>
-            <input type="checkbox" name="stone_type" value="pearl" onchange="filterProducts()"> Pearl
-        </div>
-
-        <br>
-        <!-- Material Type Filter -->
-        <div class="filter-category">
-            <label><strong>Material Type</strong></label><br>
-            <input type="checkbox" name="metal_type" value="gold" onchange="filterProducts()"> Gold<br>
-            <input type="checkbox" name="metal_type" value="silver" onchange="filterProducts()"> Silver<br>
-            <input type="checkbox" name="metal_type" value="platinum" onchange="filterProducts()"> Platinum<br>
-            <input type="checkbox" name="metal_type" value="rosegold" onchange="filterProducts()"> Rose Gold
-        </div>
-        <button class="button" onclick="clearFilters()">Clear Filters</button>
+        <form method="get" action="{% url 'ring_list' %}">
+            <!-- Ring Size Filter -->
+            <div>
+                <h3>Ring Size:</h3>
+                {% for size in ring_sizes %}
+                    <label>
+                        <input type="checkbox" name="ring_size" value="{{ size }}"
+                            {% if size in selected_ring_sizes %}checked{% endif %}>
+                        {{ size }}
+                    </label><br>
+                {% endfor %}
+            </div>
+    
+            <br>
+            <!-- Ring Type Filter -->
+            <div>
+                <h3>Ring Type:</h3>
+                {% for type in ring_types %}
+                    <label>
+                        <input type="checkbox" name="ring_type" value="{{ type }}"
+                            {% if type in selected_ring_types %}checked{% endif %}>
+                        {{ type }}
+                    </label><br>
+                {% endfor %}
+            </div>
+    
+            <br>
+            <!-- Gemstone Filter -->
+            <div>
+                <h3>Gemstone:</h3>
+                {% for gem in gemstones %}
+                    <label>
+                        <input type="checkbox" name="stone_type" value="{{ gem }}"
+                            {% if gem in selected_gemstones %}checked{% endif %}>
+                        {{ gem }}
+                    </label><br>
+                {% endfor %}
+            </div>
+    
+            <br>
+            <!-- Material Type Filter -->
+            <div>
+                <h3>Material Type:</h3>
+                {% for mat in materials %}
+                    <label>
+                        <input type="checkbox" name="metal_type" value="{{ mat }}"
+                            {% if mat in selected_materials %}checked{% endif %}>
+                        {{ mat }}
+                    </label><br>
+                {% endfor %}
+            </div>
+    
+            <button type="submit">Filter</button>
+            <button type="button" class="button" onclick="clearFilters()">Clear Filters</button>
+        </form>
     </div>
-
+    
     <!-- Main Product List Section -->
     <div class="product-list">
         <h2>Rings Collection</h2>
@@ -134,9 +147,13 @@
             {% if rings %}
                 {% for ring in rings %}
                     <div class="product" data-ringsize="{{ ring.ring_size }}" data-ringtype="{{ ring.ring_type }}" data-gemstone="{{ ring.stone_type }}" data-material="{{ ring.metal_type }}">
+                        {% if ring.images %}
                         <img src="{{ ring.images.url }}" alt="{{ ring.product_name }}">
+                        {% else %}
+                        <img src="{% static 'default_image.jpg' %}" alt="No Image Available">
+                        {% endif %}
+    
                         <h5>{{ ring.product_name }}</h5>
-                        <!-- <p>{{ ring.product_description|truncatewords:15 }}</p> -->
                         <p><strong>Price:</strong> Rs:{{ ring.price }}</p>
                         <a href="{% url 'ring_detail' ring.product_id %}" class="button">View Details</a>
                     </div>
@@ -146,53 +163,44 @@
             {% endif %}
         </div>
     </div>
-
+    
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
+    
     <!-- JavaScript Filter Function -->
     <script>
         function filterProducts() {
-            const selectedRingSizes = Array.from(document.querySelectorAll('input[name="ring_size"]:checked')).map(cb => cb.value.toLowerCase());
-            const selectedRingTypes = Array.from(document.querySelectorAll('input[name="ring_type"]:checked')).map(cb => cb.value.toLowerCase());
-            const selectedGemstones = Array.from(document.querySelectorAll('input[name="stone_type"]:checked')).map(cb => cb.value.toLowerCase());
-            const selectedMaterials = Array.from(document.querySelectorAll('input[name="metal_type"]:checked')).map(cb => cb.value.toLowerCase());
-
+            const selectedRingSizes = Array.from(document.querySelectorAll('input[name="ring_size"]:checked')).map(cb => cb.value.toLowerCase().trim());
+            const selectedRingTypes = Array.from(document.querySelectorAll('input[name="ring_type"]:checked')).map(cb => cb.value.toLowerCase().trim());
+            const selectedGemstones = Array.from(document.querySelectorAll('input[name="stone_type"]:checked')).map(cb => cb.value.toLowerCase().trim());
+            const selectedMaterials = Array.from(document.querySelectorAll('input[name="metal_type"]:checked')).map(cb => cb.value.toLowerCase().trim());
+    
             const productCards = Array.from(document.querySelectorAll('.product'));
-
+    
             productCards.forEach(card => {
-                const cardRingSize = card.getAttribute('data-ringsize').toLowerCase().replace(/\s+/g, '');
-                const cardRingType = card.getAttribute('data-ringtype').toLowerCase().replace(/\s+/g, '');
-                const cardGemstone = card.getAttribute('data-gemstone').toLowerCase().replace(/\s+/g, '');
-                const cardMaterial = card.getAttribute('data-material').toLowerCase().replace(/\s+/g, '');
-
+                const cardRingSize = card.getAttribute('data-ringsize').toLowerCase().trim();
+                const cardRingType = card.getAttribute('data-ringtype').toLowerCase().trim();
+                const cardGemstone = card.getAttribute('data-gemstone').toLowerCase().trim();
+                const cardMaterial = card.getAttribute('data-material').toLowerCase().trim();
+    
                 const sizeMatch = selectedRingSizes.length === 0 || selectedRingSizes.includes(cardRingSize);
                 const typeMatch = selectedRingTypes.length === 0 || selectedRingTypes.includes(cardRingType);
                 const gemstoneMatch = selectedGemstones.length === 0 || selectedGemstones.includes(cardGemstone);
                 const materialMatch = selectedMaterials.length === 0 || selectedMaterials.includes(cardMaterial);
-
-                return sizeMatch && typeMatch && gemstoneMatch && materialMatch; // Return true for products that match
-
+    
+                if (sizeMatch && typeMatch && gemstoneMatch && materialMatch) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
             });
-            // Clear the product list and append filtered products
-        const productListContainer = document.querySelector('.product-list .row');
-        productListContainer.innerHTML = ''; // Clear the existing products
-
-        // Append filtered products to the DOM
-        if (filteredProducts.length > 0) {
-            filteredProducts.forEach(card => {
-                productListContainer.appendChild(card); // Move the matched product to the end of the list
-            });
-        } else {
-            productListContainer.innerHTML = '<p class="text-center">No products found for the selected filters.</p>'; // Display message if no products found
         }
-    }
         
         function clearFilters() {
             document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
             filterProducts(); // Reapply filter logic after clearing
-}
-
+        }
     </script>
+    
 </body>
 </html>

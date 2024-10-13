@@ -137,6 +137,18 @@ USE_I18N = True
 
 USE_TZ = True
 
+
+
+LOGIN_URL = '/login/'
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # This should be enabled by default
+SESSION_COOKIE_AGE = 1209600  # Two weeks in seconds (default)
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Set to True if you want to expire when the browser closes
+SESSION_SAVE_EVERY_REQUEST = True  # Ensures that the session is saved on every request
+
+
+
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 

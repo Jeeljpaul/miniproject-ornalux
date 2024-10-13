@@ -132,7 +132,6 @@ class ProductAttribute(models.Model):
 class Cart(models.Model):
     cart_id = models.AutoField(primary_key=True)
     login = models.OneToOneField(Tbl_login, on_delete=models.CASCADE, related_name='cart')
-    product = models.ManyToManyField(Product, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -140,6 +139,13 @@ class Cart(models.Model):
         return f"Cart for {self.login.email}"
 
     def total_price(self):
-        return sum(product.price for product in self.products.all())
+        return sum(item.product.price * item.quantity for item in self.items.all())
 
- 
+class CartItem(models.Model):
+    cartitem_id = models.AutoField(primary_key=True)
+    cart = models.ForeignKey(Cart, related_name='items', on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+
+    def __str__(self):
+        return f"{self.quantity} of {self.product.product_name} in cart"

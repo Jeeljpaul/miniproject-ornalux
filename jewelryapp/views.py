@@ -110,6 +110,7 @@ from .models import Tbl_login, Tbl_user, Tbl_staff
 
 def login(request):
     if request.method == 'POST':
+        print("Login POST request received")
         email = request.POST.get('email')
         password = request.POST.get('password')
 
@@ -117,11 +118,13 @@ def login(request):
         try:
             validate_email(email)
         except ValidationError:
+            print("Invalid email format")  # Debug print
             messages.error(request, 'Please enter a valid email address')
             return redirect('/login/')
         
         # Server-side password validation
         if len(password) < 8:
+            print("Password validation failed") 
             messages.error(request, 'Password must be at least 8 characters long')
             return redirect('/login/')
 
@@ -142,12 +145,13 @@ def login(request):
         
         # Check if the user is staff
         try:
-            staff = Tbl_staff.objects.get(login_email=email, login_password=password)
+            staff_login = Tbl_login.objects.get(email=email, password=password)
+            staff = Tbl_staff.objects.get(login_id=staff_login.login_id)
             # Staff login success
             request.session['user_type'] = 'staff'
-            request.session['login_id'] = staff.login.login_id  # Store login_id in session
+            request.session['login_id'] = staff_login.login_id  # Store login_id in session
             request.session['staff_id'] = staff.staff_id
-            request.session['email'] = staff.login.email
+            request.session['email'] = staff_login.email
             request.session['name'] = staff.name  # Fetch the staff's name
 
             # Increment login count and update login timestamp for staff
@@ -169,7 +173,10 @@ def login(request):
             request.session['email'] = user_login.email
             request.session['name'] = user.name  # Fetch the user's name
               # Increment login count and update login timestamp
-            user_login.login()  # Call the method to update login info
+            request.session.save()  # Explicitly save the session to ensure it is stored
+            print("User session data:", dict(request.session)) 
+            user_login.login()
+            print("User logged in:", request.session)   # Call the method to update login info
 
             
             return redirect('/base_home/')  # Redirect to user dashboard
@@ -509,50 +516,34 @@ def product(request):
     return render(request, 'user/product.html')
 
 
-
-def ring_list(request):
-    # Fetch all products with the category 'Rings'
-    rings = Product.objects.filter(category='Ring', is_active=True)
-
-    # Get filter criteria from the request
-    ring_size = request.GET.get('ring_size')
-    ring_type = request.GET.get('ring_type')
-    stone_type = request.GET.get('stone_type')
-    metal_type = request.GET.get('metal_type')
-
-    # Apply filters if they are present
-    if ring_size:
-        rings = rings.filter(size=ring_size)
-    if ring_type:
-        rings = rings.filter(ring_type=ring_type)
-    if stone_type:
-        rings = rings.filter(gemstone=stone_type)
-    if metal_type:
-        rings = rings.filter(metal_type=metal_type)
-
-
-    return render(request, 'user/ring_list.html', {'rings': rings})
-
+from django.shortcuts import render
+from .models import Product, ProductAttribute
 
 def earring_list(request):
-    # Fetch all products with the category 'Earrings'
-    earrings = Product.objects.filter(category='Earring', is_active=True)
+    # Get all products initially
+    earrings = Product.objects.filter(category__name='Earring')
 
-    # Get filter criteria from the request
-    earring_style = request.GET.get('earring_style')
-    shop_for = request.GET.get('shop_for')
-    stone_type = request.GET.get('stone_type')
-    metal_type = request.GET.get('metal_type')
+    # Get filter parameters from the request
+    earring_style = request.GET.getlist('earring_style')
+    shop_for = request.GET.getlist('shop_for')
+    gemstone = request.GET.getlist('gemstone')
+    metal_type = request.GET.getlist('metal_type')
 
-    # Apply filters if they are present
+    # Apply filters based on the selected values
     if earring_style:
-        earrings = earrings.filter(earring_style__iexact=earring_style)
+        earrings = earrings.filter(attributes__attribute_name='earring_style', attributes__attribute_value__in=earring_style)
+
     if shop_for:
-        earrings = earrings.filter(shop_for__iexact=shop_for)
-    if stone_type:
-        earrings = earrings.filter(stone_type__iexact=stone_type)
+        earrings = earrings.filter(gender__in=shop_for)
+
+    if gemstone:
+        earrings = earrings.filter(stonetype__name__in=gemstone)
+
     if metal_type:
-        earrings = earrings.filter(metal_type__iexact=metal_type)
+        earrings = earrings.filter(metaltype__name__in=metal_type)
+
+    # Use distinct to avoid duplicate products in case of multiple attribute matches
+    earrings = earrings.distinct()
 
     return render(request, 'user/earring_list.html', {'earrings': earrings})
 
@@ -580,34 +571,115 @@ def bracelet_list(request):
 
     return render(request, 'user/bracelet.html', {'bracelets': bracelets})
 
+
+
+from django.shortcuts import render
+from .models import Product, ProductAttribute, Metaltype, Stonetype, Category
+
+def ring_list(request):
+    # Fetch only the rings from the Product table
+    category_ring = Category.objects.get(name='Ring')
+    rings = Product.objects.filter(category=category_ring)
+
+    # Get the filtering options from the request
+    selected_ring_sizes = request.GET.getlist('ring_size')
+    selected_ring_types = request.GET.getlist('ring_type')
+    selected_gemstones = request.GET.getlist('gemstone')
+    selected_materials = request.GET.getlist('material')
+
+    # Apply filters if they exist
+    if selected_ring_sizes:
+        rings = rings.filter(attributes__attribute_name='Ringsize', 
+                             attributes__attribute_value__in=selected_ring_sizes)
+
+    if selected_ring_types:
+        rings = rings.filter(attributes__attribute_name='Ringtype', 
+                             attributes__attribute_value__in=selected_ring_types)
+
+    if selected_gemstones:
+        rings = rings.filter(metaltype__name__in=selected_gemstones)
+
+    if selected_materials:
+        rings = rings.filter(stonetype__name__in=selected_materials)
+
+    # Fetch distinct ring sizes, ring types, gemstones, and materials for checkbox filters
+    ring_sizes = ProductAttribute.objects.filter(attribute_name='Ringsize').values_list('attribute_value', flat=True).distinct()
+    ring_types = ProductAttribute.objects.filter(attribute_name='Ringtype').values_list('attribute_value', flat=True).distinct()
+    gemstones = Metaltype.objects.all().values_list('name', flat=True)
+    materials = Stonetype.objects.all().values_list('name', flat=True)
+
+    context = {
+        'rings': rings,
+        'ring_sizes': ring_sizes,
+        'ring_types': ring_types,
+        'gemstones': gemstones,
+        'materials': materials,
+        'selected_ring_sizes': selected_ring_sizes,
+        'selected_ring_types': selected_ring_types,
+        'selected_gemstones': selected_gemstones,
+        'selected_materials': selected_materials,
+    }
+
+    return render(request, 'user/ring_list.html', context)
+
+
+
+
+
+
+
 from django.shortcuts import render, get_object_or_404
+from .models import Product, ProductAttribute, Metaltype, Stonetype, Category
 
 def ring_detail(request, product_id):
-    product = get_object_or_404(Product, product_id=product_id, category='Ring')
-    return render(request, 'user/ring_detail.html', {'product': product})
+    # Get the specific product by its ID, along with related Metaltype, Stonetype, and Category
+    product = get_object_or_404(Product.objects.select_related('metaltype', 'stonetype', 'category'), product_id=product_id)
+  
 
+    # Fetch the product's attributes (e.g., ring size, ring type, etc.)
+    product_attributes = ProductAttribute.objects.filter(product=product)
 
+    # Fetch the category attributes for the specific product category (if any)
+    category_attributes = product.category.attributes.all() if product.category else []
 
-from django.shortcuts import get_object_or_404
-from django.contrib.auth.decorators import login_required
+    context = {
+        'product': product,
+        'product_attributes': product_attributes,
+        'category_attributes': category_attributes,
+        'metaltype': product.metaltype,
+        'stonetype': product.stonetype,
+    }
+
+    return render(request, 'user/ring_detail.html', context)
+
 from django.http import JsonResponse
-from .models import Cart, Product, Tbl_login
+from django.shortcuts import get_object_or_404
+from .models import Product, Cart, CartItem
+from django.contrib.auth.decorators import login_required
 
+@login_required
 def add_to_cart(request, product_id):
-    # Check if the user is authenticated
-    if not request.user.is_authenticated:
-        return JsonResponse({'success': False, 'message': 'You need to register or log in to add items to the cart.'})
     
-    # If the user is authenticated, proceed to add the product to the cart
-    product = get_object_or_404(Product, id=product_id)
-    user_login = request.user.tbl_login  # Assuming you have a way to link the user to Tbl_login
-    cart, created = Cart.objects.get_or_create(login=user_login)
+    if request.user.is_authenticated:
+        
+        if request.method == 'POST':
+            product = get_object_or_404(Product, product_id=product_id)
+            
+            user = get_object_or_404(Tbl_user, user_id=request.user.id)
+            user_cart, created = Cart.objects.get_or_create(login=user.login)
 
-    if product not in cart.products.all():
-        cart.products.add(product)
+            cart_item, item_created = CartItem.objects.get_or_create(cart=user_cart, product=product)
 
-    cart.save()
-    return redirect('ring_detail')
+            if not item_created:
+                cart_item.quantity += 1
+                cart_item.save()
+
+            return JsonResponse({'success': True, 'message': f'{product.product_name} added to cart successfully!'})
+    else:
+        return JsonResponse({'success': False, 'message': 'User not authenticated.'})
+
+    return JsonResponse({'success': False, 'message': 'Invalid request.'})
+
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------
 

@@ -16,10 +16,10 @@ urlpatterns = [
     path('reset-password/<str:token>/', views.reset_password),
     path('social-auth/', include('social_django.urls', namespace='social')),
 
-    path('adminhome/add_p/', views.add_p, name='add_p'),
+    # path('adminhome/add_p/', views.add_p, name='add_p'),
     path('update_p/<int:product_id>/', views.update_p, name='update_p'),  # New URL pattern
    
-    path('adminhome/add_product/', views.add_product, name='add_product'),
+    # path('adminhome/add_product/', views.add_product, name='add_product'),
     path('adminhome/product_list/', views.product_list, name='product_list'),  # Make sure this line exists   
     path('adminhome/view_products/',views.view_products, name='view_products'),
     path('product_details/<int:product_id>/', views.product_details, name='product_details'),
@@ -49,7 +49,8 @@ urlpatterns = [
     path('earring_list/', views.earring_list, name='earring_list'),
     path('bracelet_list/', views.bracelet_list, name='bracelet_list'),
     path('ring_detail/<int:product_id>/', views.ring_detail, name='ring_detail'),
-    path('add-to-cart/<int:product_id>/', views.add_to_cart, name='add_to_cart'),
+
+    path('add_to_cart/<int:product_id>/', views.add_to_cart, name='add_to_cart'),
 
 
 
