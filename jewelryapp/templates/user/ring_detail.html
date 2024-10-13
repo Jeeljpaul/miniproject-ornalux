@@ -105,7 +105,7 @@
 
         <!-- Buttons for adding to cart, wishlist, and going back -->
         <a href="{% url 'add_to_cart' product.product_id %}" class="button add_to_cart" data-product-id="{{ product.product_id }}">Add to Cart</a>
-        <a href="#" class="button wishlist-button add-to-wishlist" data-product-id="{{ product.product_id }}">Add to Wishlist</a>
+        <a href="{% url 'add_to_wishlist' product.product_id %}" class="button wishlist-button add-to-wishlist" data-product-id="{{ product.product_id }}">Add to Wishlist</a>
         <a href="{% url 'ring_list' %}" class="button back-button">Back</a>
     </div>
 
@@ -144,18 +144,23 @@
             $('.add-to-wishlist').click(function (e) {
                 e.preventDefault();
                 var productId = $(this).data('product-id');
-                
+                var csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
+
                 $.ajax({
-                    url: '/add-to-wishlist/' + productId + '/',
+                    url: '/add_to_wishlist/' + productId + '/',
                     type: 'POST',
-                    data: {
-                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    headers: {
+                        'X-CSRFToken': csrfToken  // Setting the CSRF token in the request header
                     },
                     success: function (response) {
                         if (response.success) {
                             alert(response.message);
                         } else {
                             alert(response.message);
+                            if (response.message.includes('log in')) {
+                                // Redirect the user to the login page if not authenticated
+                                window.location.href = '/login/';  // Replace with your actual login URL
+                            }
                         }
                     },
                     error: function () {
@@ -163,6 +168,7 @@
                     }
                 });
             });
+
         });
     </script>
     

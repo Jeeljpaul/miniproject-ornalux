@@ -149,3 +149,16 @@ class CartItem(models.Model):
 
     def __str__(self):
         return f"{self.quantity} of {self.product.product_name} in cart"
+    
+
+
+class Wishlist(models.Model):
+    wishlist_id =  models.AutoField(primary_key=True)
+    user = models.ForeignKey(Tbl_user, on_delete=models.CASCADE, related_name='wishlist')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    added_on = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.user.name} - {self.product.product_name}'
+
+

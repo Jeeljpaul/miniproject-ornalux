@@ -681,6 +681,38 @@ def add_to_cart(request, product_id):
     return JsonResponse({'success': False, 'message': 'Invalid request.'})
 
 
+
+
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from .models import Tbl_user, Product, Wishlist
+
+def add_to_wishlist(request, product_id):
+    if request.method == 'POST':
+        # Check if the user is authenticated
+        if request.user.is_authenticated:
+            # Retrieve the logged-in user's Tbl_user instance
+            user = Tbl_user.objects.get(login__email=request.user.email)
+
+            # Retrieve the product based on the product_id
+            product = get_object_or_404(Product, product_id=product_id)
+
+            # Check if the product is already in the user's wishlist
+            wishlist_item, created = Wishlist.objects.get_or_create(user=user, product=product)
+
+            if created:
+                # If the item is newly added to the wishlist
+                return JsonResponse({'success': True, 'message': 'Product added to wishlist successfully!'})
+            else:
+                # If the item already exists in the wishlist
+                return JsonResponse({'success': False, 'message': 'Product is already in your wishlist.'})
+        else:
+            # If the user is not authenticated, ask them to log in
+            return JsonResponse({'success': False, 'message': 'You need to be logged in to add items to the wishlist.'})
+    else:
+        return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
+
 #----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 #adminpage

@@ -51,6 +51,7 @@ urlpatterns = [
     path('ring_detail/<int:product_id>/', views.ring_detail, name='ring_detail'),
 
     path('add_to_cart/<int:product_id>/', views.add_to_cart, name='add_to_cart'),
+    path('add_to_wishlist/<int:product_id>/', views.add_to_wishlist, name='add_to_wishlist'),
 
 
 
