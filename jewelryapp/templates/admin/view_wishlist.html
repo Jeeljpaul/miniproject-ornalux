@@ -1,0 +1,9 @@
+<!-- view_wishlist.html -->
+<h2>Your Wishlist</h2>
+<ul>
+    {% for item in wishlist_items %}
+        <li>{{ item.product.product_name }} - <a href="{% url 'product_detail' item.product.id %}">View Product</a></li>
+    {% empty %}
+        <li>Your wishlist is empty.</li>
+    {% endfor %}
+</ul>

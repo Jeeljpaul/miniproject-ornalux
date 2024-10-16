@@ -8,7 +8,7 @@ from django.utils.crypto import get_random_string
 from django.core.mail import send_mail
 
 def index(request):
-    return render(request, 'index.html')
+    return render(request, 'index.html', {'user': request.user})
 
 def base(request):
     return render(request, 'base.html')
@@ -102,6 +102,7 @@ def register(request):
 
     
     return render(request, 'register.html', {'form': form})
+
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.core.validators import validate_email
@@ -179,7 +180,7 @@ def login(request):
             print("User logged in:", request.session)   # Call the method to update login info
 
             
-            return redirect('/base_home/')  # Redirect to user dashboard
+            return redirect('/')  # Redirect to user dashboard
         except (Tbl_login.DoesNotExist, Tbl_user.DoesNotExist):
             messages.error(request, 'Invalid email or password')
             return redirect('/login/')
@@ -517,96 +518,34 @@ def product(request):
 
 
 from django.shortcuts import render
-from .models import Product, ProductAttribute
+from .models import Product, Stonetype, Metaltype, ProductAttribute, Category
 
-def earring_list(request):
-    # Get all products initially
-    earrings = Product.objects.filter(category__name='Earring')
+def ring_lists(request):
+    # Get all possible filter values from the database
+    ring_sizes = ProductAttribute.objects.filter(attribute_name='Ringsize').values_list('attribute_value', flat=True).distinct()
+    ring_types = ProductAttribute.objects.filter(attribute_name='Ringtype').values_list('attribute_value', flat=True).distinct()
+    gemstones = Stonetype.objects.all()
+    materials = Metaltype.objects.all()
 
-    # Get filter parameters from the request
-    earring_style = request.GET.getlist('earring_style')
-    shop_for = request.GET.getlist('shop_for')
-    gemstone = request.GET.getlist('gemstone')
-    metal_type = request.GET.getlist('metal_type')
-
-    # Apply filters based on the selected values
-    if earring_style:
-        earrings = earrings.filter(attributes__attribute_name='earring_style', attributes__attribute_value__in=earring_style)
-
-    if shop_for:
-        earrings = earrings.filter(gender__in=shop_for)
-
-    if gemstone:
-        earrings = earrings.filter(stonetype__name__in=gemstone)
-
-    if metal_type:
-        earrings = earrings.filter(metaltype__name__in=metal_type)
-
-    # Use distinct to avoid duplicate products in case of multiple attribute matches
-    earrings = earrings.distinct()
-
-    return render(request, 'user/earring_list.html', {'earrings': earrings})
-
-
-
-def bracelet_list(request):
-    # Fetch all products with the category 'Bracelet'
-    bracelets = Product.objects.filter(category='Bracelet', is_active=True)
-
-    # Get filter criteria from the request
-    bracelet_style = request.GET.get('bracelet_style')
-    shop_for = request.GET.get('shop_for')
-    stone_type = request.GET.get('stone_type')
-    metal_type = request.GET.get('metal_type')
-
-    # Apply filters if they are present
-    if bracelet_style:
-        bracelets = bracelets.filter(bracelet_style__iexact=bracelet_style)
-    if shop_for:
-        bracelets = bracelets.filter(shop_for__iexact=shop_for)
-    if stone_type:
-        bracelets = bracelets.filter(stone_type__iexact=stone_type)
-    if metal_type:
-        bracelets = bracelets.filter(metal_type__iexact=metal_type)
-
-    return render(request, 'user/bracelet.html', {'bracelets': bracelets})
-
-
-
-from django.shortcuts import render
-from .models import Product, ProductAttribute, Metaltype, Stonetype, Category
-
-def ring_list(request):
-    # Fetch only the rings from the Product table
-    category_ring = Category.objects.get(name='Ring')
-    rings = Product.objects.filter(category=category_ring)
-
-    # Get the filtering options from the request
+    # Retrieve selected filters from the request
     selected_ring_sizes = request.GET.getlist('ring_size')
     selected_ring_types = request.GET.getlist('ring_type')
     selected_gemstones = request.GET.getlist('gemstone')
-    selected_materials = request.GET.getlist('material')
+    selected_materials = request.GET.getlist('metal_type')
 
-    # Apply filters if they exist
+    # Initialize the queryset to fetch all ring products initially
+    category_ring = Category.objects.get(name='Ring')
+    rings = Product.objects.filter(category=category_ring, is_active=True)
+
+    # Apply filtering based on selected values
     if selected_ring_sizes:
-        rings = rings.filter(attributes__attribute_name='Ringsize', 
-                             attributes__attribute_value__in=selected_ring_sizes)
-
+        rings = rings.filter(attributes__attribute_name='Ringsize', attributes__attribute_value__in=selected_ring_sizes)
     if selected_ring_types:
-        rings = rings.filter(attributes__attribute_name='Ringtype', 
-                             attributes__attribute_value__in=selected_ring_types)
-
+        rings = rings.filter(attributes__attribute_name='Ringtype', attributes__attribute_value__in=selected_ring_types)
     if selected_gemstones:
-        rings = rings.filter(metaltype__name__in=selected_gemstones)
-
+        rings = rings.filter(stonetype__name__in=selected_gemstones)
     if selected_materials:
-        rings = rings.filter(stonetype__name__in=selected_materials)
-
-    # Fetch distinct ring sizes, ring types, gemstones, and materials for checkbox filters
-    ring_sizes = ProductAttribute.objects.filter(attribute_name='Ringsize').values_list('attribute_value', flat=True).distinct()
-    ring_types = ProductAttribute.objects.filter(attribute_name='Ringtype').values_list('attribute_value', flat=True).distinct()
-    gemstones = Metaltype.objects.all().values_list('name', flat=True)
-    materials = Stonetype.objects.all().values_list('name', flat=True)
+        rings = rings.filter(metaltype__name__in=selected_materials)
 
     context = {
         'rings': rings,
@@ -652,36 +591,249 @@ def ring_detail(request, product_id):
 
     return render(request, 'user/ring_detail.html', context)
 
+
+
+from django.shortcuts import render
+from .models import Product, Stonetype, Metaltype, ProductAttribute
+
+def earring_list(request):
+    # Get all possible filter values from the database
+    gemstones = Stonetype.objects.all()
+    materials = Metaltype.objects.all()
+    earring_styles = ProductAttribute.objects.filter(attribute_name='Earring Style').values_list('attribute_value', flat=True).distinct()
+    shop_for_options = Product.objects.values_list('gender', flat=True).distinct()
+
+    # Retrieve selected filters from the request
+    selected_gemstones = request.GET.getlist('gemstone')
+    selected_materials = request.GET.getlist('metal_type')
+    selected_earring_styles = request.GET.getlist('earringstyle')
+    selected_shop_for = request.GET.getlist('shop_for')
+
+    # Initialize the queryset to fetch all products initially
+    category_earring = Category.objects.get(name='Earring')
+    earrings = Product.objects.filter(category=category_earring, is_active=True)
+
+
+    # Apply filtering based on selected values
+    if selected_shop_for:
+        earrings = earrings.filter(gender__in=selected_shop_for)
+    if selected_gemstones:
+        earrings = earrings.filter(stonetype__name__in=selected_gemstones)
+    if selected_materials:
+        earrings = earrings.filter(metaltype__name__in=selected_materials)
+    if selected_earring_styles:
+        earrings = earrings.filter(attributes_attribute_name='Earring Style', attributes__attribute_value__in=selected_earring_styles)
+
+    context = {
+        'earrings': earrings,
+        'gemstones': gemstones,
+        'materials': materials,
+        'earring_styles': earring_styles,
+        'shop_for_options': shop_for_options,
+        'selected_gemstones': selected_gemstones,
+        'selected_materials': selected_materials,
+        'selected_earring_styles': selected_earring_styles,
+        'selected_shop_for': selected_shop_for,
+    }
+
+    return render(request, 'user/earring_list.html', context)
+
+
+
+from django.shortcuts import render, get_object_or_404
+from .models import Product, ProductAttribute, Metaltype, Stonetype, Category
+
+def earring_detail(request, product_id):
+    # Get the specific product by its ID, along with related Metaltype, Stonetype, and Category
+    product = get_object_or_404(Product.objects.select_related('metaltype', 'stonetype', 'category'), product_id=product_id)
+  
+
+    # Fetch the product's attributes (e.g., ring size, ring type, etc.)
+    product_attributes = ProductAttribute.objects.filter(product=product)
+
+    # Fetch the category attributes for the specific product category (if any)
+    category_attributes = product.category.attributes.all() if product.category else []
+
+    context = {
+        'product': product,
+        'product_attributes': product_attributes,
+        'category_attributes': category_attributes,
+        'metaltype': product.metaltype,
+        'stonetype': product.stonetype,
+    }
+
+    return render(request, 'user/earring_detail.html', context)
+
+
+from django.shortcuts import render
+from .models import Product, Stonetype, Metaltype, ProductAttribute, Category
+
+def bracelet_lists(request):
+    # Get all possible filter values from the database
+    bracelet_styles = ProductAttribute.objects.filter(attribute_name='Bracelet Style').values_list('attribute_value', flat=True).distinct()
+    gemstones = Stonetype.objects.all()
+    materials = Metaltype.objects.all()
+    shop_for_options = Product.objects.values_list('gender', flat=True).distinct()
+
+    # Retrieve selected filters from the request
+    selected_styles = request.GET.getlist('bracelet_style')
+    selected_shop_for = request.GET.getlist('shop_for')
+    selected_gemstones = request.GET.getlist('gemstone')
+    selected_materials = request.GET.getlist('metal_type')
+
+    # Initialize the queryset to fetch all bracelet products initially
+    category_bracelet = Category.objects.get(name='Bracelets')
+    bracelets = Product.objects.filter(category=category_bracelet, is_active=True)
+
+    # Apply filtering based on selected values
+    if selected_styles:
+        bracelets = bracelets.filter(attributes__attribute_name='Bracelet Style', attributes__attribute_value__in=selected_styles)
+    if selected_shop_for:
+        bracelets = bracelets.filter(gender__in=selected_shop_for)
+    if selected_gemstones:
+        bracelets = bracelets.filter(stonetype__name__in=selected_gemstones)
+    if selected_materials:
+        bracelets = bracelets.filter(metaltype__name__in=selected_materials)
+
+    context = {
+        'bracelets': bracelets,
+        'bracelet_styles': bracelet_styles,
+        'shop_for_options': shop_for_options,
+        'gemstones': gemstones,
+        'materials': materials,
+        'selected_styles': selected_styles,
+        'selected_shop_for': selected_shop_for,
+        'selected_gemstones': selected_gemstones,
+        'selected_materials': selected_materials,
+    }
+
+    return render(request, 'user/bracelet.html', context)
+
+
+from django.shortcuts import render, get_object_or_404
+from .models import Product, ProductAttribute, Metaltype, Stonetype, Category
+
+def bracelet_detail(request, product_id):
+    # Get the specific product by its ID, along with related Metaltype, Stonetype, and Category
+    product = get_object_or_404(Product.objects.select_related('metaltype', 'stonetype', 'category'), product_id=product_id)
+  
+
+    # Fetch the product's attributes (e.g., ring size, ring type, etc.)
+    product_attributes = ProductAttribute.objects.filter(product=product)
+
+    # Fetch the category attributes for the specific product category (if any)
+    category_attributes = product.category.attributes.all() if product.category else []
+
+    context = {
+        'product': product,
+        'product_attributes': product_attributes,
+        'category_attributes': category_attributes,
+        'metaltype': product.metaltype,
+        'stonetype': product.stonetype,
+    }
+
+    return render(request, 'user/bracelet_details.html', context)
+
+
+
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from .models import Product, Cart, CartItem
 from django.contrib.auth.decorators import login_required
+from .models import Tbl_user
 
-@login_required
 def add_to_cart(request, product_id):
-    
-    if request.user.is_authenticated:
-        
-        if request.method == 'POST':
-            product = get_object_or_404(Product, product_id=product_id)
-            
+    product = get_object_or_404(Product, product_id=product_id)
+
+    if request.method == 'POST':
+        # Check if the user is authenticated
+        if request.user.is_authenticated:
             user = get_object_or_404(Tbl_user, user_id=request.user.id)
             user_cart, created = Cart.objects.get_or_create(login=user.login)
 
+            # Check if the cart item already exists
             cart_item, item_created = CartItem.objects.get_or_create(cart=user_cart, product=product)
 
             if not item_created:
+                # If the item is already in the cart, increase the quantity
                 cart_item.quantity += 1
                 cart_item.save()
 
             return JsonResponse({'success': True, 'message': f'{product.product_name} added to cart successfully!'})
-    else:
-        return JsonResponse({'success': False, 'message': 'User not authenticated.'})
+        
+        else:
+            # Handle cart for non-authenticated users using session
+            cart = request.session.get('cart', {})
+
+            # Check if the product is already in the cart
+            if str(product_id) in cart:
+                cart[str(product_id)]['quantity'] += 1
+            else:
+                cart[str(product_id)] = {
+                    'product_id': product_id,
+                    'product_name': product.product_name,
+                    'quantity': 1,
+                    'price': str(product.price)  # Convert to string for session compatibility
+                }
+
+            # Save the updated cart in the session
+            request.session['cart'] = cart
+            return JsonResponse({'success': True, 'message': f'{product.product_name} added to session cart successfully!'})
 
     return JsonResponse({'success': False, 'message': 'Invalid request.'})
+from django.shortcuts import render
+from .models import Cart, CartItem, Product
+from django.contrib.auth.decorators import login_required
 
+def view_cart(request):
+    cart_items = []
+    total_price = 0
 
+    if request.user.is_authenticated:
+        # If the user is authenticated, get the cart items from the database
+        try:
+            user_cart = Cart.objects.get(login=request.user.id)
+            cart_items = CartItem.objects.filter(cart=user_cart)
 
+            # Calculate the total price of the cart items
+            total_price = sum(item.product.price * item.quantity for item in cart_items)
+
+            # Convert CartItem objects to a dictionary format for the template
+            cart_items = [
+                {
+                    'product_name': item.product.product_name,
+                    'price': item.product.price,
+                    'quantity': item.quantity,
+                    'total_price': item.product.price * item.quantity
+                }
+                for item in cart_items
+            ]
+        except Cart.DoesNotExist:
+            cart_items = []
+    else:
+        # If the user is not authenticated, get the cart items from the session
+        cart = request.session.get('cart', {})
+
+        for product_id, item in cart.items():
+            try:
+                product = Product.objects.get(product_id=product_id)
+                item_data = {
+                    'product_name': product.product_name,
+                    'price': product.price,
+                    'quantity': item['quantity'],
+                    'total_price': product.price * item['quantity'],
+                }
+                cart_items.append(item_data)
+                total_price += item_data['total_price']
+            except Product.DoesNotExist:
+                continue
+
+    context = {
+        'cart_items': cart_items,
+        'total_price': total_price,
+    }
+
+    return render(request, 'user/view_cart.html', context)
 
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -692,7 +844,7 @@ def add_to_wishlist(request, product_id):
         # Check if the user is authenticated
         if request.user.is_authenticated:
             # Retrieve the logged-in user's Tbl_user instance
-            user = Tbl_user.objects.get(login__email=request.user.email)
+            user = get_object_or_404(Tbl_user, login__email=request.user.email)
 
             # Retrieve the product based on the product_id
             product = get_object_or_404(Product, product_id=product_id)
@@ -711,6 +863,7 @@ def add_to_wishlist(request, product_id):
             return JsonResponse({'success': False, 'message': 'You need to be logged in to add items to the wishlist.'})
     else:
         return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
 
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------

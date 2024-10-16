@@ -45,16 +45,20 @@ urlpatterns = [
 
 
     path('product/', views.product, name='product'),
-    path('ring_list/', views.ring_list, name='ring_list'),
+    path('ring_list/', views.ring_lists, name='ring_list'),
     path('earring_list/', views.earring_list, name='earring_list'),
-    path('bracelet_list/', views.bracelet_list, name='bracelet_list'),
+    path('bracelet_list/', views.bracelet_lists, name='bracelet_list'),
     path('ring_detail/<int:product_id>/', views.ring_detail, name='ring_detail'),
+    path('earring/<int:product_id>/', views.earring_detail, name='earring_detail'),
+    path('bracelet_detail/<int:product_id>/', views.bracelet_detail, name='bracelet_detail'),
+
 
     path('add_to_cart/<int:product_id>/', views.add_to_cart, name='add_to_cart'),
+    path('view_cart/', views.view_cart, name='view_cart'),
+  
+
     path('add_to_wishlist/<int:product_id>/', views.add_to_wishlist, name='add_to_wishlist'),
-
-
-
+ 
 
 ]
 if settings.DEBUG:

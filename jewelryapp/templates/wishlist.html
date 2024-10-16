@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Wishlist</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Your Wishlist</h1>
+
+        {% if wishlist_items %}
+            <ul class="list-group">
+                {% for item in wishlist_items %}
+                    <li class="list-group-item">
+                        <h5>{{ item.product.product_name }}</h5>
+                        <p>Price: Rs {{ item.product.price }}</p>
+                        <!-- <p>Description: {{ item.product.product_description }}</p> -->
+                        <!-- You can add a button to remove from wishlist or view details here -->
+                        <a href="{% url 'remove_from_wishlist' item.product.product_id %}" class="btn btn-danger">Remove</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>Your wishlist is empty.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

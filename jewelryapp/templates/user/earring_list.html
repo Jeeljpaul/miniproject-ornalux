@@ -1,192 +1,85 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Earrings Collection</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            margin: 0;
-        }
+{% load static %}
+{% include 'user/trial.html' %}
+{% block content %}
 
-        /* Sidebar Styling */
-        .filters {
-            width: 250px;
-            background-color: #f4f4f4;
-            padding: 20px;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-            height: 100vh;
-            position: fixed;
-            overflow-y: auto;
-        }
-
-        h2 {
-            margin-left: 280px;
-            padding: 20px;
-        }
-
-        /* Main content section */
-        .product-list {
-            margin-left: 280px;
-            padding: 20px;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: flex-start;
-        }
-
-        /* Product card styling */
-        .product {
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            padding: 10px;
-            margin: 10px;
-            width: 200px;
-            text-align: center;
-            box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
-            transition: transform 0.2s ease;
-        }
-
-        .product:hover {
-            transform: scale(1.05);
-        }
-
-        .product img {
-            max-width: 100%;
-            height: auto;
-        }
-
-        /* Button styling */
-        .button {
-            display: inline-block;
-            padding: 8px 12px;
-            margin: 5px;
-            font-size: 14px;
-            font-weight: bold;
-            color: white;
-            background-color: #28a745;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .button:hover {
-            background-color: #218838;
-        }
-    </style>
-</head>
-<body>
-    <!-- Sidebar Filter Section -->
-    <div class="filters">
-        <h4>Filter by</h4>
-
+<!-- Sidebar Filter Section -->
+<div class="filters">
+    <h4>Filter by</h4>
+    <form method="get" action="{% url 'earring_list' %}">
         <!-- Earring Style Filter -->
-        <div class="filter-category">
-            <label><strong>Earring Style</strong></label><br>
-            <input type="checkbox" name="earring_style" value="studs" onchange="filterProducts()"> Studs and Tops<br>
-            <input type="checkbox" name="earring_style" value="drops" onchange="filterProducts()"> Drops and Danglers<br>
-            <input type="checkbox" name="earring_style" value="hoops" onchange="filterProducts()"> Hoops and Hugglers<br>
-            <input type="checkbox" name="earring_style" value="jhumkas" onchange="filterProducts()"> Jhumkas<br>
-            <input type="checkbox" name="earring_style" value="daily wear" onchange="filterProducts()"> Daily Wear<br>
-            <input type="checkbox" name="earring_style" value="light weight" onchange="filterProducts()"> Light Weight<br>
-            <input type="checkbox" name="earring_style" value="earcuffs" onchange="filterProducts()"> Ear Cuffs
+        <div>
+            <h3>Earring Style:</h3>
+            {% for style in earring_styles %}
+                <label>
+                    <input type="checkbox" name="earring_style" value="{{ style }}"
+                        {% if style in selected_earring_styles %}checked{% endif %}>
+                    {{ style }}
+                </label><br>
+            {% endfor %}
         </div>
 
         <br>
         <!-- Shop For Filter -->
-        <div class="filter-category">
-            <label><strong>Shop For</strong></label><br>
-            <input type="checkbox" name="shop_for" value="women" onchange="filterProducts()"> Women<br>
-            <input type="checkbox" name="shop_for" value="men" onchange="filterProducts()"> Men<br>
-            <input type="checkbox" name="shop_for" value="kids" onchange="filterProducts()"> Kids
+        <div>
+            <h3>Shop For:</h3>
+            {% for category in shop_for_options %}
+                <label>
+                    <input type="checkbox" name="shop_for" value="{{ category }}"
+                        {% if category in selected_shop_for %}checked{% endif %}>
+                    {{ category }}
+                </label><br>
+            {% endfor %}
         </div>
 
         <br>
         <!-- Gemstone Filter -->
-        <div class="filter-category">
-            <label><strong>Gemstone</strong></label><br>
-            <input type="checkbox" name="gemstone" value="ruby" onchange="filterProducts()"> Ruby<br>
-            <input type="checkbox" name="gemstone" value="emerald" onchange="filterProducts()"> Emerald<br>
-            <input type="checkbox" name="gemstone" value="diamond" onchange="filterProducts()"> Diamond<br>
-            <input type="checkbox" name="gemstone" value="pearl" onchange="filterProducts()"> Pearl<br>
-            <input type="checkbox" name="gemstone" value="citrine" onchange="filterProducts()"> Citrine
+        <div>
+            <h3>Gemstone:</h3>
+            {% for gem in gemstones %}
+                <label>
+                    <input type="checkbox" name="gemstone" value="{{ gem }}"
+                        {% if gem in selected_gemstones %}checked{% endif %}>
+                    {{ gem }}
+                </label><br>
+            {% endfor %}
         </div>
 
         <br>
         <!-- Metal Type Filter -->
-        <div class="filter-category">
-            <label><strong>Metal Type</strong></label><br>
-            <input type="checkbox" name="metal_type" value="gold" onchange="filterProducts()"> Gold<br>
-            <input type="checkbox" name="metal_type" value="silver" onchange="filterProducts()"> Silver<br>
-            <input type="checkbox" name="metal_type" value="platinum" onchange="filterProducts()"> Platinum<br>
-            <input type="checkbox" name="metal_type" value="two tone" onchange="filterProducts()"> Two Tone<br>
-            <input type="checkbox" name="metal_type" value="rose gold" onchange="filterProducts()"> Rose Gold
+        <div>
+            <h3>Metal Type:</h3>
+            {% for mat in materials %}
+                <label>
+                    <input type="checkbox" name="metal_type" value="{{ mat }}"
+                        {% if mat in selected_materials %}checked{% endif %}>
+                    {{ mat }}
+                </label><br>
+            {% endfor %}
         </div>
-        <button class="button" onclick="clearFilters()">Clear Filters</button>
+
+        <button type="submit" class="button">Apply Filters</button>
+        <button type="button" class="button" onclick="window.location.href='/earring_list/'">Clear Filters</button>
+    </form>
+</div>
+
+<!-- Main Product List Section -->
+<div class="product-list">
+    <h2>Earrings Collection</h2>
+    <div class="row">
+        {% if earrings %}
+            {% for earring in earrings %}
+                <div class="product" data-earringstyle="{{ earring.earring_style }}" data-shopfor="{{ earring.shop_for }}" data-gemstone="{{ earring.gemstone }}" data-material="{{ earring.material }}">
+                    <img src="{{ earring.images.url }}" alt="{{ earring.product_name }}">
+                    <h5>{{ earring.product_name }}</h5>
+                    <p><strong>Price:</strong> Rs:{{ earring.price }}</p>
+                    <a href="{% url 'earring_detail' earring.product_id %}" class="button">View Details</a>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-center">No earrings available at the moment.</p>
+        {% endif %}
     </div>
-
-    <!-- Main Product List Section -->
-    <div class="product-list">
-        <h2>Earrings Collection</h2>
-        <div class="row">
-            {% if earrings %}
-                {% for earring in earrings %}
-                    <div class="product" data-earringstyle="{{ earring.earring_style }}" data-shopfor="{{ earring.shop_for }}" data-gemstone="{{ earring.stone_type }}" data-material="{{ earring.metal_type }}">
-                        <img src="{{ earring.images.url }}" alt="{{ earring.product_name }}">
-                        <h5>{{ earring.product_name }}</h5>
-                        <p>{{ earring.product_description|truncatewords:15 }}</p>
-                        <p><strong>Price:</strong> Rs:{{ earring.price }}</p>
-                        <a href="#" class="button">View Details</a>
-                    </div>
-                {% endfor %}
-            {% else %}
-                <p class="text-center">No earrings available at the moment.</p>
-            {% endif %}
-        </div>
-    </div>
-
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
-    <!-- JavaScript Filter Function -->
-    <script>
-        function filterProducts() {
-            const selectedStyles = Array.from(document.querySelectorAll('input[name="earring_style"]:checked')).map(cb => cb.value.toLowerCase().replace(/\s+/g, ''));
-            const selectedShops = Array.from(document.querySelectorAll('input[name="shop_for"]:checked')).map(cb => cb.value.toLowerCase());
-            const selectedGemstones = Array.from(document.querySelectorAll('input[name="gemstone"]:checked')).map(cb => cb.value.toLowerCase());
-            const selectedMaterials = Array.from(document.querySelectorAll('input[name="metal_type"]:checked')).map(cb => cb.value.toLowerCase());
-
-            const productCards = document.querySelectorAll('.product');
-
-            productCards.forEach(card => {
-                const cardStyle = card.getAttribute('data-earringstyle').toLowerCase().replace(/\s+/g, '');
-                const cardShopFor = card.getAttribute('data-shopfor').toLowerCase().replace(/\s+/g, '');
-                const cardGemstone = card.getAttribute('data-gemstone').toLowerCase().replace(/\s+/g, '');
-                const cardMaterial = card.getAttribute('data-material').toLowerCase().replace(/\s+/g, '');
-
-                const styleMatch = selectedStyles.length === 0 || selectedStyles.includes(cardStyle);
-                const shopMatch = selectedShops.length === 0 || selectedShops.includes(cardShopFor);
-                const gemstoneMatch = selectedGemstones.length === 0 || selectedGemstones.includes(cardGemstone);
-                const materialMatch = selectedMaterials.length === 0 || selectedMaterials.includes(cardMaterial);
-
-                if (styleMatch && shopMatch && gemstoneMatch && materialMatch) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-        }
-
-        function clearFilters() {
-            document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-            filterProducts(); // Reapply filter logic after clearing
-        }
-    </script>
-</body>
-</html>
+</div>
 
 
-
+{% endblock content %}
