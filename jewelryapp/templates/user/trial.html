@@ -1,10 +1,16 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bracelets Collection</title>
+
+    <title>
+        {% block title %}
+        {% endblock title %}
+    </title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="{% static 'fontawesome/css/all.min.css' %}" rel="stylesheet">
     <script type="text/javascript">
         // Function to disable the back button
         function preventBack() {
@@ -39,13 +45,16 @@
 
     /* Breadcrumb styling */
     .breadcrumb-container {
-        margin-left: 280px; /* Align with the main content */
-        padding: 10px 20px;
-        background-color: #f8f9fa;
-        border-radius: 5px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        margin-top: 20px; /* Add spacing from the navbar */
-    }
+    margin-left: 280px; /* Align with the main content */
+    padding: 5px 0; /* Reduce padding to make it more minimal */
+    background-color: transparent; /* Remove the background color */
+    border: none; /* Remove any border */
+    box-shadow: none; /* Remove the shadow effect */
+    margin-top: 20px; /* Keep the spacing from the navbar */
+    font-size: 14px; /* Adjust the font size if necessary */
+    color: #6c757d; /* Set a subtle text color */
+}
+
 
     h2 {
         margin-left: 280px;
@@ -106,6 +115,34 @@
     .navbar {
         transition: top 0.3s;
     }
+    /* Center and style the icons within the navigation */
+    .nav-icon {
+        display: flex;             /* Aligns items in a row */
+        align-items: center;       /* Vertically centers the icons */
+        justify-content: center;   /* Centers the icon in the space */
+        font-size: 1.5em;          /* Adjust the size of the icons */
+        margin: 0 15px;            /* Space between the navigation items */
+        padding: 8px;              /* Add some padding around the icons */
+        transition: color 0.3s, transform 0.2s; /* Smooth hover effects */
+    }
+
+    /* Change the icon color when hovered */
+    .nav-icon:hover {
+        color: #f8b400;            /* Highlight color on hover (e.g., yellow or gold) */
+        transform: scale(1.2);     /* Slightly increase the size on hover */
+    }
+
+    /* Add a subtle background effect on hover */
+    .nav-icon:hover {
+        background-color: rgba(255, 255, 255, 0.1); /* Light background on hover */
+        border-radius: 8px;        /* Rounded corners for a softer look */
+    }
+
+    /* Ensure spacing between the icons */
+    .nav-item + .nav-item {
+        margin-left: 20px;         /* Space between the items */
+    }
+
 </style>
 </head>
 <body>
@@ -119,26 +156,25 @@
         <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
-        <!-- <ul class="navbar-nav ml-auto">
-            <li class="nav-item">
-                <a class="nav-link text-white" href="/">Home</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-white" href="/earring_list">Earrings</a>
-            </li>
-            <li class="nav-item">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item"><a class="nav-link text-white nav-icon" href="{% url 'view_cart' %}"><i class="fas fa-cart-shopping" style="margin-right: 40px;"></i></a></li>
+            <li class="nav-item"><a class="nav-link text-white nav-icon" href=""><i class="fas fa-heart"></i></a></li>
+            <li class="nav-item"><a class="nav-link text-white nav-icon" href="{% url 'logout' %}"><i class="fas fa-sign-out"></i></a></li>
+
+            
+            <!-- <li class="nav-item">
                 <a class="nav-link text-white" href="/products">Products</a>
-            </li>
-            <li class="nav-item">
+            </li> -->
+            <!-- <li class="nav-item">
                 <a class="nav-link text-white" href="/about">About</a>
-            </li>
-            <li class="nav-item">
+            </li> -->
+            <!-- <li class="nav-item">
                 <a class="nav-link text-white" href="/contact">Contact</a>
-            </li>
-            <li class="nav-item">
+            </li> -->
+            <!-- <li class="nav-item">
                 <a class="nav-link text-white" href="/login">Login</a>
-            </li>
-        </ul> -->
+            </li> -->
+        </ul>
     </div>
 </nav>
 

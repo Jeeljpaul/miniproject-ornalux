@@ -734,99 +734,79 @@ def bracelet_detail(request, product_id):
 
     return render(request, 'user/bracelet_details.html', context)
 
-
+#----------------------------------------------------------------------------------------------------------------------------------------------
 
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from .models import Product, Cart, CartItem
-from django.contrib.auth.decorators import login_required
 from .models import Tbl_user
 
 def add_to_cart(request, product_id):
-    product = get_object_or_404(Product, product_id=product_id)
+    if 'login_id' in request.session:
+        product = get_object_or_404(Product, product_id=product_id)
+        user_id = request.session['login_id']
+        print(user_id)
+        if request.method == 'POST':
+            # Check if the user is authenticated
+            # if request.user.is_authenticated:
+                # user = get_object_or_404(Tbl_user, user_id=user_id)
+                # print(user)
+                user_cart, created = Cart.objects.get_or_create(login=user_id)
+                print("kk")
+                # Check if the cart item already exists
+                cart_item, item_created = CartItem.objects.get_or_create(cart=user_cart, product=product)
 
-    if request.method == 'POST':
-        # Check if the user is authenticated
-        if request.user.is_authenticated:
-            user = get_object_or_404(Tbl_user, user_id=request.user.id)
-            user_cart, created = Cart.objects.get_or_create(login=user.login)
+                if not item_created:
+                    # If the item is already in the cart, increase the quantity
+                    cart_item.quantity += 1
+                    cart_item.save()
 
-            # Check if the cart item already exists
-            cart_item, item_created = CartItem.objects.get_or_create(cart=user_cart, product=product)
+                return JsonResponse({'success': True, 'message': f'{product.product_name} added to cart successfully!'})
+            
+            # else:
+            #     # Handle cart for non-authenticated users using session
+            #     cart = request.session.get('cart', {})
 
-            if not item_created:
-                # If the item is already in the cart, increase the quantity
-                cart_item.quantity += 1
-                cart_item.save()
+            #     # Check if the product is already in the cart
+            #     if str(product_id) in cart:
+            #         cart[str(product_id)]['quantity'] += 1
+            #     else:
+            #         cart[str(product_id)] = {
+            #             'product_id': product_id,
+            #             'product_name': product.product_name,
+            #             'quantity': 1,
+            #             'price': str(product.price)  # Convert to string for session compatibility
+            #         }
 
-            return JsonResponse({'success': True, 'message': f'{product.product_name} added to cart successfully!'})
-        
-        else:
-            # Handle cart for non-authenticated users using session
-            cart = request.session.get('cart', {})
+            #     # Save the updated cart in the session
+            #     request.session['cart'] = cart
+            #     return JsonResponse({'success': True, 'message': f'{product.product_name} added to session cart successfully!'})
 
-            # Check if the product is already in the cart
-            if str(product_id) in cart:
-                cart[str(product_id)]['quantity'] += 1
-            else:
-                cart[str(product_id)] = {
-                    'product_id': product_id,
-                    'product_name': product.product_name,
-                    'quantity': 1,
-                    'price': str(product.price)  # Convert to string for session compatibility
-                }
+        return JsonResponse({'success': False, 'message': 'Invalid request.'})
+    else:
+        return redirect('login')
 
-            # Save the updated cart in the session
-            request.session['cart'] = cart
-            return JsonResponse({'success': True, 'message': f'{product.product_name} added to session cart successfully!'})
-
-    return JsonResponse({'success': False, 'message': 'Invalid request.'})
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.http import JsonResponse
 from .models import Cart, CartItem, Product
-from django.contrib.auth.decorators import login_required
 
 def view_cart(request):
-    cart_items = []
-    total_price = 0
+    # Check if the user is logged in
+    if 'login_id' not in request.session:
+        return redirect('login')  # Redirect to login page if the user is not logged in
 
-    if request.user.is_authenticated:
-        # If the user is authenticated, get the cart items from the database
-        try:
-            user_cart = Cart.objects.get(login=request.user.id)
-            cart_items = CartItem.objects.filter(cart=user_cart)
+    user_id = request.session['login_id']
 
-            # Calculate the total price of the cart items
-            total_price = sum(item.product.price * item.quantity for item in cart_items)
+    # Fetch the user's cart using the login_id stored in the session
+    try:
+        user_cart = Cart.objects.get(login=user_id)
+        cart_items = CartItem.objects.filter(cart=user_cart).select_related('product')
+    except Cart.DoesNotExist:
+        # If the cart does not exist, initialize an empty list for cart items
+        cart_items = []
 
-            # Convert CartItem objects to a dictionary format for the template
-            cart_items = [
-                {
-                    'product_name': item.product.product_name,
-                    'price': item.product.price,
-                    'quantity': item.quantity,
-                    'total_price': item.product.price * item.quantity
-                }
-                for item in cart_items
-            ]
-        except Cart.DoesNotExist:
-            cart_items = []
-    else:
-        # If the user is not authenticated, get the cart items from the session
-        cart = request.session.get('cart', {})
-
-        for product_id, item in cart.items():
-            try:
-                product = Product.objects.get(product_id=product_id)
-                item_data = {
-                    'product_name': product.product_name,
-                    'price': product.price,
-                    'quantity': item['quantity'],
-                    'total_price': product.price * item['quantity'],
-                }
-                cart_items.append(item_data)
-                total_price += item_data['total_price']
-            except Product.DoesNotExist:
-                continue
+    # Calculate the total price of all items in the cart
+    total_price = sum(item.product.price * item.quantity for item in cart_items)
 
     context = {
         'cart_items': cart_items,
@@ -835,35 +815,111 @@ def view_cart(request):
 
     return render(request, 'user/view_cart.html', context)
 
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
-from .models import Tbl_user, Product, Wishlist
+
+def update_cart_quantity(request):
+    if request.method == 'POST' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        product_id = request.POST.get('product_id')
+        change = int(request.POST.get('change'))
+
+        try:
+            user_id = request.session['login_id']
+            user_cart = Cart.objects.get(login=user_id)
+            cart_item = CartItem.objects.get(cart=user_cart, product_id=product_id)
+
+            # Update the quantity
+            cart_item.quantity += change
+            if cart_item.quantity <= 0:
+                cart_item.delete()
+            else:
+                cart_item.save()
+
+            # Calculate the updated total price for the cart item and the cart
+            item_total_price = cart_item.product.price * cart_item.quantity
+            total_price = sum(item.product.price * item.quantity for item in CartItem.objects.filter(cart=user_cart))
+
+            return JsonResponse({
+                'new_quantity': cart_item.quantity,
+                'item_total_price': item_total_price,
+                'new_total_price': total_price,
+            })
+
+        except (Cart.DoesNotExist, CartItem.DoesNotExist):
+            return JsonResponse({'error': 'Cart or CartItem not found.'}, status=404)
+
+    return JsonResponse({'error': 'Invalid request.'}, status=400)
+
+
+
+def remove_item_from_cart(request):
+    if request.method == 'POST' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        product_id = request.POST.get('product_id')
+
+        try:
+            user_id = request.session['login_id']
+            user_cart = Cart.objects.get(login=user_id)
+            cart_item = CartItem.objects.get(cart=user_cart, product_id=product_id)
+
+            # Remove the item from the cart
+            cart_item.delete()
+
+            # Recalculate the total price of the cart
+            total_price = sum(item.product.price * item.quantity for item in CartItem.objects.filter(cart=user_cart))
+
+            return JsonResponse({
+                'new_total_price': total_price,
+            })
+
+        except (Cart.DoesNotExist, CartItem.DoesNotExist):
+            return JsonResponse({'error': 'Cart or CartItem not found.'}, status=404)
+
+    return JsonResponse({'error': 'Invalid request.'}, status=400)
+
+
+from django.http import JsonResponse, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, redirect
+from .models import Product, Wishlist, WishlistItem, Tbl_user
 
 def add_to_wishlist(request, product_id):
-    if request.method == 'POST':
-        # Check if the user is authenticated
-        if request.user.is_authenticated:
-            # Retrieve the logged-in user's Tbl_user instance
-            user = get_object_or_404(Tbl_user, login__email=request.user.email)
+    if 'login_id' in request.session:
+        product = get_object_or_404(Product, product_id=product_id)
+        user_id = request.session['login_id']
 
-            # Retrieve the product based on the product_id
-            product = get_object_or_404(Product, product_id=product_id)
+        user_instance = get_object_or_404(Tbl_login, login_id=user_id)
+        
+        if request.method == 'POST':
+            # Get or create a wishlist for the user
+            user_wishlist, created = Wishlist.objects.get_or_create(login=user_instance)
+            # Check if the product is already in the wishlist
+            wishlist_item, item_created = WishlistItem.objects.get_or_create(wishlist=user_wishlist, product=product)
+            if not item_created:
+                return JsonResponse({'success': False, 'message': f'{product.product_name} is already in your wishlist!'})
 
-            # Check if the product is already in the user's wishlist
-            wishlist_item, created = Wishlist.objects.get_or_create(user=user, product=product)
+            return JsonResponse({'success': True, 'message': f'{product.product_name} added to your wishlist successfully!'})
 
-            if created:
-                # If the item is newly added to the wishlist
-                return JsonResponse({'success': True, 'message': 'Product added to wishlist successfully!'})
-            else:
-                # If the item already exists in the wishlist
-                return JsonResponse({'success': False, 'message': 'Product is already in your wishlist.'})
-        else:
-            # If the user is not authenticated, ask them to log in
-            return JsonResponse({'success': False, 'message': 'You need to be logged in to add items to the wishlist.'})
+        return JsonResponse({'success': False, 'message': 'Invalid request.'})
     else:
-        return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+        return redirect('login')
 
+def view_wishlist(request):
+    if 'login_id' in request.session:
+        user_id = request.session['login_id']
+        user_instance = get_object_or_404(Tbl_login, login_id=user_id)
+
+        # Get the user's wishlist
+        user_wishlist = Wishlist.objects.filter(login=user_instance).first()
+        wishlist_items = WishlistItem.objects.filter(wishlist=user_wishlist) if user_wishlist else []
+
+        return render(request, 'user/wishlist.html', {'wishlist_items': wishlist_items})
+    else:
+        return redirect('login')
+
+def remove_from_wishlist(request, item_id):
+    if 'login_id' in request.session:
+        wishlist_item = get_object_or_404(WishlistItem, id=item_id)
+        wishlist_item.delete()
+        return JsonResponse({'success': True, 'message': 'Item removed from your wishlist.'})
+    else:
+        return JsonResponse({'success': False, 'message': 'You need to be logged in to perform this action.'})
 
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------

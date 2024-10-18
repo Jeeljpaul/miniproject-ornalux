@@ -4,6 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Product</title>
+    <script type="text/javascript">
+        // Function to disable the back button
+        function preventBack() {
+            history.pushState(null, null, location.href); // Add a new state to the history
+            window.addEventListener('popstate', function (event) {
+                history.pushState(null, null, location.href); // Keep adding a new state to block the back action
+            });
+        }
+
+        // Call the function to prevent back navigation
+        window.onload = preventBack;
+    </script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -74,6 +86,45 @@
             color: red;
             font-size: 0.875rem;
         }
+        #sidebar-wrapper {
+    min-height: 100vh;
+    margin-left: 0;
+    transition: margin 0.25s ease-out;
+    background-color: #343a40; /* Dark sidebar */
+}
+
+        #sidebar-wrapper .sidebar-heading {
+            padding: 1rem;
+            font-size: 1.5rem;
+            background-color: #212529; /* Darker heading for contrast */
+            color: #fff;
+            text-align: center;
+        }
+
+        .list-group-item {
+            border: none;
+            background-color: transparent;
+            color: #0a0a0a; /* Light text color */
+        }
+
+        .list-group-item:hover, .list-group-item:focus {
+            background-color: #495057; /* Darker hover effect */
+            color: #fff;
+        }
+
+        #page-content-wrapper {
+            width: 100vw;
+            padding: 20px;
+        }
+
+        .navbar {
+            padding-left: 0;
+        }
+
+        .navbar-light {
+            background-color: #e9ecef; /* Light navbar background */
+        }
+
     </style>
     <script>
         function validateForm(event) {
@@ -257,6 +308,79 @@ $.ajax({
     </script>
 </head>
 <body>
+ <!-- Sidebar -->
+ <div class="d-flex" id="wrapper">
+    <div class="bg-light border-right" id="sidebar-wrapper">
+        <div class="sidebar-heading">Ornalux Admin</div>
+        <div class="list-group list-group-flush">
+            <!-- Manage Users -->
+            <div class="dropdown">
+                <a class="list-group-item list-group-item-action bg-light dropdown-toggle" href="#" id="usersDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Manage Users
+                </a>
+                <div class="dropdown-menu" aria-labelledby="usersDropdown">
+                    <a class="dropdown-item" href="/view_registered_users/">View Registered Users</a>
+                </div>
+            </div>
+
+            <!-- Manage Staff -->
+            <div class="dropdown">
+                <a class="list-group-item list-group-item-action bg-light dropdown-toggle" href="#" id="staffDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Manage Staff
+                </a>
+                <div class="dropdown-menu" aria-labelledby="staffDropdown">
+                    <a class="dropdown-item" href="{% url 'view_staff' %}">View Staff</a>
+                    <a class="dropdown-item" href="{% url 'add_staff' %}">Add Staff</a>
+                </div>
+            </div>
+
+            <!-- Manage Products -->
+            <div class="dropdown">
+                <a class="list-group-item list-group-item-action bg-light dropdown-toggle" href="#" id="productsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Manage Products
+                </a>
+                <div class="dropdown-menu" aria-labelledby="productsDropdown">
+                    <a class="dropdown-item" href="product_list/">View Products</a>
+                    <a class="dropdown-item" href="{% url 'add_pro' %}">Add Product</a>
+                    <a class="dropdown-item" href="{% url 'add_category' %}">Add Category</a>
+                    <a class="dropdown-item" href="{% url 'add_metaltype' %}">Add Metal Type</a>
+                    <a class="dropdown-item" href="{% url 'add_stonetype' %}">Add Stone Type</a>
+                </div>
+            </div>
+
+            <!-- View Order Details -->
+            <a href="#" class="list-group-item list-group-item-action bg-light">View Orders</a>
+
+            <!-- View Payment Details -->
+            <a href="#" class="list-group-item list-group-item-action bg-light">View Payments</a>
+
+            <!-- View Return Details -->
+            <a href="#" class="list-group-item list-group-item-action bg-light">View Return Details</a>
+
+            <!-- View Booking Schedule -->
+            <a href="#" class="list-group-item list-group-item-action bg-light">View Booking Schedule</a>
+
+            <!-- Manage Feedback and Reviews -->
+            <a href="#" class="list-group-item list-group-item-action bg-light">Manage Feedback & Reviews</a>
+
+        </div>
+    </div>
+
+    <!-- Page Content -->
+    <div id="page-content-wrapper">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav ml-auto mt-2 mt-lg-0">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/adminhome/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
     <div class="container mt-5">
         <h2>Add New Product</h2>
         <div id="error-messages"></div>

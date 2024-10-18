@@ -111,7 +111,7 @@
             var productId = $(this).data('product-id');
             
             $.ajax({
-                url: '/add-to-cart/' + productId + '/',
+                url: '/add_to_cart/' + productId + '/',
                 type: 'POST',
                 data: {
                     csrfmiddlewaretoken: '{{ csrf_token }}'

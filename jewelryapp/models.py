@@ -153,12 +153,20 @@ class CartItem(models.Model):
 
 
 class Wishlist(models.Model):
-    wishlist_id =  models.AutoField(primary_key=True)
-    user = models.ForeignKey(Tbl_user, on_delete=models.CASCADE, related_name='wishlist')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    added_on = models.DateTimeField(auto_now_add=True)
+    wishlist_id = models.AutoField(primary_key=True)
+    login = models.ForeignKey(Tbl_login, on_delete=models.CASCADE, related_name='wishlists')
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'{self.user.name} - {self.product.product_name}'
+        return f"Wishlist of User ID: {self.login.user_id}"
+
+class WishlistItem(models.Model):
+    wishlist = models.ForeignKey(Wishlist, on_delete=models.CASCADE, related_name='items')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.product.product_name} in Wishlist ID: {self.wishlist.id}"
+
 
 

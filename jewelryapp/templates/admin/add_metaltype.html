@@ -1,68 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Metal Type</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            max-width: 400px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
-        }
-        input[type="text"] {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            transition: border-color 0.3s;
-        }
-        input[type="text"]:focus {
-            border-color: #007BFF;
-            outline: none;
-        }
-        button {
-            width: 100%;
-            padding: 10px;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-    </style>
-</head>
-<body>
+{% include 'admin/navbar.html' %}
+{% block content %}
     <div class="container">
-        <h1>Add Metal Type</h1>
+        <h2>Add Metal Type</h2>
         <form method="POST">
             {% csrf_token %}
-            <label for="name">Metal Type Name:</label>
-            <input type="text" id="name" name="name" required oninput="validateMetalTypeName(this)">
-            <button type="submit">Add Metal Type</button>
+            <div class="form-group">
+                <label for="name">Metal Type Name:</label>
+                <input type="text" id="name" name="name" required oninput="validateMetalTypeName(this)">
+            </div>
+            <div class="form-group">
+                <button type="submit">Add Metal Type</button>
+            </div>        
         </form>
     </div>
 
@@ -73,5 +21,4 @@
             input.value = input.value.replace(/[^a-zA-Z\s]/g, '');
         }
     </script>
-</body>
-</html>
+{% endblock content %}

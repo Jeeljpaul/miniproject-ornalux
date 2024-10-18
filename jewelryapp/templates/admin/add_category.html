@@ -1,94 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Category</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            margin: 0;
-            padding: 20px;
-        }
+{% include 'admin/navbar.html' %}
 
-        .container {
-            max-width: 600px;
-            background: white;
-            padding: 20px;
-            margin: 0 auto;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-        }
-
-        h2 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-
-        .form-group input[type="text"],
-        .form-group textarea,
-        .form-group select {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        .form-group button {
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .form-group button:hover {
-            background-color: #0056b3;
-        }
-
-        .attribute-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .attribute-group input[type="text"] {
-            flex: 2;
-        }
-
-        .attribute-group select {
-            flex: 1;
-        }
-
-        .add-attribute-btn {
-            padding: 5px 10px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .add-attribute-btn:hover {
-            background-color: #218838;
-        }
-    </style>
-</head>
-<body>
-
+{% block content %}
     <div class="container">
         <h2>Add New Category</h2>
         <form method="POST" action="">
@@ -119,7 +31,6 @@
             </div>
         </form>
     </div>
-
     <script>
         function addAttributeField() {
             const container = document.getElementById('attribute-container');
@@ -144,5 +55,7 @@
         }
     </script>
 
-</body>
-</html>
+{% endblock content %}
+
+
+    
