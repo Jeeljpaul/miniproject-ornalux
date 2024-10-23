@@ -1,0 +1,51 @@
+
+{% load static %}
+{% include 'user/trial.html' %}
+
+{% block title %}
+  Book Schedule
+{% endblock title %}
+{% block content %}
+
+<div class="form-container">
+    <h3>Book Schedule for {{ product.product_name }}</h3>
+    <form id="schedule-form" method="POST" action="{% url 'submit_schedule' product.product_id %}">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="phone">Phone Number:</label>
+            <input type="text" id="phone" name="phone" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="address">Address:</label>
+            <textarea id="address" name="address" class="form-control" required></textarea>
+        </div>
+        <div class="form-group">
+            <label for="schedule-date">Pick a Date:</label>
+            <input type="text" id="schedule-date" name="date" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+</div>
+
+<script>
+    $(document).ready(function () {
+        // Initialize the flatpickr date picker
+        $("#schedule-date").flatpickr({
+            enableTime: false,
+            minDate: "today",
+            dateFormat: "Y-m-d",
+            disable: [
+                {% for booked_date in booked_dates %}
+                    "{{ booked_date }}",
+                {% endfor %}
+            ]
+        });
+    });
+</script>
+
+{% endblock content %}
+

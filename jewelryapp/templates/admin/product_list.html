@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product List</title>
+    <title>Update Product</title>
     <script type="text/javascript">
         // Function to disable the back button
         function preventBack() {
@@ -16,236 +16,232 @@
         // Call the function to prevent back navigation
         window.onload = preventBack;
     </script>
-    
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
+        /* Add your styles here */
         body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            margin: 0;
+            background-color: #e9ecef;
+            font-family: 'Poppins', sans-serif;
         }
-
-        /* Sidebar Styling */
-        .filters {
-            width: 250px;
-            background-color: #f4f4f4;
-            padding: 20px;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-            height: 100vh;
-            position: fixed;
-            overflow-y: auto;
+        .container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            max-width: 700px;
+            margin: 60px auto;
         }
-
-        h1 {
-            margin-left: 300px;
-        }
-
-        /* Main content section */
-        .product-list {
-            margin-left: 280px;
-            padding: 20px;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: flex-start;
-        }
-
-        /* Product card styling */
-        .product {
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            padding: 10px;
-            margin: 10px;
-            width: 200px;
+        h2 {
             text-align: center;
-            box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
-            transition: transform 0.2s ease;
+            margin-bottom: 30px;
+        }
+        
+        #sidebar-wrapper .sidebar-heading {
+            padding: 1rem;
+            font-size: 1.5rem;
+            background-color: #212529; /* Darker heading for contrast */
+            color: #fff;
+            text-align: center;
         }
 
-        .product:hover {
-            transform: scale(1.05);
+
+        #page-content-wrapper {
+            width: 100vw;
+            padding: 20px;
         }
 
-        .product img {
-            max-width: 100%;
-            height: auto;
+        .navbar {
+            padding-left: 0;
         }
 
-        /* Filter options styling */
-        .filter-category,
-        .filter-options {
-            margin-bottom: 20px;
+        .navbar-light {
+            background-color: #e9ecef; /* Light navbar background */
         }
 
-        label {
-            font-weight: bold;
-        }
+         /* Product List Styling */
+    .product-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        padding: 20px;
+        margin-top: 20px;
+    }
 
-        input[type="checkbox"] {
-            margin-right: 10px;
-        }
+    .product {
+        background-color: #ffffff;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        padding: 15px;
+        text-align: center;
+        transition: transform 0.3s;
+    }
 
-        input[type="range"] {
-            width: 100%;
-        }
+    .product:hover {
+        transform: translateY(-5px);
+    }
 
-        select {
-            padding: 5px;
-            width: 100%;
-            margin-bottom: 15px;
-        }
+    .product img {
+        max-width: 100%;
+        border-radius: 8px;
+        margin-bottom: 15px;
+    }
 
-        /* Button styling */
-        .button {
-            display: inline-block;
-            padding: 8px 12px;
-            margin: 5px;
-            font-size: 14px;
-            font-weight: bold;
-            color: white;
-            background-color: #28a745;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
+    .product h2 {
+        font-size: 1.2rem;
+        color: #333;
+        margin: 10px 0;
+    }
 
-        .button:hover {
-            background-color: #218838;
-        }
+    .product p {
+        color: #666;
+        font-size: 0.95rem;
+        margin: 8px 0;
+    }
 
-        .button.disable-button {
-            background-color: #dc3545;
-        }
+    .product .button-group {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 15px;
+    }
 
-        .button.disable-button:hover {
-            background-color: #c82333;
-        }
+    .product .button {
+        background-color: #007bff;
+        color: white;
+        padding: 8px 12px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.2s;
+        width: 48%;
+    }
 
-        .button-group {
-            display: flex;
-            justify-content: space-between;
-            flex-direction: row;
-            gap: 10px;
-        }
+    .product .button:hover {
+        background-color: #0056b3;
+        transform: translateY(-2px);
+    }
+
+    /* Product Activation/Deactivation Button */
+    .product .disable-button {
+        background-color: #6c757d;
+    }
+
+    .product .disable-button.btn-danger {
+        background-color: #dc3545;
+    }
+
+    .product .disable-button.btn-danger:hover {
+        background-color: #c82333;
+    }
+
+    .product .disable-button.btn-success {
+        background-color: #28a745;
+    }
+
+    .product .disable-button.btn-success:hover {
+        background-color: #218838;
+    }
+
+    /* No products message */
+    .product-list p {
+        color: #999;
+        text-align: center;
+        font-size: 1rem;
+    }
+
+
+
     </style>
-
 </head>
 <body>
 
-    <!-- Sidebar Filter Section -->
-    <div class="filters">
-        <!-- Category Filter -->
-        <div class="filter-category">
-            <label>Filter by Category:</label><br>
-            <input type="checkbox" id="earring" value="earring"> Earring<br>
-            <input type="checkbox" id="necklace" value="necklace"> Necklace<br>
-            <input type="checkbox" id="bracelet" value="bracelet"> Bracelet<br>
-            <input type="checkbox" id="bangles" value="bangles"> Bangles<br>
-            <input type="checkbox" id="chains" value="chains"> Chains<br>
-            <input type="checkbox" id="stud" value="stud"> Stud<br>
-            <input type="checkbox" id="anklet" value="anklet"> Anklet<br>
-            <input type="checkbox" id="nosering" value="nosering"> Nosering<br>
-        </div>
-
-        <!-- Price Range Filter -->
-        <div class="filter-options">
-            <label for="priceRange">Price Range: $<span id="priceRangeValue">0-5000</span></label>
-            <input type="range" id="priceRange" min="0" max="5000" step="100" value="5000">
-        </div>
-
-        <!-- Weight Range Filter -->
-        <div class="filter-options">
-            <label for="weightRange">Weight Range (g): <span id="weightRangeValue">0-100</span></label>
-            <input type="range" id="weightRange" min="0" max="100" step="1" value="100">
-        </div>
-
-        <!-- Metal Type Filter -->
-        <div class="filter-options">
-            <label>Metal Type:</label><br>
-            <input type="checkbox" id="gold" value="gold"> Gold<br>
-            <input type="checkbox" id="silver" value="silver"> Silver<br>
-            <input type="checkbox" id="platinum" value="platinum"> Platinum<br>
-        </div>
-
-        <!-- Gemstone Type Filter -->
-        <div class="filter-options">
-            <label>Gemstone Type:</label><br>
-            <input type="checkbox" id="diamond" value="diamond"> Diamond<br>
-            <input type="checkbox" id="ruby" value="ruby"> Ruby<br>
-            <input type="checkbox" id="emerald" value="emerald"> Emerald<br>
-            <input type="checkbox" id="sapphire" value="sapphire"> Sapphire<br>
-        </div>
-    </div>
-
-    <!-- Product List -->
-    <div class="product-list">
-        {% for product in products %}
-            <div class="product" data-category="{{ product.category }}" data-price="{{ product.price }}" data-weight="{{ product.weight }}" data-metal_type="{{ product.metal_type }}" data-gemstone_type="{{ product.gemstone_type }}">
-                <img src="{{ product.images.url }}" alt="{{ product.product_name }}">
-                <h2>{{ product.product_name }}</h2>
-                <p>Price: ${{ product.price }}</p>
-                <p>Weight: {{ product.weight }}g</p>
-                <div class="button-group">
-                    <button class="button" onclick="window.location.href='{% url 'update_p' product.product_id %}'">Update</button>
-                    <button class="button disable-button" onclick="window.location.href='{% url 'toggle_product_status' product.product_id %}'">Disable</button>
-                </div>
+<!-- Sidebar -->
+<div class="d-flex" id="wrapper">
+    <div class="bg-light border-right" id="sidebar-wrapper">
+        <div class="sidebar-heading">Ornalux Admin</div>
+        <form method="get" action="{% url 'product_list' %}">
+            <div>
+                <h3>Filter by Category:</h3><br>
+                {% for category in categories %}
+                    <label>
+                        <input type="checkbox" name="category" value="{{ category }}" 
+                        {% if category in selected_category %}checked{% endif %}>
+                        {{ category }}
+                    </label><br>
+                {% endfor %}
             </div>
-        {% empty %}
-            <p>No products available.</p>
-        {% endfor %}
+            <div>
+                <h3>Gemstone:</h3>
+                {% for gem in gemstones %}
+                    <label>
+                        <input type="checkbox" name="stone_type" value="{{ gem }}"
+                            {% if gem in selected_gemstones %}checked{% endif %}>
+                        {{ gem }}
+                    </label><br>
+                {% endfor %}
+            </div>
+            <div>
+                <h3>Material Type:</h3>
+                {% for mat in materials %}
+                    <label>
+                        <input type="checkbox" name="metal_type" value="{{ mat }}"
+                            {% if mat in selected_materials %}checked{% endif %}>
+                        {{ mat }}
+                    </label><br>
+                {% endfor %}
+            </div>
+            <button type="submit">Filter</button>
+            <button type="button" class="button" onclick="window.location.href='/product_list/'">Clear Filters</button>
+        </form>
     </div>
 
-    <script>
-        // Select filter elements
-        const priceRange = document.getElementById('priceRange');
-        const priceRangeValue = document.getElementById('priceRangeValue');
-        const weightRange = document.getElementById('weightRange');
-        const weightRangeValue = document.getElementById('weightRangeValue');
-        const products = document.querySelectorAll('.product');
 
-        // Update price range value dynamically
-        priceRange.addEventListener('input', function() {
-            priceRangeValue.textContent = `0 - ${priceRange.value}`;
-            filterProducts();
-        });
 
-        // Update weight range value dynamically
-        weightRange.addEventListener('input', function() {
-            weightRangeValue.textContent = `0 - ${weightRange.value}`;
-            filterProducts();
-        });
 
-        // Filter products based on selected filters
-        function filterProducts() {
-            const selectedCategories = Array.from(document.querySelectorAll('.filter-category input:checked')).map(cb => cb.value);
-            const selectedMetals = Array.from(document.querySelectorAll('.filter-options input[type="checkbox"]:checked')).map(cb => cb.value);
-            const selectedPrice = parseFloat(priceRange.value);
-            const selectedWeight = parseFloat(weightRange.value);
+    <!-- Page Content -->
+    <div id="page-content-wrapper">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav ml-auto mt-2 mt-lg-0">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/adminhome/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
 
-            products.forEach(product => {
-                const productCategory = product.getAttribute('data-category');
-                const productPrice = parseFloat(product.getAttribute('data-price'));
-                const productWeight = parseFloat(product.getAttribute('data-weight'));
-                const productMetalType = product.getAttribute('data-metal_type');
-                const productGemstoneType = product.getAttribute('data-gemstone_type');
 
-                const categoryMatch = selectedCategories.length === 0 || selectedCategories.includes(productCategory);
-                const priceMatch = productPrice <= selectedPrice;
-                const weightMatch = productWeight <= selectedWeight;
-                const metalTypeMatch = selectedMetals.length === 0 || selectedMetals.includes(productMetalType);
+        <!-- Product List -->
+        <div class="product-list">
+            {% for product in products %}
+                <div class="product" data-category="{{ product.category }}" data-price="{{ product.price }}" data-weight="{{ product.weight }}" data-metal_type="{{ product.metal_type }}" data-gemstone_type="{{ product.gemstone_type }}">
+                    <img src="{{ product.images.url }}" alt="{{ product.product_name }}">
+                    <h2>{{ product.product_name }}</h2>
+                    <p>Price: ${{ product.price }}</p>
+                    <p>Weight: {{ product.weight }}g</p>
+                    <div class="button-group">
+                        <button class="button" onclick="window.location.href='{% url 'update_pro' product.product_id %}'">Update</button>
+                        <form action="{% url 'toggle_product_status' product.product_id %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="{% if product.is_active %}deactivate{% else %}activate{% endif %}">
+                            <button type="submit" class="button disable-button {% if product.is_active %}btn-danger{% else %}btn-success{% endif %}">
+                                {% if product.is_active %}Deactivate{% else %}Activate{% endif %}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            {% empty %}
+                <p>No products available.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
 
-                if (categoryMatch && priceMatch && weightMatch && metalTypeMatch) {
-                    product.style.display = 'inline-block';
-                } else {
-                    product.style.display = 'none';
-                }
-            });
-        }
-
-        // Attach event listeners for checkboxes
-        document.querySelectorAll('.filter-category input, .filter-options input[type="checkbox"]').forEach(checkbox => {
-            checkbox.addEventListener('change', filterProducts);
-        });
-    </script>
-    
 </body>
 </html>

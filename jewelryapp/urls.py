@@ -17,22 +17,20 @@ urlpatterns = [
     path('social-auth/', include('social_django.urls', namespace='social')),
 
     # path('adminhome/add_p/', views.add_p, name='add_p'),
-    path('update_p/<int:product_id>/', views.update_p, name='update_p'),  # New URL pattern
+    path('adminhome/update_pro/<int:product_id>/', views.update_pro, name='update_pro'),  # New URL pattern
    
     # path('adminhome/add_product/', views.add_product, name='add_product'),
     path('adminhome/product_list/', views.product_list, name='product_list'),  # Make sure this line exists   
     path('adminhome/view_products/',views.view_products, name='view_products'),
     path('product_details/<int:product_id>/', views.product_details, name='product_details'),
     path('product/<int:product_id>/toggle_status/', views.toggle_product_status, name='toggle_product_status'),
-    path('product/<int:product_id>/update/', views.update_product, name='update_product'),
+    # path('product/<int:product_id>/update/', views.update_product, name='update_product'),
 
     path('adminhome/add-category/', views.add_category, name='add_category'),
     path('get_category_attributes/<int:category_id>/', views.get_category_attributes, name='get_category_attributes'),
     path('adminhome/add_metaltype/', views.add_metaltype, name='add_metaltype'),
     path('adminhome/add_stonetype/', views.add_stonetype, name='add_stonetype'),
     path('adminhome/add_pro/', views.add_pro, name='add_pro'),
-
-
 
 
     path('view_registered_users/', views.view_registered_users, name='view_registered_users'),
@@ -51,14 +49,17 @@ urlpatterns = [
     path('ring_detail/<int:product_id>/', views.ring_detail, name='ring_detail'),
     path('earring/<int:product_id>/', views.earring_detail, name='earring_detail'),
     path('bracelet_detail/<int:product_id>/', views.bracelet_detail, name='bracelet_detail'),
+    path('allproducts',views.all_products,name='allproducts'),
+    path('detail/<int:product_id>/', views.detail, name='detail'),
+    path('submit_schedule/<int:product_id>/', views.submit_schedule, name='submit_schedule'),
+
+
 
 
     path('add_to_cart/<int:product_id>/', views.add_to_cart, name='add_to_cart'),
     path('view_cart/', views.view_cart, name='view_cart'),
     path('update_cart_quantity/', views.update_cart_quantity, name='update_cart_quantity'),
     path('remove_item_from_cart/', views.remove_item_from_cart, name='remove_item_from_cart'),
-
-
     path('add_to_wishlist/<int:product_id>/', views.add_to_wishlist, name='add_to_wishlist'),
     path('wishlist/', views.view_wishlist, name='view_wishlist'),
     path('remove_from_wishlist/<int:item_id>/', views.remove_from_wishlist, name='remove_from_wishlist'),

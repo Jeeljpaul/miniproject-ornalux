@@ -300,48 +300,65 @@ def product_details(request, product_id):
     context = {'product': product}
     return render(request, 'admin/product_details.html', context)
 
+
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse
+from .models import Product  # Adjust the import based on your app structure
+
 def toggle_product_status(request, product_id):
-    # Get the product object using product_id, or return 404 if not found
-    product = get_object_or_404(Product, product_id=product_id)
-    
-    # Toggle the status field (assuming it's a BooleanField)
-    product.status = not product.status  # If status is True, set it to False, and vice versa
-    
-    # Save the updated product object to the database
-    product.save()
-    
-    # Redirect back to the product details page after toggling
-    return redirect('product_details', product_id=product_id)
-
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib import messages
-from .models import Product
-from .forms import ProductForm  # Assuming you have a form class for the product
-
-def update_product(request, product_id):
-    product = get_object_or_404(Product, product_id=product_id)
-
-    if request.method == "POST":
-        form = ProductForm(request.POST, instance=product)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Product updated successfully!')
-            return redirect('product_list')  # Redirect to product list or detail page
-        else:
-            messages.error(request, 'Please correct the errors below.')
-    else:
-        form = ProductForm(instance=product)
-
-    return render(request, 'admin/update_product.html', {'form': form, 'product': product})
-
-
-# Delete a product
-def delete_product(request, product_id):
-    product = get_object_or_404(Product, product_id=product_id)
     if request.method == 'POST':
-        product.delete()
-        return redirect('view_products')
-    return render(request, 'admin/view_products.html')
+        # Get the product object using product_id, or return 404 if not found
+        product = get_object_or_404(Product, product_id=product_id)
+        
+        # Get the action from the request to determine if we should activate or deactivate
+        action = request.POST.get('action')
+
+        if action == 'deactivate':
+            product.is_active = False
+        elif action == 'activate':
+            product.is_active = True
+
+        # Save the updated product object to the database
+        product.save()
+
+    # Redirect to the product list or any appropriate view after toggling
+    return redirect(reverse('product_list'))
+
+
+#//////////////////////////////////////////////////////////////////////////////////////////////////////////////////#
+
+# from django.shortcuts import render, get_object_or_404, redirect
+# from django.contrib import messages
+# from .models import Product
+# from .forms import ProductForm 
+
+# def update_product(request, product_id):
+#     product = get_object_or_404(Product, product_id=product_id)
+
+#     if request.method == "POST":
+#         form = ProductForm(request.POST, instance=product)
+#         if form.is_valid():
+#             form.save()
+#             messages.success(request, 'Product updated successfully!')
+#             return redirect('product_list') 
+#         else:
+#             messages.error(request, 'Please correct the errors below.')
+#     else:
+#         form = ProductForm(instance=product)
+
+#     return render(request, 'admin/update_product.html', {'form': form, 'product': product})
+
+
+
+
+# def delete_product(request, product_id):
+#     product = get_object_or_404(Product, product_id=product_id)
+#     if request.method == 'POST':
+#         product.delete()
+#         return redirect('view_products')
+#     return render(request, 'admin/view_products.html')
+
+
 
 #update a product
 # def update_product(request, product_id):
@@ -357,7 +374,9 @@ def delete_product(request, product_id):
 
 #     return render(request, 'update_product.html', {'form': form, 'product': product})
 
-     #--------------------------------------------------------------------------------------#
+
+
+#//////////////////////////////////////////////////////////////////////////////////////////////////////////////#
 def view_registered_users(request):
     users = Tbl_user.objects.all()  # Fetch all users
     return render(request, 'admin/view_registered_users.html', {'users': users})
@@ -493,27 +512,27 @@ def product_list(request):
 
 
 
-from django.shortcuts import get_object_or_404
+# from django.shortcuts import get_object_or_404
 
-def update_p(request, product_id):
-    product = get_object_or_404(Product, pk=product_id)
+# def update_p(request, product_id):
+#     product = get_object_or_404(Product, pk=product_id)
     
-    if request.method == "POST":
-        form = ProductForm(request.POST, request.FILES, instance=product)
-        if form.is_valid():
-            form.save()
-            return redirect('product_list')  # Make sure 'product_list' is defined in your URLs
-    else:
-        form = ProductForm(instance=product)
+#     if request.method == "POST":
+#         form = ProductForm(request.POST, request.FILES, instance=product)
+#         if form.is_valid():
+#             form.save()
+#             return redirect('product_list')  
+#     else:
+#         form = ProductForm(instance=product)
 
-    return render(request, 'admin/update_p.html', {'form': form, 'product': product})
+#     return render(request, 'admin/update_p.html', {'form': form, 'product': product})
 
 
 # -----------------------------------------------------------------------------------------------------
 
 #userpage
 
-def product(request):
+def product(request): 
     return render(request, 'user/product.html')
 
 
@@ -1001,6 +1020,7 @@ def add_pro(request):
         delivery_options = request.POST.getlist('delivery_options[]')
         home_delivery = 'Home Delivery' in delivery_options
         store_pickup = 'Store Pickup' in delivery_options
+        try_at_home = 'Try at home' in delivery_options
         
         # Handling bestselling checkbox
         bestseller = request.POST.get('bestselling', 'off') == 'Yes'  # Checkbox for bestselling item
@@ -1054,6 +1074,7 @@ def add_pro(request):
                 stonetype=stonetype,
                 home_delivery=home_delivery,
                 store_pickup=store_pickup,
+                try_at_home=try_at_home,
                 bestselling=bestseller
             )
             product.save()
@@ -1109,6 +1130,121 @@ def add_pro(request):
     return render(request, 'admin/add_p.html', context)
 
 
+from django.shortcuts import get_object_or_404, redirect, render
+from django.contrib import messages
+from .models import Product, Category, Metaltype, Stonetype, CategoryAttribute, ProductAttribute
+
+def update_pro(request, product_id):
+    product = get_object_or_404(Product, product_id=product_id)
+
+    if request.method == 'POST':
+        product_name = request.POST.get('product_name')
+        category_id = request.POST.get('id_category')
+        product_description = request.POST.get('product_description')
+        price = request.POST.get('price')
+        stock_quantity = request.POST.get('stock_quantity')
+        weight = request.POST.get('weight')
+        metaltype_id = request.POST.get('metaltype', None)
+        stonetype_id = request.POST.get('stonetype', None)
+        gender = request.POST.get('gender', 'Unisex')
+        image = request.FILES.get('image', product.images)  # Keep existing image if not changed
+
+
+        # Handling delivery options (checkboxes)
+        delivery_options = request.POST.getlist('delivery_options[]')
+        home_delivery = 'Home Delivery' in delivery_options
+        store_pickup = 'Store Pickup' in delivery_options
+        try_at_home = 'Try at home' in delivery_options
+
+        # Handling bestselling checkbox
+        bestseller = request.POST.get('bestselling', 'off') == 'Yes'
+
+        # Validate the inputs
+        try:
+            price = float(price)
+            stock_quantity = int(stock_quantity)
+            weight = float(weight)
+        except ValueError:
+            messages.error(request, "Invalid input values.")
+            return redirect('update_pro', product_id=product.product_id)
+
+        if not (100 <= price <= 10000000):
+            messages.error(request, "Price must be between 100 and 10,000,000.")
+            return redirect('update_pro', product_id=product.product_id)
+
+        if not (0 <= stock_quantity <= 50):
+            messages.error(request, "Stock quantity must be between 0 and 50.")
+            return redirect('update_pro', product_id=product.product_id)
+
+        if not (1 <= weight <= 100):
+            messages.error(request, "Weight must be between 1 and 100 grams.")
+            return redirect('update_pro', product_id=product.product_id)
+
+        try:
+            category = Category.objects.get(category_id=category_id)
+            metaltype = Metaltype.objects.get(metaltype_id=metaltype_id) if metaltype_id else None
+            stonetype = Stonetype.objects.get(stonetype_id=stonetype_id) if stonetype_id else None
+
+            # Update the product instance with new details
+            product.product_name = product_name
+            product.category = category
+            product.product_description = product_description
+            product.price = price
+            product.stock_quantity = stock_quantity
+            product.weight = weight
+            product.gender = gender
+            product.images = image
+            product.metaltype = metaltype
+            product.stonetype = stonetype
+            product.home_delivery = home_delivery
+            product.store_pickup = store_pickup
+            product.try_at_home = try_at_home
+            product.bestselling = bestseller
+
+            product.save()
+            messages.success(request, "Product updated successfully!")
+
+            # Handle product attributes
+            attributes_data = request.POST.getlist('attributes')
+            for attribute_id in attributes_data:
+                if attribute_id:
+                    try:
+                        category_attribute = CategoryAttribute.objects.get(id=attribute_id)
+                        attribute_name = category_attribute.name
+                        attribute_value = request.POST.get(f'attribute_{attribute_id}', '')
+
+                        # Update or create the product attribute
+                        if attribute_value:
+                            product_attribute, created = ProductAttribute.objects.update_or_create(
+                                product=product,
+                                attribute_name=attribute_name,
+                                defaults={'attribute_value': attribute_value}
+                            )
+                    except CategoryAttribute.DoesNotExist:
+                        messages.error(request, f"Attribute with ID {attribute_id} does not exist.")
+                    except Exception as e:
+                        messages.error(request, f"Error updating attribute: {str(e)}")
+
+            return redirect('product_list')
+
+        except (Category.DoesNotExist, Metaltype.DoesNotExist, Stonetype.DoesNotExist) as e:
+            messages.error(request, f"Error: {str(e)}")
+            return redirect('update_pro', product_id=product.product_id)
+
+    # GET request to render the page with existing product details
+    categories = Category.objects.all()
+    metaltypes = Metaltype.objects.all()
+    stonetypes = Stonetype.objects.all()
+    product_attributes = ProductAttribute.objects.filter(product=product)
+
+    context = {
+        'product': product,
+        'categories': categories,
+        'metaltypes': metaltypes,
+        'stonetypes': stonetypes,
+        'product_attributes': product_attributes,
+    }
+    return render(request, 'admin/update_p.html', context)
 
 
 
@@ -1138,4 +1274,262 @@ def get_category_attributes(request, category_id):
     except Exception as e:
         # Handle other errors
         return JsonResponse({'error': str(e)}, status=500)
+
+
+
+from django.shortcuts import render
+from .models import Product, Category, Metaltype, Stonetype
+
+def product_list(request):
+    # Get all possible filter values from the database
+    products = Product.objects.all()
+    categories = Category.objects.all()
+
+    # Retrieve selected filters from the request
+    selected_categories = request.GET.getlist('category')
+    selected_price = request.GET.get('price')
+    selected_weight = request.GET.get('weight')
+
+    # Apply filtering based on selected categories
+    if selected_categories and any(selected_categories):
+        products = products.filter(category___in=selected_categories)
+    # Apply exact price filtering if specified
+    if selected_price:
+        products = products.filter(price=selected_price)
+
+    # Apply exact weight filtering if specified
+    if selected_weight:
+        products = products.filter(weight=selected_weight)
+
+    context = {
+        'products': products,
+        'categories': categories,
+        'selected_categories': selected_categories,
+        'selected_price': selected_price,
+        'selected_weight': selected_weight,
+    }
+
+    return render(request, 'admin/product_list.html', context)
+
+
+# def all_products(request):
+#     categories = Category.objects.all()
+#     materials = Metaltype.objects.all()
+#     gemstones = Stonetype.objects.all()
+#     ring_sizes = ProductAttribute.objects.filter(attribute_name='Ringsize').values_list('attribute_value', flat=True).distinct()
+#     ring_types = ProductAttribute.objects.filter(attribute_name='Ringtype').values_list('attribute_value', flat=True).distinct()
+#     earring_styles = ProductAttribute.objects.filter(attribute_name='Earring Style').values_list('attribute_value', flat=True).distinct()
+#     shop_for_options = Product.objects.values_list('gender', flat=True).distinct()
+#     bracelet_styles = ProductAttribute.objects.filter(attribute_name='Bracelet Style').values_list('attribute_value', flat=True).distinct()
+
+
+#     selected_ring_sizes = request.GET.getlist('ring_size')
+#     selected_ring_types = request.GET.getlist('ring_type')
+#     selected_earring_styles = request.GET.getlist('earringstyle')
+#     selected_shop_for = request.GET.getlist('shop_for')
+#     selected_styles = request.GET.getlist('bracelet_style')
+#     selected_gemstones = request.GET.getlist('gemstone')
+#     selected_materials = request.GET.getlist('metal_type')
+#     selected_category =  request.GET.getlist('category')
+#     try_at_home_filter = request.GET.get('try_at_home')
+
+#     category_earring = Category.objects.get(name='Earring')
+#     category_ring = Category.objects.get(name='Ring')
+#     category_bracelets = Category.objects.get(name='Bracelets')
+
+#     products = Product.objects.filter(is_active=True)
+#     rings = Product.objects.filter(category=category_ring, is_active=True)
+#     earrings = Product.objects.filter(category=category_earring, is_active=True)
+#     bracelets = Product.objects.filter(category=category_bracelets, is_active=True)
+
+#     if selected_ring_sizes:
+#         rings = rings.filter(attributes__attribute_name='Ringsize', attributes__attribute_value__in=selected_ring_sizes)
+#     if selected_ring_types:
+#         rings = rings.filter(attributes__attribute_name='Ringtype', attributes__attribute_value__in=selected_ring_types)
+#     if selected_earring_styles:
+#         earrings = earrings.filter(attributes__attribute_name='Earring Style', attributes__attribute_value__in=selected_earring_styles)
+#     if selected_styles:
+#         bracelets = bracelets.filter(attributes__attribute_name='Bracelet Style', attributes__attribute_value__in=selected_styles)
+#     if selected_shop_for:
+#         products = products.filter(gender__in=selected_shop_for)
+
+#     if selected_gemstones:
+#         products = products.filter(stonetype__name__in=selected_gemstones)
+#     if selected_materials:
+#         products = products.filter(metaltype__name__in=selected_materials)
+#     if try_at_home_filter:
+#         products = products.filter(try_at_home=True)
+#     if selected_category:
+#         products =  products.filter(category__name__in=selected_category)
+
+#     context = {
+#         'products': products,
+#         'rings': rings,
+#         'earrings': earrings,
+#         'bracelets': bracelets,
+#         'categories':categories,
+#         'earring_styles': earring_styles,
+#         'bracelet_styles': bracelet_styles,
+#         'ring_sizes': ring_sizes,
+#         'ring_types': ring_types,
+#         'shop_for_options': shop_for_options,
+#         'gemstones': gemstones,
+#         'materials': materials,
+#         'selected_ring_sizes': selected_ring_sizes,
+#         'selected_ring_types': selected_ring_types,
+#         'selected_earring_styles': selected_earring_styles,
+#         'selected_styles': selected_styles,
+#         'selected_gemstones': selected_gemstones,
+#         'selected_materials': selected_materials,
+#         'selected_shop_for': selected_shop_for,
+#     }
+
+#     return render(request, 'user/all_products.html', context)
+
+
+from django.shortcuts import render
+from .models import Product, Category, Metaltype, Stonetype
+
+def all_products(request):
+    # Get all the products initially
+    products = Product.objects.filter(is_active=True)
+    
+    # Get the categories and other filter options for display in the template
+    categories = Category.objects.all()
+    metal_types = Metaltype.objects.all()
+    stone_types = Stonetype.objects.all()
+
+    # Get the filter values from the request
+    category_filter = request.GET.getlist('category')
+    try_at_home_filter = request.GET.get('try_at_home')
+    ring_size_filter = request.GET.getlist('ring_size')
+    ring_type_filter = request.GET.getlist('ring_type')
+    earring_style_filter = request.GET.getlist('earringstyle')
+    bracelet_style_filter = request.GET.getlist('bracelet_style')
+    gender_filter = request.GET.getlist('shop_for')
+    gemstone_filter = request.GET.getlist('stone_type')
+    material_filter = request.GET.getlist('metal_type')
+
+    # Apply category filtering if selected
+    if category_filter:
+        products = products.filter(category__name__in=category_filter)
+    
+    # Apply Try at Home filter
+    if try_at_home_filter == 'true':
+        products = products.filter(try_at_home=True)
+
+    # Apply ring size filter if selected
+    if ring_size_filter:
+        products = products.filter(attributes__attribute_name='Ring Size', attributes__attribute_value__in=ring_size_filter)
+
+    # Apply ring type filter if selected
+    if ring_type_filter:
+        products = products.filter(attributes__attribute_name='Ring Type', attributes__attribute_value__in=ring_type_filter)
+
+    # Apply earring style filter if selected
+    if earring_style_filter:
+        products = products.filter(attributes__attribute_name='Earring Style', attributes__attribute_value__in=earring_style_filter)
+
+    # Apply bracelet style filter if selected
+    if bracelet_style_filter:
+        products = products.filter(attributes__attribute_name='Bracelet Style', attributes__attribute_value__in=bracelet_style_filter)
+
+    # Apply gender filter if selected
+    if gender_filter:
+        products = products.filter(gender__in=gender_filter)
+
+    # Apply gemstone filter if selected
+    if gemstone_filter:
+        products = products.filter(stonetype__name__in=gemstone_filter)
+
+    # Apply material filter if selected
+    if material_filter:
+        products = products.filter(metaltype__name__in=material_filter)
+
+    # Prepare the selected filters to pass back to the template
+    context = {
+        'categories': categories,
+        'metal_types': metal_types,
+        'stone_types': stone_types,
+        'rings': products.filter(category__name='Ring'),
+        'earrings': products.filter(category__name='Earring'),
+        'bracelets': products.filter(category__name='Bracelet'),
+        'selected_category': category_filter,
+        'try_at_home_filter': try_at_home_filter,
+        'selected_ring_sizes': ring_size_filter,
+        'selected_ring_types': ring_type_filter,
+        'selected_earring_styles': earring_style_filter,
+        'selected_styles': bracelet_style_filter,
+        'selected_shop_for': gender_filter,
+        'selected_gemstones': gemstone_filter,
+        'selected_materials': material_filter,
+    }
+
+    return render(request, 'user/all_products.html', context)
+
+
+
+from django.shortcuts import render, get_object_or_404
+from .models import Product, ProductAttribute, Metaltype, Stonetype, Category
+
+def detail(request, product_id):
+    # Get the specific product by its ID, along with related Metaltype, Stonetype, and Category
+    product = get_object_or_404(Product.objects.select_related('metaltype', 'stonetype', 'category'), product_id=product_id)
+  
+
+    # Fetch the product's attributes (e.g., ring size, ring type, etc.)
+    product_attributes = ProductAttribute.objects.filter(product=product)
+
+    # Fetch the category attributes for the specific product category (if any)
+    category_attributes = product.category.attributes.all() if product.category else []
+
+    context = {
+        'product': product,
+        'product_attributes': product_attributes,
+        'category_attributes': category_attributes,
+        'metaltype': product.metaltype,
+        'stonetype': product.stonetype,
+    }
+
+    return render(request, 'user/all_details.html', context)
+
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse
+from .models import Product, Booking
+from django.utils import timezone
+
+# Schedule booking form view
+def schedule_booking(request, product_id):
+    product = get_object_or_404(Product, product_id=product_id)
+    # Retrieve booked dates for the same product
+    booked_dates = Booking.objects.filter(product=product).values_list('date', flat=True)
+    return render(request, 'schedule_booking.html', {'product': product, 'booked_dates': booked_dates})
+
+def submit_schedule(request, product_id):
+    if request.method == 'POST':
+        product = get_object_or_404(Product, product_id=product_id)
+        name = request.POST.get('name')
+        phone = request.POST.get('phone')
+        address = request.POST.get('address')
+        date = request.POST.get('date')
+
+        # Validate the inputs
+        if not name or not phone or not address or not date:
+            return JsonResponse({'error': 'All fields are required'}, status=400)
+        
+        if len(phone) != 10 or not phone.isdigit():
+            return JsonResponse({'error': 'Invalid phone number'}, status=400)
+
+        # Save the booking
+        booking = Booking.objects.create(
+            product=product,
+            name=name,
+            phone=phone,
+            address=address,
+            date=date,
+            status='Pending'  # Set status as pending
+        )
+
+        return redirect('booking_confirmation', booking_id=booking.id)
 

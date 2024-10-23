@@ -89,54 +89,44 @@
 
         .wishlist-button:hover {
             background-color: #e0a800;
-            
         }
 
     /* Breadcrumb styling */
     .breadcrumb-container {
-    margin-left: 70px; /* Align with the main content */
-    padding: 5px 0; /* Reduce padding to make it more minimal */
-    background-color: transparent; /* Remove the background color */
-    border: none; /* Remove any border */
-    box-shadow: none; /* Remove the shadow effect */
-    margin-top: 50px; /* Keep the spacing from the navbar */
-    font-size: 14px; /* Adjust the font size if necessary */
-    color: #6c757d; /* Set a subtle text color */
-}
+        margin-left: 70px;
+        padding: 5px 0;
+        background-color: transparent;
+        border: none;
+        box-shadow: none;
+        margin-top: 50px;
+        font-size: 14px;
+        color: #6c757d;
+    }
 
     .navbar {
         transition: top 0.3s;
     }
 
-   
-    /* Center and style the icons within the navigation */
     .nav-icon {
-        display: flex;             /* Aligns items in a row */
-        align-items: center;       /* Vertically centers the icons */
-        justify-content: center;   /* Centers the icon in the space */
-        font-size: 1.5em;          /* Adjust the size of the icons */
-        margin: 0 15px;            /* Space between the navigation items */
-        padding: 8px;              /* Add some padding around the icons */
-        transition: color 0.3s, transform 0.2s; /* Smooth hover effects */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5em;
+        margin: 0 15px;
+        padding: 8px;
+        transition: color 0.3s, transform 0.2s;
     }
 
-    /* Change the icon color when hovered */
     .nav-icon:hover {
-        color: #f8b400;            /* Highlight color on hover (e.g., yellow or gold) */
-        transform: scale(1.2);     /* Slightly increase the size on hover */
+        color: #f8b400;
+        transform: scale(1.2);
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
     }
 
-    /* Add a subtle background effect on hover */
-    .nav-icon:hover {
-        background-color: rgba(255, 255, 255, 0.1); /* Light background on hover */
-        border-radius: 8px;        /* Rounded corners for a softer look */
-    }
-
-    /* Ensure spacing between the icons */
     .nav-item + .nav-item {
-        margin-left: 20px;         /* Space between the items */
+        margin-left: 20px;
     }
-
 
     </style>
 </head>
@@ -151,20 +141,6 @@
                 <li class="nav-item"><a class="nav-link text-white nav-icon" href="{% url 'view_cart' %}"><i class="fas fa-cart-shopping" style="margin-right: 40px;"></i></a></li>
                 <li class="nav-item"><a class="nav-link text-white nav-icon" href=""><i class="fas fa-heart"></i></a></li>
                 <li class="nav-item"><a class="nav-link text-white nav-icon" href="{% url 'logout' %}"><i class="fas fa-sign-out"></i></a></li>
-
-                
-                <!-- <li class="nav-item">
-                    <a class="nav-link text-white" href="/products">Products</a>
-                </li> -->
-                <!-- <li class="nav-item">
-                    <a class="nav-link text-white" href="/about">About</a>
-                </li> -->
-                <!-- <li class="nav-item">
-                    <a class="nav-link text-white" href="/contact">Contact</a>
-                </li> -->
-                <!-- <li class="nav-item">
-                    <a class="nav-link text-white" href="/login">Login</a>
-                </li> -->
             </ul>
         </div>
     </nav>
@@ -175,7 +151,7 @@
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
               <li class="breadcrumb-item"><a href="/">Home</a></li>
-              <li class="breadcrumb-item"><a href="{% url 'ring_list' %}">Ring List</a></li>
+              <li class="breadcrumb-item"><a href="{% url 'allproducts' %}">Collection</a></li>
               <li class="breadcrumb-item active" aria-current="page">Details</li>
             </ol>
           </nav>
@@ -202,13 +178,18 @@
             {% endif %}
 
             <p><strong>Weight:</strong> {{ product.weight }} grams</p>
+
+            <!-- Display Book Schedule button only if try_at_home is True -->
+            {% if product.try_at_home %}
+            <a href="" class="button">Book Schedule</a>
+            {% endif %}
         </div>
+
         <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 
         <!-- Buttons for adding to cart, wishlist, and going back -->
         <a href="{% url 'add_to_cart' product.product_id %}" class="button add_to_cart" data-product-id="{{ product.product_id }}">Add to Cart</a>
         <a href="{% url 'add_to_wishlist' product.product_id %}" class="button wishlist-button add_to_wishlist" data-product-id="{{ product.product_id }}">Add to Wishlist</a>
-        <!-- <a href="{% url 'ring_list' %}" class="button back-button">Back</a> -->
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
@@ -259,9 +240,8 @@
                             alert(response.message);
                         } else {
                             alert(response.message);
-                            if (response.message.includes('log in')) {
-                                // Redirect the user to the login page if not authenticated
-                                window.location.href = '{% url "login" %}';  // Replace with your actual login URL
+                            if (response.redirect) {
+                                window.location.href = response.redirect;
                             }
                         }
                     },
@@ -270,26 +250,7 @@
                     }
                 });
             });
-
         });
     </script>
-
-<script>
-    let lastScrollTop = 0;
-    const navbar = document.querySelector('.navbar');
-
-    window.addEventListener('scroll', function () {
-        let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        if (scrollTop > lastScrollTop) {
-            // Scrolling down, hide the navbar
-            navbar.style.top = '-70px'; // Adjust according to the height of your navbar
-        } else {
-            // Scrolling up, show the navbar
-            navbar.style.top = '0';
-        }
-        lastScrollTop = scrollTop;
-    });
-</script>
-    
 </body>
 </html>

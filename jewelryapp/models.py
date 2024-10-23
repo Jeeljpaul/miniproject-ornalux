@@ -112,6 +112,7 @@ class Product(models.Model):
     stonetype = models.ForeignKey(Stonetype, on_delete=models.CASCADE, null=True, blank=True)
     home_delivery = models.BooleanField(default=False)
     store_pickup = models.BooleanField(default=False)
+    try_at_home = models.BooleanField(default=False)
     bestselling = models.BooleanField(default=False)
 
     
@@ -170,3 +171,10 @@ class WishlistItem(models.Model):
 
 
 
+class Booking(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+    phone = models.CharField(max_length=10)
+    address = models.TextField()
+    date = models.DateField()
+    status = models.CharField(max_length=20, default='Pending')
