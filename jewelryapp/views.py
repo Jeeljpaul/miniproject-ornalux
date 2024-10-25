@@ -1039,11 +1039,7 @@ def add_attribute_to_category(request, category_id):
 
 
 
-
-
-
-
-    
+  
 from django.shortcuts import render, redirect
 from .models import Metaltype
 from django.http import HttpResponse
