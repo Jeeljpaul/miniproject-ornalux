@@ -964,8 +964,7 @@ def remove_from_wishlist(request, item_id):
         return JsonResponse({'success': False, 'message': 'You need to be logged in to perform this action.'})
 
 
-#----------------------------------------------------------------------------------------------------------------------------------------------------------
-
+#///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #adminpage
 # from django.shortcuts import render, redirect, get_object_or_404
 # from .models import Category, CategoryAttribute
@@ -999,21 +998,25 @@ def remove_from_wishlist(request, item_id):
 #         'categories': categories
 #     }
 #     return render(request, 'admin/add_category.html', context)
-
 from django.shortcuts import render, redirect
 from .models import Category
 
 def add_category(request):
+    error_message = None
+
     if request.method == 'POST':
         category_name = request.POST.get('category_name')
-
-        if category_name:
-            # Create a new Category
+        
+        if not category_name:
+            error_message = "Category name cannot be empty."
+        elif Category.objects.filter(name__iexact=category_name).exists():
+            error_message = "This category already exists in the database."
+        else:
+            # Create a new Category if it doesn't already exist
             Category.objects.create(name=category_name)
+            return redirect('view_categories')  # Redirect after successful creation
 
-            return redirect('view_categories')  # Redirect to category listing page after saving
-
-    return render(request, 'admin/add_category.html')
+    return render(request, 'admin/add_category.html', {'error_message': error_message})
 
 
 
@@ -1037,40 +1040,114 @@ def add_attribute_to_category(request, category_id):
 
 
 
-
+#-----------------------------------------------------------------------------------------------------------------------------------------
 
   
+# from django.shortcuts import render, redirect
+# from .models import Metaltype
+# from django.http import HttpResponse
+
+# def add_metaltype(request):
+#     if request.method == 'POST':
+#         name = request.POST.get('name')
+#         if name:
+#             Metaltype.objects.create(name=name)
+#             return redirect('add_metaltype') 
+#         else:
+#             return HttpResponse("Name field cannot be empty.")
+
+#     return render(request, 'admin/add_metaltype.html')
+
+# views.py
+from django.shortcuts import render
+from .models import Metaltype
+
+def view_metaltypes(request):
+    metaltypes = Metaltype.objects.all()
+    return render(request, 'admin/view_metaltype.html', {'metaltypes': metaltypes})
+
+
 from django.shortcuts import render, redirect
 from .models import Metaltype
-from django.http import HttpResponse
 
 def add_metaltype(request):
+    error_message = None
+
     if request.method == 'POST':
         name = request.POST.get('name')
-        if name:
-            Metaltype.objects.create(name=name)
-            return redirect('add_metaltype')  # Redirect after successful creation
+        
+        if not name:
+            error_message = "Name field cannot be empty."
+        elif Metaltype.objects.filter(name__iexact=name).exists():
+            error_message = "This metal type already exists in the database."
         else:
-            return HttpResponse("Name field cannot be empty.")
+            Metaltype.objects.create(name=name)
+            return redirect('view_metaltypes')  # Redirect after successful creation
 
-    return render(request, 'admin/add_metaltype.html')
+    # Fetch all metal types to display in the template
+    # metaltypes = Metaltype.objects.all()
 
-    
+    return render(request, 'admin/add_metaltype.html', {'error_message': error_message})
+
+
+
+
+
+
+#-----------------------------------------------------------------------------------------------------------------
+
+
+# views.py
+from django.shortcuts import render
+from .models import Stonetype
+
+def view_stonetypes(request):
+    stonetypes = Stonetype.objects.all()
+    return render(request, 'admin/view_stonetypes.html', {'stonetypes': stonetypes})
+
+
+
+
 from django.shortcuts import render, redirect
-from .models import Metaltype
-from django.http import HttpResponse
+from .models import Stonetype
 
 def add_stonetype(request):
+    error_message = None
+
     if request.method == 'POST':
         name = request.POST.get('name')
-        if name:
-            Stonetype.objects.create(name=name)
-            return redirect('add_stonetype')  # Redirect after successful creation
+        
+        if not name:
+            error_message = "Name field cannot be empty."
+        elif Stonetype.objects.filter(name__iexact=name).exists():
+            error_message = "This stone type already exists in the database."
         else:
-            return HttpResponse("Name field cannot be empty.")
+            Stonetype.objects.create(name=name)
+            return redirect('view_stonetypes')  # Redirect after successful creation
 
-    return render(request, 'admin/add_stonetype.html')
+    return render(request, 'admin/add_stonetype.html', {'error_message': error_message})
 
+
+
+# from django.shortcuts import render, redirect
+# from .models import Metaltype
+# from django.http import HttpResponse
+
+# def add_stonetype(request):
+#     if request.method == 'POST':
+#         name = request.POST.get('name')
+#         if name:
+#             Stonetype.objects.create(name=name)
+#             return redirect('add_stonetype')  
+#         else:
+#             return HttpResponse("Name field cannot be empty.")
+
+#     return render(request, 'admin/add_stonetype.html')
+
+
+
+
+#--------------------------------------------------------------------------------------------------------------------------------------------
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .models import Product, Category, Metaltype, Stonetype, ProductAttribute, CategoryAttribute
@@ -1458,7 +1535,7 @@ def product_list(request):
 
 #     return render(request, 'user/all_products.html', context)
 
-
+#-----------------------------------------------------------------------------------------------------------------------------
 from django.shortcuts import render
 from .models import Product, Category, Metaltype, Stonetype
 
@@ -1565,6 +1642,8 @@ def detail(request, product_id):
 
     return render(request, 'user/all_details.html', context)
 
+#---------------------------------------------------------------------------------------------------------------------------------------------------------
+
 def get_booked_dates_for_product(product):
     # Fetch all booked dates for the given product
     booked_dates = Booking.objects.filter(product=product).values_list('booking_date', flat=True)
@@ -1631,4 +1710,7 @@ def booking_details(request, booking_id):
     }
 
     return render(request, 'user/booking_detail.html', context)
+
+
+
 

@@ -33,7 +33,10 @@ urlpatterns = [
 
     path('get_category_attributes/<int:category_id>/', views.get_category_attributes, name='get_category_attributes'),
     path('adminhome/add_metaltype/', views.add_metaltype, name='add_metaltype'),
+    path('view-metaltypes/', views.view_metaltypes, name='view_metaltypes'),
     path('adminhome/add_stonetype/', views.add_stonetype, name='add_stonetype'),
+    path('view-stonetypes/', views.view_stonetypes, name='view_stonetypes'),
+
     path('adminhome/add_pro/', views.add_pro, name='add_pro'),
 
 

@@ -12,6 +12,11 @@
                 <button type="submit">Add Metal Type</button>
             </div>        
         </form>
+        {% if error_message %}
+        <script>
+            alert("{{ error_message }}");
+        </script>
+        {% endif %}
     </div>
 
     <script>

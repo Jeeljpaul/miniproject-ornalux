@@ -24,6 +24,11 @@
                 <button type="submit">Save Category</button>
             </div>
         </form>
+        {% if error_message %}
+    <script>
+        alert("{{ error_message }}");
+    </script>
+    {% endif %}
     </div>
 
     <script>
