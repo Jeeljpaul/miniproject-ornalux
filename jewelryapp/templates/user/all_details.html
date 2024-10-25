@@ -181,7 +181,7 @@
 
             <!-- Display Book Schedule button only if try_at_home is True -->
             {% if product.try_at_home %}
-            <a href="" class="button">Book Schedule</a>
+            <a href="{% url 'book_schedule' product.product_id %}" class="button">Book Schedule</a>
             {% endif %}
         </div>
 

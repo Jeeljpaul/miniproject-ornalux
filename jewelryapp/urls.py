@@ -27,6 +27,10 @@ urlpatterns = [
     # path('product/<int:product_id>/update/', views.update_product, name='update_product'),
 
     path('adminhome/add-category/', views.add_category, name='add_category'),
+    path('categories/', views.view_categories, name='view_categories'),
+    path('add_attribute/<int:category_id>/', views.add_attribute_to_category, name='add_attribute_to_category'),
+
+
     path('get_category_attributes/<int:category_id>/', views.get_category_attributes, name='get_category_attributes'),
     path('adminhome/add_metaltype/', views.add_metaltype, name='add_metaltype'),
     path('adminhome/add_stonetype/', views.add_stonetype, name='add_stonetype'),
@@ -51,7 +55,11 @@ urlpatterns = [
     path('bracelet_detail/<int:product_id>/', views.bracelet_detail, name='bracelet_detail'),
     path('allproducts',views.all_products,name='allproducts'),
     path('detail/<int:product_id>/', views.detail, name='detail'),
+    path('book_schedule/<int:product_id>/', views.book_schedule, name='book_schedule'),
     path('submit_schedule/<int:product_id>/', views.submit_schedule, name='submit_schedule'),
+    path('booking-details/<int:booking_id>/', views.booking_details, name='booking_details'),
+
+
 
 
 

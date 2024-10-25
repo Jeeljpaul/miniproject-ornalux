@@ -121,6 +121,7 @@ class Product(models.Model):
     def __str__(self):
         return self.product_name
     
+    
 class ProductAttribute(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='attributes')
     attribute_name = models.CharField(max_length=100)
@@ -170,11 +171,16 @@ class WishlistItem(models.Model):
         return f"{self.product.product_name} in Wishlist ID: {self.wishlist.id}"
 
 
-
 class Booking(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    name = models.CharField(max_length=100)
-    phone = models.CharField(max_length=10)
-    address = models.TextField()
-    date = models.DateField()
-    status = models.CharField(max_length=20, default='Pending')
+    booking_id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(Tbl_user, on_delete=models.CASCADE)  # User who makes the booking
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)  # The product being booked
+    address = models.TextField()  # User's address for the booking
+    booking_date = models.DateField()  # Date of the booking
+    created_at = models.DateTimeField(auto_now_add=True)  # Timestamp for when the booking was created
+    status = models.CharField(max_length=20, choices=[('pending', 'Pending'), ('confirmed', 'Confirmed'), ('cancelled', 'Cancelled')], default='pending')
+    is_active = models.BooleanField(default=True)
+
+
+    def __str__(self):
+        return f"Booking {self.booking_id} by {self.user.name} for {self.product.product_name} on {self.booking_date}"

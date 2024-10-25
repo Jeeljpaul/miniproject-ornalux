@@ -1,9 +1,9 @@
 {% load static %}
 {% include 'user/trial.html' %}
 
-
-{% block content %}
-<!-- Add inline CSS for styling -->
+{% block title %}
+Booking Details
+{% endblock title %}
 <style>
     .form-container {
         background-color: #f8f9fa;
@@ -174,99 +174,36 @@
     }
 
 </style>
+
 <div class="breadcrumb-container">
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
           <li class="breadcrumb-item"><a href="/">Home</a></li>
           <li class="breadcrumb-item"><a href="{% url 'allproducts' %}">Collection</a></li>
-          <li class="breadcrumb-item"><a href="{% url 'detail' product.product_id %}">Details</a></li>
-          <li class="breadcrumb-item active" aria-current="page">Booking</li>
+          <!-- <li class="breadcrumb-item"><a href="{% url 'detail' product.product_id %}">Details</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Booking</li> -->
         </ol>
       </nav>
-      
+{% block content %}
+<div class="container">
+    <h2>Booking Details</h2>
+    <div class="card">
+        <div class="card-body">
+            <h4>Product: {{ booking.product.product_name }}</h4>
+            <p><strong>User:</strong> {{ booking.user.name }}</p>
+            <p><strong>Phone:</strong> {{ booking.user.phone }}</p>
+            <p><strong>Address:</strong> {{ booking.address }}</p>
+            <p><strong>Booking Date:</strong> {{ booking.booking_date }}</p>
+            <p><strong>Status:</strong> 
+                {% if booking.status == 'pending' %}
+                    <span class="badge badge-warning">Pending</span>
+                {% elif booking.status == 'confirmed' %}
+                    <span class="badge badge-success">Confirmed</span>
+                {% elif booking.status == 'cancelled' %}
+                    <span class="badge badge-danger">Cancelled</span>
+                {% endif %}
+            </p>
+        </div>
+    </div>
 </div>
-<div class="form-container">
-    <h3>Book Schedule for {{ product.product_name }}</h3>
-    <form id="schedule-form" method="POST" action="{% url 'submit_schedule' product.product_id %}">
-        {% csrf_token %}
-        <div class="form-group">
-            <label for="name">Name:</label>
-            <input type="text" id="name" name="name" class="form-control" 
-                   value="{{ user.name }}" required readonly>
-        </div>
-        <div class="form-group">
-            <label for="phone">Phone Number:</label>
-            <input type="text" id="phone" name="phone" class="form-control" 
-                   value="{{ user.phone }}" required readonly>
-        </div>
-        <div class="form-group">
-            <label for="address">Address:</label>
-            <textarea id="address" name="address" class="form-control" required></textarea>
-        </div>
-        <div class="form-group">
-            <label for="schedule-date">Pick a Date:</label>
-            <input type="date" id="schedule-date" name="date" class="form-control" required>
-        </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
-</div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Date validation
-        const dateInput = document.getElementById('schedule-date');
-
-        // Get today's date
-        let today = new Date();
-        let todayISO = today.toISOString().split('T')[0];
-
-        // Set min date to today
-        dateInput.min = todayISO;
-
-        // Get the date three months from today
-        let maxDate = new Date(today);
-        maxDate.setMonth(today.getMonth() + 3);
-
-        // Adjust for the end of the year wrap-around case
-        if (maxDate.getMonth() + 3 > 11) {
-            maxDate.setFullYear(today.getFullYear() + 1);
-            maxDate.setMonth(maxDate.getMonth() % 12);
-        }
-
-        let maxDateISO = maxDate.toISOString().split('T')[0];
-        dateInput.max = maxDateISO;
-
-        // Disable already booked dates
-        let bookedDates = [
-            {% for booked_date in booked_dates %}
-                "{{ booked_date }}",
-            {% endfor %}
-        ];
-
-        dateInput.addEventListener('change', function() {
-            let selectedDate = new Date(this.value);
-
-            // Check if the selected date is unavailable
-            if (bookedDates.includes(this.value)) {
-                alert('This date is already booked. Please select another date.');
-                this.value = '';
-            }
-        });
-
-        // Address validation
-        const addressInput = document.getElementById('address');
-        addressInput.addEventListener('input', function() {
-            const address = this.value.trim();
-
-            // Check if address is at least 10 characters
-            if (address.length < 10) {
-                this.setCustomValidity('Address must be at least 10 characters long.');
-            } else if (!/^[a-zA-Z0-9\s,.'-]+$/.test(address)) {
-                this.setCustomValidity('Address can only contain alphanumeric characters, commas, periods, apostrophes, and dashes.');
-            } else {
-                this.setCustomValidity('');
-            }
-        });
-    });
-</script>
 {% endblock content %}

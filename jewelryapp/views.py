@@ -405,6 +405,10 @@ def toggle_user_status(request, user_id):
     return redirect(reverse('view_registered_users'))
 
  #---------------------------------------------------------------
+from django.shortcuts import render, redirect
+from django.core.mail import send_mail
+from django.conf import settings
+from .models import Tbl_login, Tbl_staff
 from .forms import StaffForm
 
 def add_staff(request):
@@ -412,11 +416,30 @@ def add_staff(request):
         form = StaffForm(request.POST)
         if form.is_valid():
             form.save()
+
+            # After saving the staff details, send an email with the login credentials
+            email = form.cleaned_data['email']
+            password = form.cleaned_data['password']
+            name = form.cleaned_data['name']
+
+            subject = 'Your Staff Account Details'
+            message = f'Hello {name},\n\nYou have been added as a staff member.\n\nYour login details are:\nEmail: {email}\nPassword: {password}\n\nPlease login and change your password.\n\nBest regards,\nAdmin Team'
+
+            # Send the email
+            send_mail(
+                subject,
+                message,
+                settings.DEFAULT_FROM_EMAIL,
+                [email],
+                fail_silently=False,
+            )
+
             return redirect('/adminhome/')  # Redirect to a view after successful staff addition
     else:
         form = StaffForm()
 
     return render(request, 'admin/add_staff.html', {'form': form})
+
 
 
 def view_staff(request):
@@ -944,28 +967,81 @@ def remove_from_wishlist(request, item_id):
 #----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 #adminpage
+# from django.shortcuts import render, redirect, get_object_or_404
+# from .models import Category, CategoryAttribute
+
+# def add_category(request):
+#     if request.method == 'POST':
+#         category_name = request.POST.get('category_name')
+#         attribute_names = request.POST.getlist('attribute_names')
+#         attribute_datatypes = request.POST.getlist('attribute_datatypes')
+
+#         existing_category_id = request.POST.get('existing_category')
+
+#         if existing_category_id:
+#             category = get_object_or_404(Category, id=existing_category_id)
+#         elif category_name:
+            
+#             category = Category.objects.create(name=category_name)
+
+#         if attribute_names and attribute_datatypes:
+           
+#             for name, datatype in zip(attribute_names, attribute_datatypes):
+#                 if name:  
+#                     CategoryAttribute.objects.create(category=category, name=name, datatype=datatype)
+
+#         return redirect('add_category')  
+
+    
+#     categories = Category.objects.all()
+
+#     context = {
+#         'categories': categories
+#     }
+#     return render(request, 'admin/add_category.html', context)
 
 from django.shortcuts import render, redirect
-from .models import Category, CategoryAttribute
+from .models import Category
 
 def add_category(request):
     if request.method == 'POST':
         category_name = request.POST.get('category_name')
-        attribute_names = request.POST.getlist('attribute_names')
-        attribute_datatypes = request.POST.getlist('attribute_datatypes')
 
-
-        if category_name and attribute_names and attribute_datatypes:
+        if category_name:
             # Create a new Category
-            category = Category.objects.create(name=category_name)
+            Category.objects.create(name=category_name)
 
-            # Add each attribute to the category
-            for name, datatype in zip(attribute_names, attribute_datatypes):
-                if name:  # Make sure the attribute name is not empty
-                    CategoryAttribute.objects.create(category=category, name=name, datatype=datatype)
-            return redirect('add_category')  # Redirect to the same page after saving
+            return redirect('view_categories')  # Redirect to category listing page after saving
 
     return render(request, 'admin/add_category.html')
+
+
+
+def view_categories(request):
+    categories = Category.objects.all().prefetch_related('attributes')
+    return render(request, 'admin/view_categories.html', {'categories': categories})
+
+
+def add_attribute_to_category(request, category_id):
+    category = get_object_or_404(Category, pk=category_id)
+
+    if request.method == 'POST':
+        attribute_name = request.POST.get('attribute_name')
+
+        if attribute_name:
+            # Add the new attribute to the existing category
+            CategoryAttribute.objects.create(category=category, name=attribute_name)
+            return redirect('view_categories')  # Redirect to category list after adding attribute
+
+    return render(request, 'admin/add_attribute.html', {'category': category})
+
+
+
+
+
+
+
+
 
     
 from django.shortcuts import render, redirect
@@ -1493,43 +1569,70 @@ def detail(request, product_id):
 
     return render(request, 'user/all_details.html', context)
 
+def get_booked_dates_for_product(product):
+    # Fetch all booked dates for the given product
+    booked_dates = Booking.objects.filter(product=product).values_list('booking_date', flat=True)
+    return list(booked_dates)
 
-from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse
-from .models import Product, Booking
-from django.utils import timezone
 
-# Schedule booking form view
-def schedule_booking(request, product_id):
-    product = get_object_or_404(Product, product_id=product_id)
-    # Retrieve booked dates for the same product
-    booked_dates = Booking.objects.filter(product=product).values_list('date', flat=True)
-    return render(request, 'schedule_booking.html', {'product': product, 'booked_dates': booked_dates})
+
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Product, Tbl_user
+
+def book_schedule(request, product_id):
+    if 'login_id' not in request.session:
+        return redirect('login')  # Redirect to the login page if not logged in
+    
+    # Get the logged-in user's details using the session 'login_id'
+    login_id = request.session.get('login_id')
+    
+    # Fetch the Tbl_user associated with the Tbl_login's login_id
+    user = get_object_or_404(Tbl_user, login_id=login_id)  # login_id refers to the login field in Tbl_user
+    
+    product = get_object_or_404(Product, pk=product_id)
+    
+    booked_dates = get_booked_dates_for_product(product)  # Function to get booked dates
+
+    context = {
+        'product': product,
+        'user': user,
+        'booked_dates': booked_dates
+    }
+
+    return render(request, 'user/schedule_booking.html', context)
+
+from django.core.mail import send_mail
+from django.conf import settings
 
 def submit_schedule(request, product_id):
-    if request.method == 'POST':
-        product = get_object_or_404(Product, product_id=product_id)
-        name = request.POST.get('name')
-        phone = request.POST.get('phone')
+    if request.method == "POST":
+        login_id = request.session.get('login_id')
+        user = get_object_or_404(Tbl_user, login_id=login_id)
+        product = get_object_or_404(Product, pk=product_id)
         address = request.POST.get('address')
-        date = request.POST.get('date')
+        booking_date = request.POST.get('date')
 
-        # Validate the inputs
-        if not name or not phone or not address or not date:
-            return JsonResponse({'error': 'All fields are required'}, status=400)
-        
-        if len(phone) != 10 or not phone.isdigit():
-            return JsonResponse({'error': 'Invalid phone number'}, status=400)
+        # Create and save a new booking
+        booking = Booking(user=user, product=product, address=address, booking_date=booking_date)
+        booking.save()
 
-        # Save the booking
-        booking = Booking.objects.create(
-            product=product,
-            name=name,
-            phone=phone,
-            address=address,
-            date=date,
-            status='Pending'  # Set status as pending
-        )
+        # Send email to staff
+        staff_email = 'jeelelzapaul@gmail.com'  # Replace with actual staff email
+        subject = f'New Booking for {product.product_name}'
+        message = f'Booking Details:\n\nUser: {user.name}\nPhone: {user.phone}\nProduct: {product.product_name}\nDate: {booking_date}\nAddress: {address}'
+        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [staff_email])
 
-        return redirect('booking_confirmation', booking_id=booking.id)
+        # Redirect to booking details page with booking ID
+        return redirect('booking_details', booking_id=booking.booking_id)
+    
+def booking_details(request, booking_id):
+    booking = get_object_or_404(Booking, pk=booking_id)
+
+    context = {
+        'booking': booking,
+        'product': booking.product,
+        'user': booking.user
+    }
+
+    return render(request, 'user/booking_detail.html', context)
 
