@@ -1,0 +1,183 @@
+{% load static %}
+{% include 'user/trial.html' %}
+
+<!-- {% block title %}
+    Booking History
+{% endblock title %} -->
+<style>
+    /* Table container styling */
+    .table-container {
+        max-width: 900px; /* Limit the width for better readability */
+        margin: 20px auto; /* Center the container */
+        padding: 20px; /* Padding inside the container */
+        background-color: #f8f9fa; /* Light background color */
+        border-radius: 10px; /* Rounded corners */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    }
+
+    /* Table styling */
+    table {
+        width: 100%; /* Full width */
+        border-collapse: collapse; /* Collapse borders */
+    }
+
+    th, td {
+        padding: 10px; /* Padding inside cells */
+        border: 1px solid #ddd; /* Light border */
+        text-align: left; /* Left align text */
+        vertical-align: middle; /* Center align vertically */
+    }
+
+    th {
+        background-color: #007bff; /* Header background color */
+        color: white; /* Header text color */
+    }
+
+    /* Badge styling for statuses */
+    .badge {
+        padding: 5px 10px; /* Padding inside badges */
+        border-radius: 5px; /* Rounded badges */
+        font-size: 14px; /* Font size for badges */
+        font-weight: bold; /* Bold text */
+    }
+
+    .badge-warning {
+        background-color: #ffc107; /* Warning badge color */
+        color: black; /* Text color for warning */
+    }
+
+    .badge-success {
+        background-color: #28a745; /* Success badge color */
+        color: white; /* Text color for success */
+    }
+
+    .badge-danger {
+        background-color: #dc3545; /* Danger badge color */
+        color: white; /* Text color for danger */
+    }
+
+    .badge-info {
+        background-color: #17a2b8; /* Info badge color */
+        color: white; /* Text color for info */
+    }
+
+    /* Edit button styling */
+    .edit-button {
+        background-color: #17a2b8; /* Button background color */
+        color: white; /* Button text color */
+        padding: 5px 10px; /* Padding inside button */
+        border: none; /* No border */
+        border-radius: 5px; /* Rounded corners */
+        cursor: pointer; /* Pointer cursor on hover */
+        text-decoration: none; /* Remove underline from link */
+        font-size: 14px; /* Font size for button */
+        transition: background-color 0.3s ease; /* Smooth transition */
+    }
+
+    .edit-button:hover {
+        background-color: #138496; /* Darker shade on hover */
+    }
+
+    /* Styling for completed rows */
+    .completed-row {
+        filter: blur(3px); /* Blur effect */
+        opacity: 0.6; /* Reduced opacity */
+    }
+
+    /* Breadcrumb styling */
+    .breadcrumb-container {
+        margin-left: 30px; /* Left margin */
+        padding: 10px 0; /* Padding */
+        background-color: transparent; /* Transparent background */
+        border: none; /* No border */
+        box-shadow: none; /* No shadow */
+        margin-top: 20px; /* Space above breadcrumb */
+        font-size: 14px; /* Font size for breadcrumb */
+        color: #6c757d; /* Text color */
+        max-width: 1300px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .table-container {
+            margin: 10px; /* Reduce margin on smaller screens */
+            padding: 15px; /* Reduce padding */
+        }
+
+        th, td {
+            padding: 8px; /* Reduce padding for smaller screens */
+            font-size: 12px; /* Smaller font size */
+        }
+
+        .edit-button {
+            font-size: 12px; /* Smaller button font size */
+        }
+
+        .badge {
+            font-size: 12px; /* Smaller badge font size */
+        }
+    }
+</style>
+
+<div class="breadcrumb-container">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <!-- <li class="breadcrumb-item"><a href="{% url 'allproducts' %}">Collection</a></li> -->
+            <li class="breadcrumb-item active" aria-current="page">Your Bookings</li>
+        </ol>
+    </nav>
+</div>
+
+{% block content %}
+<div class="container">
+    <h2>All Bookings</h2>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Booking Date</th>
+                    <th>Address</th>
+                    <th>Phone</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in bookings %}
+                <tr class="{% if booking.status == 'completed' %}completed-row{% endif %}">
+                    <td>
+                        {{ booking.product.product_name }} <br>
+                        <img src="{{ booking.product.images.url }}" alt="Product Image" style="width: 100px; height: auto;">
+                    </td>
+                    <td>{{ booking.booking_date }}</td>
+                    <td>{{ booking.address }}</td>
+                    <td>{{ booking.user.phone }}</td>
+                    <td>
+                        {% if booking.status == 'pending' %}
+                            <span class="badge badge-warning">Pending</span>
+                        {% elif booking.status == 'confirmed' %}
+                            <span class="badge badge-success">Confirmed</span>
+                        {% elif booking.status == 'cancelled' %}
+                            <span class="badge badge-danger">Cancelled</span>
+                        {% elif booking.status == 'completed' %}
+                            <span class="badge badge-info">Completed</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if booking.status != 'completed' %}
+                            <a href="{% url 'edit_booking' booking.booking_id %}" class="edit-button">Edit</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6">No bookings found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock content %}

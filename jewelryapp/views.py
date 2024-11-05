@@ -1651,30 +1651,61 @@ def get_booked_dates_for_product(product):
 
 
 
-from django.shortcuts import render, get_object_or_404, redirect
-from .models import Product, Tbl_user
+# from django.shortcuts import render, get_object_or_404, redirect
+# from .models import Product, Tbl_user
+
+# def book_schedule(request, product_id):
+#     if 'login_id' not in request.session:
+#         return redirect('login')  
+    
+#     login_id = request.session.get('login_id')
+    
+#     user = get_object_or_404(Tbl_user, login_id=login_id)  
+    
+#     product = get_object_or_404(Product, pk=product_id)
+    
+#     booked_dates = get_booked_dates_for_product(product) 
+
+#     context = {
+#         'product': product,
+#         'user': user,
+#         'booked_dates': booked_dates
+#     }
+
+#     return render(request, 'user/schedule_booking.html', context)
+
+
 
 def book_schedule(request, product_id):
     if 'login_id' not in request.session:
         return redirect('login')  # Redirect to the login page if not logged in
-    
-    # Get the logged-in user's details using the session 'login_id'
+
     login_id = request.session.get('login_id')
-    
-    # Fetch the Tbl_user associated with the Tbl_login's login_id
-    user = get_object_or_404(Tbl_user, login_id=login_id)  # login_id refers to the login field in Tbl_user
-    
+    user = get_object_or_404(Tbl_user, login_id=login_id)
     product = get_object_or_404(Product, pk=product_id)
-    
-    booked_dates = get_booked_dates_for_product(product)  # Function to get booked dates
+    booked_dates = get_booked_dates_for_product(product)
+
+    if request.method == 'POST':
+        booking_date = request.POST.get('booking_date')
+
+        # Check if the user has already booked the same product for the selected date
+        existing_booking = Booking.objects.filter(user=user, product=product, date=booking_date).exists()
+
+        if existing_booking:
+            messages.error(request, "You have already booked this product for the selected date.")
+        else:
+            # Create a new booking
+            Booking.objects.create(user=user, product=product, date=booking_date, status='pending')
+            messages.success(request, "Your booking has been scheduled successfully.")
+            return redirect('booking_confirmation')  # Redirect to a confirmation page
 
     context = {
         'product': product,
         'user': user,
-        'booked_dates': booked_dates
+        'booked_dates': booked_dates,
     }
+    return render(request, 'user/schedule_booking.html', context)  # Render the template with context
 
-    return render(request, 'user/schedule_booking.html', context)
 
 from django.core.mail import send_mail
 from django.conf import settings
@@ -1711,6 +1742,352 @@ def booking_details(request, booking_id):
 
     return render(request, 'user/booking_detail.html', context)
 
+from django.shortcuts import render, redirect, get_object_or_404
+from django.core.mail import send_mail
+from django.conf import settings
+from .models import Booking, Tbl_user, Product, Tbl_staff
+from django.contrib import messages
+
+def view_bookings(request):
+    bookings = Booking.objects.all()  # Fetch all bookings
+    staff_members = Tbl_staff.objects.filter(status=True)  # Active staff only
+
+    if request.method == 'POST':
+        booking_id = request.POST.get('booking_id')
+        action = request.POST.get('action')
+        booking = get_object_or_404(Booking, booking_id=booking_id)  # Get the specific booking
+        user = booking.user
+        product = booking.product
+
+        if action == 'approve':
+            booking.status = 'confirmed'
+            booking.save()
+
+            # Send email to the user
+            send_mail(
+                'Booking Confirmation',
+                f'Dear {user.name},\n\nYour booking for {product.product_name} has been confirmed.',
+                settings.DEFAULT_FROM_EMAIL,
+                [user.login.email],
+            )
+            messages.success(request, 'Booking approved and email sent to user.')
+
+        elif action == 'reject':
+            booking.status = 'cancelled'
+            booking.save()
+
+            # Send email to the user
+            send_mail(
+                'Booking Cancellation',
+                f'Dear {user.name},\n\nYour booking for {product.product_name} has been cancelled.',
+                settings.DEFAULT_FROM_EMAIL,
+                [user.login.email],
+            )
+            messages.success(request, 'Booking rejected and email sent to user.')
+
+        elif action == 'assign_staff':
+            staff_id = request.POST.get('staff_id')
+            staff = get_object_or_404(Tbl_staff, staff_id=staff_id)
+
+            # Assign the staff for try at home
+            booking.try_at_home = True  # Assuming this attribute indicates assignment
+            booking.save()
+
+            # Send email to the staff
+            send_mail(
+                'New Try at Home Assignment',
+                f'Dear {staff.name},\n\nYou have been assigned to assist with the booking for {product.product_name}.',
+                settings.DEFAULT_FROM_EMAIL,
+                [staff.login.email],
+            )
+            messages.success(request, 'Staff assigned and email sent to staff.')
+
+        return redirect('view_bookings')  # Redirect to the same page to see updated status
+
+    return render(request, 'admin/view_booking.html', {
+        'bookings': bookings,
+        'staff_members': staff_members,
+    })
+
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Booking, Tbl_user
+
+def booking_history(request):
+    # Check if the user is logged in by verifying 'login_id' in the session
+    if 'login_id' not in request.session:
+        return redirect('login')  # Redirect to login if not logged in
+
+    # Get the login_id from session and fetch the corresponding user
+    login_id = request.session['login_id']
+    user = get_object_or_404(Tbl_user, login_id=login_id)
+
+    # Retrieve bookings for the logged-in user, ordered by most recent first
+    bookings = Booking.objects.filter(user=user).order_by('-booking_date')
+
+    # Pass bookings to the template
+    return render(request, 'user/booking.html', {'bookings': bookings})
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from .models import Booking, Tbl_user
+
+def edit_booking(request, booking_id):  
+    # Check if the user is logged in
+    if 'login_id' not in request.session:
+        return redirect('login')
+
+    login_id = request.session['login_id']
+    user = get_object_or_404(Tbl_user, login_id=login_id)
+
+    # Retrieve the booking based on booking_id and user
+    booking = get_object_or_404(Booking, booking_id=booking_id, user=user)
+
+    if request.method == 'POST':
+        address = request.POST.get('address')
+        phone = request.POST.get('phone')
+
+        # Phone validation
+        if not (phone.isdigit() and len(phone) == 10 and phone[0] in '6789'):
+            messages.error(request, "Phone number must be 10 digits and start with 6, 7, 8, or 9.")
+            return render(request, 'user/edit_booking.html', {'form': None, 'booking': booking})
+
+        # Address validation
+        if not address.strip():
+            messages.error(request, "Address cannot be empty.")
+            return render(request, 'user/edit_booking.html', {'form': None, 'booking': booking})
+
+        # Update the booking if validations pass
+        booking.address = address
+        booking.phone = phone  # Assuming you have a phone field in the Booking model
+        booking.save()
+        messages.success(request, "Booking updated successfully.")
+        return redirect('booking_history')
+
+    return render(request, 'user/edit_booking.html', {'form': None, 'booking': booking})
+
+#//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
+from django.http import JsonResponse
+from .models import Cart, CartItem, Billing, Tbl_user, Order, Product
+from django.db import transaction
+
+# Checkout View
+def checkout(request):
+    # Check if user is logged in
+    if 'login_id' not in request.session:
+        return redirect('login')  # Redirect to login if not logged in
+
+    login_id = request.session['login_id']
+    
+    # Get `Tbl_user` instance for the logged-in user
+    try:
+        user = Tbl_user.objects.get(login__login_id=login_id)
+    except Tbl_user.DoesNotExist:
+        return redirect('login')  # Redirect to login if user not found
+
+    # Retrieve the cart and active cart items for the user
+    cart = get_object_or_404(Cart, login=login_id)
+    cart_items = cart.items.filter(status=True)
+    total_price = sum(item.product.price * item.quantity for item in cart_items)
+
+    # Fetch the billing addresses for the current user
+    addresses = Billing.objects.filter(user=user)
+
+    # Display checkout page with total price, cart items, and addresses
+    context = {
+        'cart_items': cart_items,
+        'total_price': total_price,
+        'addresses': addresses,
+    }
+    return render(request, 'user/billing.html', context)
+
+from django.shortcuts import redirect, render
+from django.contrib import messages
+from .models import Billing, Tbl_user
+
+def add_address(request):
+    # Check if the user is logged in
+    if 'login_id' not in request.session:
+        return redirect('login')
+    
+    # Retrieve the logged-in user's ID from the session
+    login_id = request.session['login_id']
+    
+    # Get the `Tbl_user` instance related to the `Tbl_login` session ID
+    try:
+        user = Tbl_user.objects.get(login__login_id=login_id)
+    except Tbl_user.DoesNotExist:
+        messages.error(request, "User not found.")
+        return redirect('checkout')
+
+    if request.method == 'POST':
+        # Collect form data
+        house_name = request.POST.get('house_name')
+        postal_address = request.POST.get('postal_address')
+        city = request.POST.get('city')
+        district = request.POST.get('district')
+        state = request.POST.get('state')
+        pincode = request.POST.get('pincode')
+
+        # Create and save the new Billing address
+        billing_address = Billing(
+            user=user,  # `user` is an instance of `Tbl_user`
+            house_name=house_name,
+            postal_address=postal_address,
+            city=city,
+            district=district,
+            state=state,
+            pincode=pincode
+        )
+        
+        try:
+            billing_address.save()
+            messages.success(request, "Address added successfully!")
+            return redirect('checkout')
+        except Exception as e:
+            messages.error(request, f"Error saving address: {e}")
+            return redirect('add_address')
+
+    # Render the add address page if request method is GET
+    return render(request, 'user/add_address.html')
+
+
+# views.py
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import Billing  # Replace with your actual address model
+
+@csrf_exempt
+def remove_address(request, address_id):
+    if request.method == 'POST':
+        try:
+            address = Billing.objects.get(id=address_id)
+            address.delete()
+            return JsonResponse({'status': 'success'})
+        except Billing.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Address not found'})
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'})
 
 
 
+from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
+from django.utils import timezone
+from .models import Tbl_user, Cart, Order, OrderItem, Billing, Payment, Product, CartItem
+
+import razorpay
+
+# Initialize Razorpay client
+razorpay_client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+
+@csrf_exempt
+def start_payment(request):
+    if request.method == "POST":
+        user_id = request.session.get('login_id')
+        user = get_object_or_404(Tbl_user, login_id=user_id)
+
+        cart_items = CartItem.objects.filter(user=user, status=True)
+        total_price = sum(item.product.price * item.quantity for item in cart_items) * 100
+
+        # Prepare Razorpay order
+        razorpay_order = razorpay_client.order.create({
+            "amount": total_price,
+            "currency": "INR",
+            "payment_capture": "1"
+        })
+
+        order = Order.objects.create(
+            user=user,
+            cart=get_object_or_404(Cart, user=user),
+            total_amount=total_price / 100,
+            razorpay_order_id=razorpay_order['id']
+        )
+
+        return JsonResponse({
+            "order_id": razorpay_order['id'],
+            "amount": total_price,
+            "currency": "INR",
+            "key": settings.RAZORPAY_KEY_ID
+        })
+
+def payment_success(request):
+    if request.method == "POST":
+        user_id = request.session.get('login_id')
+        user = get_object_or_404(Tbl_user, login_id=user_id)
+        razorpay_payment_id = request.POST.get("razorpay_payment_id")
+        razorpay_order_id = request.POST.get("razorpay_order_id")
+
+        # Get Order and Billing Address
+        order = get_object_or_404(Order, razorpay_order_id=razorpay_order_id, user=user)
+        selected_address_id = request.POST.get('selected_address')
+        billing_address = get_object_or_404(Billing, id=selected_address_id, user=user)
+        order.billing = billing_address
+        order.status = 'Completed'
+        order.save()
+
+        # Update stock and mark CartItem status as False
+        for item in CartItem.objects.filter(user=user, status=True):
+            product = item.product
+            product.stock -= item.quantity  # Reduce stock quantity
+            product.save()
+            item.status = False  # Mark item as processed
+            item.save()
+
+            # Create OrderItem
+            OrderItem.objects.create(
+                order=order,
+                product=product,
+                quantity=item.quantity,
+                price=item.product.price
+            )
+
+        # Record payment details
+        Payment.objects.create(
+            order=order,
+            payment_id=razorpay_payment_id,
+            status='Success',
+            amount=order.total_amount,
+            created_at=timezone.now()
+        )
+
+        return redirect(reverse('order_summary', args=[order.id]))
+
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+
+
+# def place_order(request):
+#     if 'login_id' not in request.session:
+#         return redirect('login') 
+#     user_id = request.session['login_id']
+    
+#     cart = get_object_or_404(Cart, login=user_id)
+#     cart_items = cart.items.filter(status=True)
+#     selected_address = request.POST.get('selected_address')
+#     address = get_object_or_404(Billing, id=selected_address) if selected_address else None
+
+   
+#     order = Order.objects.create(user_id=user_id, billing=address, cart=cart, status='Pending')
+#     for item in cart_items:
+#         item.status = False
+#         item.save()
+     
+#         item.product.stock_quantity -= item.quantity
+#         item.product.save()
+
+  
+#     return redirect('order_summary', order_id=order.id)
+
+# Order Summary View
+# def order_summary(request, order_id):
+#     if 'login_id' not in request.session:
+#         return redirect('login')  
+#     user_id = request.session['login_id']
+    
+#     order = get_object_or_404(Order, id=order_id, user_id=user_id)
+#     context = {'order': order}
+#     return render(request, 'order_summary.html', context)

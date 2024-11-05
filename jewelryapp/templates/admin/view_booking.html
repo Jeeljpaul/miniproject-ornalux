@@ -1,0 +1,66 @@
+{% include 'admin/navbar.html' %}
+
+{% block content %}
+<!-- <div class="container"> -->
+    <h2>Booking Details</h2>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <!-- <th>Booking ID</th> -->
+                <th>User Details</th>
+                <th>Product Details</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for booking in bookings %}
+            <tr>
+                <!-- <td>{{ booking.booking_id }}</td> -->
+                
+                <!-- User Details Column -->
+                <td>
+                    <p><strong>Name:</strong> {{ booking.user.name }}</p>
+                    <p><strong>Phone:</strong> {{ booking.user.phone }}</p>
+                    <p><strong>Address:</strong> {{ booking.address }}</p>
+                </td>
+                
+                <!-- Product Details Column -->
+                <td>
+                    <p><strong>Name:</strong> {{ booking.product.product_name }}</p>
+                    <p><strong>Description:</strong> {{ booking.product.description }}</p>
+                    <p><strong>Price:</strong> ${{ booking.product.price }}</p>
+                    <p><strong>Stock:</strong> {{ booking.product.stock }}</p>
+                    <p><strong>Status:</strong> {{ booking.status }}</p>
+                    <img src="{{ booking.product.images.url }}" alt="Product Image" style="width: 100px; height: auto;">
+                </td>
+                
+                <!-- Actions Column -->
+                <td>
+                    <form method="post" action="{% url 'view_bookings' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="booking_id" value="{{ booking.booking_id }}">
+
+                        {% if booking.status == 'pending' %}
+                            <button type="submit" name="action" value="approve" class="btn btn-success">Approve</button>
+                            <button type="submit" name="action" value="reject" class="btn btn-danger">Reject</button>
+                        {% endif %}
+
+                        {% if booking.status == 'confirmed' %}
+                            <div class="form-group">
+                                <label for="staff_id">Assign Staff:</label>
+                                <select name="staff_id" id="staff_id" class="form-control">
+                                    {% for staff in staff_members %}
+                                        <option value="{{ staff.staff_id }}">{{ staff.name }} - {{ staff.role }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" name="action" value="assign_staff" class="btn btn-primary mt-2">Assign</button>
+                            </div>
+                        {% endif %}
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+<!-- </div> -->
+{% endblock %}

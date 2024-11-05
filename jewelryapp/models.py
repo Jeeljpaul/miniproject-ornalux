@@ -148,6 +148,8 @@ class CartItem(models.Model):
     cart = models.ForeignKey(Cart, related_name='items', on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
+    status = models.BooleanField(default=True)  # True if active in cart, False if removed
+
 
     def __str__(self):
         return f"{self.quantity} of {self.product.product_name} in cart"
@@ -160,7 +162,7 @@ class Wishlist(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Wishlist of User ID: {self.login.user_id}"
+        return f"Wishlist of User ID: {self.login.email}"
 
 class WishlistItem(models.Model):
     wishlist = models.ForeignKey(Wishlist, on_delete=models.CASCADE, related_name='items')
@@ -168,7 +170,7 @@ class WishlistItem(models.Model):
     added_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.product.product_name} in Wishlist ID: {self.wishlist.id}"
+        return f"{self.product.product_name} in Wishlist ID: {self.wishlist.wishlist_id}"
 
 
 class Booking(models.Model):
@@ -184,3 +186,58 @@ class Booking(models.Model):
 
     def __str__(self):
         return f"Booking {self.booking_id} by {self.user.name} for {self.product.product_name} on {self.booking_date}"
+
+
+# Billing Model
+class Billing(models.Model):
+    user = models.ForeignKey(Tbl_user, on_delete=models.CASCADE)  # Change to ForeignKey
+    house_name = models.CharField(max_length=255)
+    postal_address = models.CharField(max_length=255)
+    city = models.CharField(max_length=50)
+    district = models.CharField(max_length=50)
+    state = models.CharField(max_length=50)
+    pincode = models.CharField(max_length=6)
+
+    def __str__(self):
+        return f"{self.house_name}, {self.city}"
+
+# Order Model
+class Order(models.Model):
+    user = models.ForeignKey(Tbl_user, on_delete=models.CASCADE)
+    billing = models.ForeignKey(Billing, on_delete=models.SET_NULL, null=True)
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, default='Pending') 
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2)  # Total amount for the order
+    razorpay_order_id = models.CharField(max_length=100, blank=True, null=True)  # For Razorpay integration
+    order_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Order {self.id} by {self.user.login.email} - Status: {self.status}"
+
+
+# OrderItem Model
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_items')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def get_total_price(self):
+        return self.price * self.quantity
+
+    def __str__(self):
+        return f"{self.product.product_name} - Quantity: {self.quantity} - Price: {self.price}"
+
+
+from django.db import models
+from django.utils import timezone
+
+class Payment(models.Model):
+    order = models.OneToOneField(Order, on_delete=models.CASCADE)
+    payment_id = models.CharField(max_length=100, null=True)  # Allow null for existing rows
+    status = models.CharField(max_length=20, default='Pending')  # Status can be 'Success', 'Failed', etc.
+    amount = models.DecimalField(max_digits=10, decimal_places=2)  # Amount paid
+    created_at = models.DateTimeField(default=timezone.now)  # Use timezone.now to set default value
+
+    def __str__(self):
+        return f"Payment {self.payment_id} for Order {self.order.id}"

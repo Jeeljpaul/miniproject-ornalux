@@ -36,7 +36,6 @@ urlpatterns = [
     path('view-metaltypes/', views.view_metaltypes, name='view_metaltypes'),
     path('adminhome/add_stonetype/', views.add_stonetype, name='add_stonetype'),
     path('view-stonetypes/', views.view_stonetypes, name='view_stonetypes'),
-
     path('adminhome/add_pro/', views.add_pro, name='add_pro'),
 
 
@@ -47,6 +46,9 @@ urlpatterns = [
     path('view_staff/', views.view_staff, name='view_staff'),
     path('update_staff/<int:staff_id>/', views.update_staff, name='update_staff'),
     path('staff/delete/<int:staff_id>/', views.delete_staff, name='delete_staff'),
+
+    path('view_bookings/', views.view_bookings, name='view_bookings'),
+
 
 
     path('product/', views.product, name='product'),
@@ -62,8 +64,8 @@ urlpatterns = [
     path('submit_schedule/<int:product_id>/', views.submit_schedule, name='submit_schedule'),
     path('booking-details/<int:booking_id>/', views.booking_details, name='booking_details'),
 
-
-
+    path('booking_history/', views.booking_history, name='booking_history'),
+    path('edit_booking/<int:booking_id>/', views.edit_booking, name='edit_booking'),
 
 
 
@@ -74,6 +76,11 @@ urlpatterns = [
     path('add_to_wishlist/<int:product_id>/', views.add_to_wishlist, name='add_to_wishlist'),
     path('wishlist/', views.view_wishlist, name='view_wishlist'),
     path('remove_from_wishlist/<int:item_id>/', views.remove_from_wishlist, name='remove_from_wishlist'),
+
+    path('checkout/', views.checkout, name='checkout'),
+    path('add_address/', views.add_address, name='add_address'),
+        # path('process-payment/', views.process_payment, name='process_payment'),
+
 
  
 

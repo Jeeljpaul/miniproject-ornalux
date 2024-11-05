@@ -20,7 +20,7 @@ SECRET_KEY = 'django-insecure-7ac1#6p@u*6eibbh(cafy0@@fdr-w8buz73_h$^hqp$rde)529
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -49,6 +49,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'social_django.middleware.SocialAuthExceptionMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware'
 ]
 
 SOCIAL_AUTH_PIPELINE = (
@@ -97,14 +98,29 @@ WSGI_APPLICATION = 'jewelrysystem.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'db_ornalux',
+#         'USER': 'root',
+#         'PASSWORD': '',
+#         'HOST': 'localhost',
+#         'PORT': '3306',
+#     }
+# }
+
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'db_ornalux',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': 'localhost',
-        'PORT': '3306',
+        'NAME': 'ornalux123_facinggold',
+        'USER': 'ornalux123_facinggold',
+        'PASSWORD': 'fc549d0d4a1b800378dee77be3a7c1056d2b4d7e', 
+        'HOST': 'em-ju.h.filess.io',
+        'PORT': '3307',
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
+        }
     }
 }
 
@@ -178,6 +194,9 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'jeeljpaul2025@mca.ajce.in'
-EMAIL_HOST_PASSWORD = '143@r3sdj'
+EMAIL_HOST_PASSWORD = '143r3sdj'
 DEFAULT_FROM_EMAIL = 'jeeljpaul2025@mca.ajce.in'  # Email sender's address
 
+# Razorpay credentials
+RAZORPAY_KEY_ID = 'rzp_test_7MkWbHUlMslHd2'
+RAZORPAY_KEY_SECRET = 'XjhCKjQ4LvgGdYpEfhdV0JE0'

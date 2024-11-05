@@ -1,0 +1,160 @@
+{% load static %}
+{% include 'user/trial.html' %}
+
+<style>
+    /* Center the container and give it a clean look */
+    .container {
+        max-width: 500px;
+        margin: 50px auto;
+        padding: 30px;
+        background-color: #f9f9f9;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+    }
+
+    /* Heading style */
+    .container h2 {
+        font-size: 24px;
+        font-weight: 600;
+        color: #333;
+        text-align: left;
+        margin-bottom: 20px;
+    }
+
+    /* Form input styles */
+    input, textarea {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 16px;
+        transition: border-color 0.3s ease;
+    }
+
+    /* Focused input fields */
+    input:focus, textarea:focus {
+        border-color: #007bff;
+        outline: none;
+        box-shadow: 0px 0px 4px rgba(0, 123, 255, 0.2);
+    }
+
+    /* Submit button style */
+    .btn-primary {
+        width: 100%;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        padding: 10px;
+        font-size: 18px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    /* Secondary button style */
+    .btn-secondary {
+        display: block;
+        width: 100%;
+        text-align: center;
+        color: white;
+        padding: 10px;
+        font-size: 18px;
+        margin-top: 10px;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    /* Button hover effects */
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+
+    .btn-secondary:hover {
+        color: white;
+    }
+
+    /* Error message style */
+    .error {
+        color: red;
+        font-size: 14px;
+        margin-top: -10px;
+        margin-bottom: 10px;
+    }
+
+    .breadcrumb-container {
+        margin-left: 30px; /* Left margin */
+        padding: 10px 0; /* Padding */
+        background-color: transparent; /* Transparent background */
+        border: none; /* No border */
+        box-shadow: none; /* No shadow */
+        margin-top: 20px; /* Space above breadcrumb */
+        font-size: 14px; /* Font size for breadcrumb */
+        color: #6c757d; /* Text color */
+        max-width: 1300px;
+    }
+
+</style>
+
+<div class="breadcrumb-container">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'booking_history' %}">Your bookings</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Edit Booking</li>
+        </ol>
+    </nav>
+</div>
+
+
+{% block content %}
+<div class="container">
+    <h2>Edit Booking</h2>
+    <form method="post" id="editBookingForm">
+        {% csrf_token %}
+        <label for="address">Address:</label>
+        <textarea id="address" name="address" required>{{ booking.address }}</textarea>
+        <div id="addressError" class="error"></div>
+
+        <label for="phone">Phone Number:</label>
+        <input type="text" id="phone" name="phone" maxlength="10" pattern="[6-9][0-9]{9}" required value="{{ booking.user.phone }}">
+        <div id="phoneError" class="error"></div>
+
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <a href="{% url 'booking_history' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+
+<script>
+    const form = document.getElementById('editBookingForm');
+
+    form.onsubmit = function(event) {
+        let valid = true;
+        const phone = document.getElementById('phone');
+        const address = document.getElementById('address');
+        const phoneError = document.getElementById('phoneError');
+        const addressError = document.getElementById('addressError');
+
+        // Clear previous error messages
+        phoneError.textContent = '';
+        addressError.textContent = '';
+
+        // Phone validation
+        const phonePattern = /^[6-9][0-9]{9}$/;
+        if (!phonePattern.test(phone.value)) {
+            phoneError.textContent = 'Phone number must be 10 digits and start with 6, 7, 8, or 9.';
+            valid = false;
+        }
+
+        // Address validation (example: check if it's empty)
+        if (address.value.trim() === '') {
+            addressError.textContent = 'Address cannot be empty.';
+            valid = false;
+        }
+
+        if (!valid) {
+            event.preventDefault(); // Prevent form submission
+        }
+    };
+</script>
+{% endblock content %}

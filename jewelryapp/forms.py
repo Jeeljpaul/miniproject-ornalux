@@ -61,3 +61,20 @@ class ProductForm(forms.ModelForm):
             'images': forms.ClearableFileInput(attrs={'class': 'form-control-file'}),
             'delivery_options': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Enter delivery options'}),
         }
+
+        
+from django import forms
+from .models import Booking
+
+class EditBookingForm(forms.ModelForm):
+    phone = forms.CharField(label='Phone Number', max_length=15)  # Custom field for phone
+
+    class Meta:
+        model = Booking
+        fields = ['address', 'phone']  # 'phone' is added here as a custom field
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)  # Pass the user instance
+        super().__init__(*args, **kwargs)
+        if user:
+            self.fields['phone'].initial = user.phone  # Set initial phone value from user
