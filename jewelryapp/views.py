@@ -1537,81 +1537,82 @@ def product_list(request):
 
 #-----------------------------------------------------------------------------------------------------------------------------
 from django.shortcuts import render
-from .models import Product, Category, Metaltype, Stonetype
+from .models import Product, Category, Metaltype, Stonetype, CategoryAttribute, ProductAttribute
 
 def all_products(request):
-    # Get all the products initially
-    products = Product.objects.filter(is_active=True)
+    products = Product.objects.filter(is_active=True)  # Fetch only active products
     
-    # Get the categories and other filter options for display in the template
-    categories = Category.objects.all()
-    metal_types = Metaltype.objects.all()
-    stone_types = Stonetype.objects.all()
+    # Get filter values from the request
+    search_query = request.GET.get('search', '').strip()
+    selected_category = request.GET.get('category', '').strip()
+    selected_metaltype = request.GET.getlist('metaltype')
+    selected_stonetype = request.GET.getlist('stonetype')
+    selected_gender = request.GET.getlist('gender')
+    try_at_home = request.GET.get('try_at_home', None)
+    attribute_filters = {}
 
-    # Get the filter values from the request
-    category_filter = request.GET.getlist('category')
-    try_at_home_filter = request.GET.get('try_at_home')
-    ring_size_filter = request.GET.getlist('ring_size')
-    ring_type_filter = request.GET.getlist('ring_type')
-    earring_style_filter = request.GET.getlist('earringstyle')
-    bracelet_style_filter = request.GET.getlist('bracelet_style')
-    gender_filter = request.GET.getlist('shop_for')
-    gemstone_filter = request.GET.getlist('stone_type')
-    material_filter = request.GET.getlist('metal_type')
+    # Debugging output
+    print(f"Selected Category: {selected_category}")
+    print(f"Search Query: {search_query}")
 
-    # Apply category filtering if selected
-    if category_filter:
-        products = products.filter(category__name__in=category_filter)
-    
-    # Apply Try at Home filter
-    if try_at_home_filter == 'true':
+    # Filter by search query
+    if search_query:
+        products = products.filter(product_name__icontains=search_query)
+
+    # Filter by category
+    category_attributes = None
+    if selected_category and selected_category.isdigit():  # Ensure valid category ID
+        try:
+            category_id = int(selected_category)
+            print(f"Filtering by category ID: {category_id}")
+            products = products.filter(category_id=category_id)
+
+            # Fetch category-specific attributes
+            category_attributes = CategoryAttribute.objects.filter(category_id=category_id)
+            
+            # Apply attribute filters from user input
+            for attribute in category_attributes:
+                attribute_value = request.GET.get(f"attribute_{attribute.id}", None)
+                if attribute_value:
+                    attribute_filters[attribute.name] = attribute_value
+                    products = products.filter(
+                        attributes__attribute_name=attribute.name,
+                        attributes__attribute_value=attribute_value
+                    )
+        except ValueError:
+            print("Invalid category ID passed.")
+
+    # Filter by metal type
+    if selected_metaltype:
+        products = products.filter(metaltype_id__in=selected_metaltype)
+
+    # Filter by stone type
+    if selected_stonetype:
+        products = products.filter(stonetype_id__in=selected_stonetype)
+
+    # Filter by gender
+    if selected_gender:
+        products = products.filter(gender__in=selected_gender)
+
+    # Filter by try at home
+    if try_at_home:
         products = products.filter(try_at_home=True)
 
-    # Apply ring size filter if selected
-    if ring_size_filter:
-        products = products.filter(attributes__attribute_name='Ring Size', attributes__attribute_value__in=ring_size_filter)
+    # Fetch filter options
+    categories = Category.objects.all()
+    metaltypes = Metaltype.objects.all()
+    stonetypes = Stonetype.objects.all()
+    product_gender_choices = Product.GENDER_CHOICES
 
-    # Apply ring type filter if selected
-    if ring_type_filter:
-        products = products.filter(attributes__attribute_name='Ring Type', attributes__attribute_value__in=ring_type_filter)
-
-    # Apply earring style filter if selected
-    if earring_style_filter:
-        products = products.filter(attributes__attribute_name='Earring Style', attributes__attribute_value__in=earring_style_filter)
-
-    # Apply bracelet style filter if selected
-    if bracelet_style_filter:
-        products = products.filter(attributes__attribute_name='Bracelet Style', attributes__attribute_value__in=bracelet_style_filter)
-
-    # Apply gender filter if selected
-    if gender_filter:
-        products = products.filter(gender__in=gender_filter)
-
-    # Apply gemstone filter if selected
-    if gemstone_filter:
-        products = products.filter(stonetype__name__in=gemstone_filter)
-
-    # Apply material filter if selected
-    if material_filter:
-        products = products.filter(metaltype__name__in=material_filter)
-
-    # Prepare the selected filters to pass back to the template
     context = {
+        'products': products,
         'categories': categories,
-        'metal_types': metal_types,
-        'stone_types': stone_types,
-        'rings': products.filter(category__name='Ring'),
-        'earrings': products.filter(category__name='Earring'),
-        'bracelets': products.filter(category__name='Bracelet'),
-        'selected_category': category_filter,
-        'try_at_home_filter': try_at_home_filter,
-        'selected_ring_sizes': ring_size_filter,
-        'selected_ring_types': ring_type_filter,
-        'selected_earring_styles': earring_style_filter,
-        'selected_styles': bracelet_style_filter,
-        'selected_shop_for': gender_filter,
-        'selected_gemstones': gemstone_filter,
-        'selected_materials': material_filter,
+        'metaltypes': metaltypes,
+        'stonetypes': stonetypes,
+        'product_gender_choices': product_gender_choices,
+        'selected_category': selected_category,
+        'category_attributes': category_attributes,
+        'attribute_filters': attribute_filters
     }
 
     return render(request, 'user/all_products.html', context)
@@ -1866,41 +1867,40 @@ def edit_booking(request, booking_id):
     return render(request, 'user/edit_booking.html', {'form': None, 'booking': booking})
 
 #//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-from django.shortcuts import render, redirect, get_object_or_404
-from django.urls import reverse
-from django.http import JsonResponse
-from .models import Cart, CartItem, Billing, Tbl_user, Order, Product
-from django.db import transaction
+# from django.shortcuts import render, redirect, get_object_or_404
+# from django.urls import reverse
+# from django.http import JsonResponse
+# from .models import Cart, CartItem, Billing, Tbl_user, Order, Product
+# from django.db import transaction
 
 # Checkout View
-def checkout(request):
-    # Check if user is logged in
-    if 'login_id' not in request.session:
-        return redirect('login')  # Redirect to login if not logged in
-
-    login_id = request.session['login_id']
+# def checkout(request):
     
-    # Get `Tbl_user` instance for the logged-in user
-    try:
-        user = Tbl_user.objects.get(login__login_id=login_id)
-    except Tbl_user.DoesNotExist:
-        return redirect('login')  # Redirect to login if user not found
+#     if 'login_id' not in request.session:
+#         return redirect('login') 
 
-    # Retrieve the cart and active cart items for the user
-    cart = get_object_or_404(Cart, login=login_id)
-    cart_items = cart.items.filter(status=True)
-    total_price = sum(item.product.price * item.quantity for item in cart_items)
+#     login_id = request.session['login_id']
+    
+#     try:
+#         user = Tbl_user.objects.get(login__login_id=login_id)
+#     except Tbl_user.DoesNotExist:
+#         return redirect('login')  
 
-    # Fetch the billing addresses for the current user
-    addresses = Billing.objects.filter(user=user)
+#     cart = get_object_or_404(Cart, login=login_id)
+#     cart_items = cart.items.filter(status=True)
+#     total_price = sum(item.product.price * item.quantity for item in cart_items)
 
-    # Display checkout page with total price, cart items, and addresses
-    context = {
-        'cart_items': cart_items,
-        'total_price': total_price,
-        'addresses': addresses,
-    }
-    return render(request, 'user/billing.html', context)
+#     addresses = Billing.objects.filter(user=user)
+
+   
+#     context = {
+#         'cart_items': cart_items,
+#         'total_price': total_price,
+#         'addresses': addresses,
+#     }
+#     return render(request, 'user/billing.html', context)
+
+
 
 from django.shortcuts import redirect, render
 from django.contrib import messages
@@ -1970,117 +1970,135 @@ def remove_address(request, address_id):
     return JsonResponse({'status': 'error', 'message': 'Invalid request'})
 
 
-
 from django.shortcuts import render, redirect, get_object_or_404
-from django.urls import reverse
 from django.http import JsonResponse
+from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
-from django.conf import settings
 from django.utils import timezone
-from .models import Tbl_user, Cart, Order, OrderItem, Billing, Payment, Product, CartItem
-
+from .models import Cart, CartItem, Product, Order, OrderItem, Billing, Payment, Tbl_login, Tbl_user
+from django.conf import settings
 import razorpay
 
-# Initialize Razorpay client
+# Razorpay client initialization
 razorpay_client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
 
-@csrf_exempt
-def start_payment(request):
-    if request.method == "POST":
-        user_id = request.session.get('login_id')
-        user = get_object_or_404(Tbl_user, login_id=user_id)
+def checkout(request):
+    if 'login_id' not in request.session:
+        return redirect('login')  # Redirect to login if not logged in
 
-        cart_items = CartItem.objects.filter(user=user, status=True)
-        total_price = sum(item.product.price * item.quantity for item in cart_items) * 100
+    login_id = request.session['login_id']
+    login_user = get_object_or_404(Tbl_login, login_id=login_id)
+    user = get_object_or_404(Tbl_user, login=login_user)
 
-        # Prepare Razorpay order
-        razorpay_order = razorpay_client.order.create({
-            "amount": total_price,
-            "currency": "INR",
-            "payment_capture": "1"
-        })
+    # Retrieve the user's cart and active cart items
+    cart = get_object_or_404(Cart, login=login_user)
+    cart_items = cart.items.filter(status=True)  # Only active items
+    total_price = cart.total_price()
 
+    # Retrieve billing addresses associated with the user
+    addresses = Billing.objects.filter(user=user)
+
+    if request.method == 'POST':
+        selected_address_id = request.POST.get('selected_address')
+        
+        # Check if an address is selected
+        if not selected_address_id:
+            messages.error(request, "Please select a billing address.")
+            return redirect('checkout')  # Redirect back to the checkout page
+        
+        # Get the selected address and create an order
+        address = get_object_or_404(Billing, id=selected_address_id)
         order = Order.objects.create(
             user=user,
-            cart=get_object_or_404(Cart, user=user),
-            total_amount=total_price / 100,
-            razorpay_order_id=razorpay_order['id']
+            billing=address,
+            cart=cart,
+            total_amount=total_price,
+            status='Pending'
         )
 
-        return JsonResponse({
-            "order_id": razorpay_order['id'],
-            "amount": total_price,
-            "currency": "INR",
-            "key": settings.RAZORPAY_KEY_ID
-        })
-
-def payment_success(request):
-    if request.method == "POST":
-        user_id = request.session.get('login_id')
-        user = get_object_or_404(Tbl_user, login_id=user_id)
-        razorpay_payment_id = request.POST.get("razorpay_payment_id")
-        razorpay_order_id = request.POST.get("razorpay_order_id")
-
-        # Get Order and Billing Address
-        order = get_object_or_404(Order, razorpay_order_id=razorpay_order_id, user=user)
-        selected_address_id = request.POST.get('selected_address')
-        billing_address = get_object_or_404(Billing, id=selected_address_id, user=user)
-        order.billing = billing_address
-        order.status = 'Completed'
-        order.save()
-
-        # Update stock and mark CartItem status as False
-        for item in CartItem.objects.filter(user=user, status=True):
-            product = item.product
-            product.stock -= item.quantity  # Reduce stock quantity
-            product.save()
-            item.status = False  # Mark item as processed
-            item.save()
-
-            # Create OrderItem
+        # Create order items from cart items
+        for item in cart_items:
             OrderItem.objects.create(
                 order=order,
-                product=product,
+                product=item.product,
                 quantity=item.quantity,
                 price=item.product.price
             )
+        
+        # Razorpay order creation
+        razorpay_order = razorpay_client.order.create({
+            "amount": int(total_price * 100),  # Amount in paise
+            "currency": "INR",
+            "payment_capture": "1"
+        })
+        
+        # Store Razorpay order ID in the order
+        order.razorpay_order_id = razorpay_order['id']
+        order.save()
 
-        # Record payment details
-        Payment.objects.create(
-            order=order,
-            payment_id=razorpay_payment_id,
-            status='Success',
-            amount=order.total_amount,
-            created_at=timezone.now()
-        )
+        return render(request, 'user/billing.html', {
+            'order': order,
+            'razorpay_order_id': razorpay_order['id'],
+            'razorpay_key': settings.RAZORPAY_API_KEY,
+            'total_price': total_price
+        })
 
-        return redirect(reverse('order_summary', args=[order.id]))
+    return render(request, 'user/billing.html', {
+        'cart_items': cart_items,
+        'total_price': total_price,
+        'addresses': addresses
+    })
 
-    return JsonResponse({'error': 'Invalid request'}, status=400)
 
+@csrf_exempt
+def payment_handler(request):
+    if request.method == 'POST':
+        payment_id = request.POST.get('razorpay_payment_id')
+        order_id = request.POST.get('razorpay_order_id')
+        signature = request.POST.get('razorpay_signature')
+        
+        # Retrieve the corresponding order
+        order = get_object_or_404(Order, razorpay_order_id=order_id)
+        
+        # Verify the Razorpay signature
+        params_dict = {
+            'razorpay_order_id': order_id,
+            'razorpay_payment_id': payment_id,
+            'razorpay_signature': signature
+        }
+        try:
+            razorpay_client.utility.verify_payment_signature(params_dict)
+            # Payment is successful, save payment details
+            Payment.objects.create(
+                order=order,
+                payment_id=payment_id,
+                status="Success",
+                amount=order.total_amount,
+                created_at=timezone.now()
+            )
+            # Mark cart items as inactive and update stock quantities
+            for item in order.cart.items.filter(status=True):
+                item.status = False  # Mark item as inactive
+                item.save()
+                
+                # Update stock quantity
+                product = item.product
+                product.stock_quantity = max(0, product.stock_quantity - item.quantity)
+                product.save()
+            
+            # Update order status to completed
+            order.status = "Completed"
+            order.save()
 
+            messages.success(request, "Payment successful and order placed.")
+            return JsonResponse({"status": "success"})
 
-# def place_order(request):
-#     if 'login_id' not in request.session:
-#         return redirect('login') 
-#     user_id = request.session['login_id']
-    
-#     cart = get_object_or_404(Cart, login=user_id)
-#     cart_items = cart.items.filter(status=True)
-#     selected_address = request.POST.get('selected_address')
-#     address = get_object_or_404(Billing, id=selected_address) if selected_address else None
+        except razorpay.errors.SignatureVerificationError:
+            messages.error(request, "Payment failed due to signature verification error.")
+            return JsonResponse({"status": "failed"})
 
-   
-#     order = Order.objects.create(user_id=user_id, billing=address, cart=cart, status='Pending')
-#     for item in cart_items:
-#         item.status = False
-#         item.save()
-     
-#         item.product.stock_quantity -= item.quantity
-#         item.product.save()
+    return JsonResponse({"status": "invalid request"})
 
-  
-#     return redirect('order_summary', order_id=order.id)
 
 # Order Summary View
 # def order_summary(request, order_id):

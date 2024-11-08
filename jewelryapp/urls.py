@@ -5,7 +5,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path('', views.index),
+    path('', views.index, name='home'),
     path('base_home/',views.base),
     path('login/',views.login, name='login'),
     path('logout/', views.logout_view, name='logout'),
@@ -79,7 +79,7 @@ urlpatterns = [
 
     path('checkout/', views.checkout, name='checkout'),
     path('add_address/', views.add_address, name='add_address'),
-        # path('process-payment/', views.process_payment, name='process_payment'),
+    path('payment-handler/', views.payment_handler, name='payment_handler'),
 
 
  
