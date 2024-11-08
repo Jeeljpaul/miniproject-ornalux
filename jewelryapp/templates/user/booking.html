@@ -141,7 +141,7 @@
                     <th>Address</th>
                     <th>Phone</th>
                     <th>Status</th>
-                    <th>Actions</th>
+                    <!-- <th>Actions</th> -->
                 </tr>
             </thead>
             <tbody>
@@ -165,11 +165,11 @@
                             <span class="badge badge-info">Completed</span>
                         {% endif %}
                     </td>
-                    <td>
+                    <!-- <td>
                         {% if booking.status != 'completed' %}
                             <a href="{% url 'edit_booking' booking.booking_id %}" class="edit-button">Edit</a>
                         {% endif %}
-                    </td>
+                    </td> -->
                 </tr>
                 {% empty %}
                 <tr>

@@ -186,7 +186,7 @@
                             <td>Rs: {{ item.product.price }}</td>
                             <td>
                                 <button class="btn btn-success btn-sm add-to-cart-button" data-product-id="{{ item.product.product_id }}">Add to Cart</button>
-                                <button class="btn btn-danger btn-sm remove-button" data-product-id="{{ item.product.product_id }}">Remove</button>
+                                <button class="btn btn-danger btn-sm remove-button" data-item-id="{{ item.id }}">Remove</button>
                             </td>
                         </tr>
                     {% endfor %}
@@ -211,9 +211,10 @@
 
         // Function to handle removing items from the wishlist
         $('.remove-button').on('click', function() {
-            const productId = $(this).data('product-id');
-            removeFromWishlist(productId);
-        });
+            const itemId = $(this).data('item-id');
+                removeFromWishlist(itemId);
+});
+
 
         // Function to add an item to the cart
         function addToCart(productId) {
@@ -234,23 +235,31 @@
         }
 
         // Function to remove an item from the wishlist
-        function removeFromWishlist(productId) {
-            $.ajax({
-                url: `/remove_from_wishlist/`,
-                method: 'POST',
-                data: {
-                    product_id: productId,
-                    csrfmiddlewaretoken: '{{ csrf_token }}'
-                },
-                success: function(response) {
-                    // Remove the item row from the table
-                    $(`button[data-product-id="${productId}"]`).closest('tr').remove();
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error removing item from wishlist:', error);
-                }
-            });
+        // Function to handle removing items from the wishlist
+
+// Function to remove an item from the wishlist
+function removeFromWishlist(itemId) {
+    $.ajax({
+        url: `/remove_from_wishlist/${itemId}/`,  // Use item_id directly in the URL
+        method: 'POST',
+        data: {
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+        },
+        success: function(response) {
+            if (response.success) {
+                alert(response.message);
+                // Remove the item row from the table
+                $(`button[data-item-id="${itemId}"]`).closest('tr').remove();
+            } else {
+                alert(response.message);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error removing item from wishlist:', error);
         }
+    });
+}
+
     </script>
 </body>
 </html>
