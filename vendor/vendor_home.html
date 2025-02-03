@@ -1,0 +1,141 @@
+{% block content %}
+<div class="d-flex" id="wrapper">
+    <!-- Sidebar -->
+    <div class="bg-light border-right" id="sidebar-wrapper">
+        <div class="sidebar-heading">Vendor Dashboard</div>
+        <div class="list-group list-group-flush">
+            <div class="accordion" id="sidebarAccordion">
+                <!-- Product Management -->
+                <div class="card">
+                    <div class="card-header" id="productManagement">
+                        <h2 class="mb-0">
+                            <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseProducts">
+                                Product Management
+                            </button>
+                        </h2>
+                    </div>
+                    <div id="collapseProducts" class="collapse" data-parent="#sidebarAccordion">
+                        <div class="card-body">
+                            <a href="{% url 'vendor_add_product' %}" class="list-group-item">Add Product</a>
+                            <a href="{% url 'vendor_view_products' %}" class="list-group-item">View Products</a>
+                        </div>
+                    </div>
+                </div>
+                <!-- Order Management -->
+                <div class="card">
+                    <div class="card-header" id="orderManagement">
+                        <h2 class="mb-0">
+                            <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseOrders">
+                                Order Management
+                            </button>
+                        </h2>
+                    </div>
+                    <div id="collapseOrders" class="collapse" data-parent="#sidebarAccordion">
+                        <div class="card-body">
+                            <a href="{% url 'vendor_pending_orders' %}" class="list-group-item">Pending Orders</a>
+                            <a href="{% url 'vendor_order_history' %}" class="list-group-item">Order History</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page Content -->
+    <div id="page-content-wrapper">
+        <div class="container-fluid">
+            <h1 class="mt-4">Welcome, {{ request.user.vendor.business_name }}</h1>
+            
+            <!-- Restock Requests -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5>Pending Restock Requests</h5>
+                </div>
+                <div class="card-body">
+                    <h2>Restock Requests</h2>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Product Name</th>
+                                <th>Requested Quantity</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for request in restock_requests %}
+                            <tr>
+                                <td>{{ request.product.product_name }}</td>
+                                <td>{{ request.requested_date|date:"M d, Y" }}</td>
+                                <td>{{ request.status }}</td>
+                                <td>
+                                    <button class="btn btn-success" onclick="acceptRestockRequest({{ request.id }})">Accept</button>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4">No restock requests available.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="successModalLabel">Success</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="modalMessage"></p> <!-- This will display the success message -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function acceptRestockRequest(requestId) {
+    const csrftoken = getCookie('csrftoken');
+
+    fetch(`/vendor/restock-requests/${requestId}/accept/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrftoken,
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Show success message in a modal
+            document.getElementById('modalMessage').innerText = data.message;
+            $('#successModal').modal('show'); // Show the modal
+            location.reload(); // Optionally reload the page to update the list
+        } else {
+            alert('Error accepting request: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to accept request. Please try again.');
+    });
+}
+</script>
+{% endblock %}

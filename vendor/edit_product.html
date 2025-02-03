@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Product</title>
+    <script type="text/javascript">
+        // Function to disable the back button
+        function preventBack() {
+            history.pushState(null, null, location.href); // Add a new state to the history
+            window.addEventListener('popstate', function (event) {
+                history.pushState(null, null, location.href); // Keep adding a new state to block the back action
+            });
+        }
+
+        // Call the function to prevent back navigation
+        window.onload = preventBack;
+    </script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        /* Add your styles here */
+        body {
+            background-color: #e9ecef;
+            font-family: 'Poppins', sans-serif;
+        }
+        .container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            max-width: 700px;
+            margin: 60px auto;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .error-message {
+            color: red;
+            font-size: 0.875rem;
+        }
+        
+        #sidebar-wrapper .sidebar-heading {
+            padding: 1rem;
+            font-size: 1.5rem;
+            background-color: #212529; /* Darker heading for contrast */
+            color: #fff;
+            text-align: center;
+        }
+
+        .list-group-item {
+            border: none;
+            background-color: transparent;
+            color: #0a0a0a; /* Light text color */
+        }
+
+        .list-group-item:hover, .list-group-item:focus {
+            background-color: #495057; /* Darker hover effect */
+            color: #fff;
+        }
+
+        #page-content-wrapper {
+            width: 100vw;
+            padding: 20px;
+        }
+
+        .navbar {
+            padding-left: 0;
+        }
+
+        .navbar-light {
+            background-color: #e9ecef; /* Light navbar background */
+        }
+
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="{% url 'vendor_home' %}">Home</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+<!-- Sidebar -->
+<div class="d-flex" id="wrapper">
+    <div class="bg-light border-right" id="sidebar-wrapper">
+        <div class="sidebar-heading">Blue Dart</div>
+        <!-- <div class="list-group list-group-flush"> -->
+    </div>
+</div>      
+
+
+        <div class="container">
+            <h2>Update Product</h2>
+            <form method="POST" action="{% url 'vendor_edit_product' product.id %}" onsubmit="validateForm(event)" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="id_product_name">Product Name</label>
+                    <input type="text" class="form-control" id="id_product_name" name="product_name" value="{{ product.product_name }}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_category">Category</label>
+                    <select class="form-control" id="id_category" name="id_category" onchange="loadAttributes()" required>
+                        <option value="">Select a category</option>
+                        {% for category in categories %}
+                            <option value="{{ category.category_id }}" {% if category.id == product.category.catgeory_id %}selected{% endif %}>{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+    
+                <div id="attributes-container">
+                    <!-- Attributes will be dynamically loaded here based on the category -->
+                </div>
+    
+                <div class="form-group">
+                    <label for="id_price">Price</label>
+                    <input type="text" class="form-control" id="id_price" name="price" value="{{ product.price }}" required>
+                </div>
+    
+                <div class="form-group">
+                    <label for="id_stock_quantity">Stock Quantity</label>
+                    <input type="number" class="form-control" id="id_stock_quantity" name="stock_quantity" value="{{ product.stock_quantity }}" required>
+                </div>
+    
+                <div class="form-group">
+                    <label for="id_weight">Weight</label>
+                    <input type="number" class="form-control" id="id_weight" name="weight" value="{{ product.weight }}" required>
+                </div>
+    
+                <div class="form-group">
+                    <label for="id_product_description">Description</label>
+                    <textarea class="form-control" id="id_product_description" name="product_description" required>{{ product.product_description }}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_metaltype">Metal Type</label>
+                    <select class="form-control" id="id_metaltype" name="metaltype" required>
+                        <option value="">Select Metal Type</option>
+                        {% for metaltype in metaltypes %}
+                            <option value="{{ metaltype.metaltype_id }}" 
+                                {% if metaltype.metaltype_id == product.metaltype.metaltype_id %}selected{% endif %}>
+                                {{ metaltype.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                
+            <div class="form-group">
+                <label for="id_stonetype">Stone Type </label>
+                <select class="form-control" id="id_stonetype" name="stonetype">
+                    <option value="">Select Stone Type</option>
+                    {% for stonetype in stonetypes %}
+                    <option value="{{ stonetype.stonetype_id }}" 
+                    {% if stonetype.stonetype_id == product.stonetype.stonetype_id %}selected{% endif %}>
+                    {{ stonetype.name }}
+                </option>                   
+                {% endfor %}
+                </select>
+            </div>
+
+
+            <div class="form-group">
+                <label for="id_gender">Gender <span class="required">*</span></label>
+                <select class="form-control" id="id_gender" name="gender" required>
+                    <option value="">Select Gender</option>
+                    <option value="Men" {% if product.gender == "Men" %}selected{% endif %}>Men</option>
+                    <option value="Women" {% if product.gender == "Women" %}selected{% endif %}>Women</option>
+                    <option value="Unisex" {% if product.gender == "Unisex" %}selected{% endif %}>Unisex</option>
+                    <option value="Kid" {% if product.gender == "Kid" %}selected{% endif %}>Kid</option>
+                    <option value="Baby" {% if product.gender == "Baby" %}selected{% endif %}>Baby</option>
+                </select>
+            </div>
+                
+
+
+
+                <div class="form-group">
+                    <label for="id_image">Image</label>
+                    
+                    <!-- Display the current image if it exists -->
+                    {% if product.images %}
+                        <div>
+                            <img src="{{ product.images.url }}" alt="Current Image" style="max-width: 150px; max-height: 150px;">
+                        </div>
+                    {% endif %}
+                    
+                    <!-- File input field to upload a new image -->
+                    <input type="file" class="form-control" id="id_image" name="image">
+                </div>
+                
+                
+    
+                <button type="submit">Update Product</button>
+    
+                <div id="error-messages"></div>
+            </form>
+        </div>
+    
+        <script>
+            function loadAttributes() {
+                const categoryId = document.getElementById('id_category').value;
+                if (!categoryId) {
+                    $('#attributes-container').html('<p style="color:red;">Please select a category to load its attributes.</p>');
+                    return;
+                }
+    
+                $.ajax({
+                    url: `/get_category_attributes/${categoryId}/`,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (response) {
+                        displayAttributes(response);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error fetching category attributes:', error);
+                        $('#attributes-container').html('<p style="color:red;">Error fetching attributes. Please try again.</p>');
+                    }
+                });
+            }
+    
+            function displayAttributes(data) {
+                const attributesContainer = $('#attributes-container');
+                attributesContainer.empty();
+    
+                if (data && data.attributes && data.attributes.length > 0) {
+                    let attributesHtml = '';
+                    data.attributes.forEach(function (attribute) {
+                        attributesHtml += `
+                            <div class="form-group">
+                                <label>${attribute.name}</label>
+                                <input type="text" class="form-control" name="attribute_${attribute.id}" value="${attribute.value || ''}" />
+                                <input type="hidden" name="attributes" value="${attribute.id}" />
+                            </div>
+                        `;
+                    });
+                    attributesContainer.html(attributesHtml);
+                } else {
+                    attributesContainer.html('<p>No attributes found for this category.</p>');
+                }
+            }
+    
+            $(document).ready(function () {
+                // Load attributes for the initial product category on page load
+                loadAttributes();
+            });
+        </script>
+
+</body>
+</html>

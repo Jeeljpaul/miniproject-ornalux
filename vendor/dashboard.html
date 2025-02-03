@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendor Dashboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+        .sidebar {
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            background-color: #343a40;
+            color: white;
+            padding-top: 20px;
+        }
+        .sidebar a {
+            color: white;
+            transition: background-color 0.3s;
+        }
+        .sidebar a:hover {
+            background-color: #495057;
+        }
+        .sidebar .dropdown-menu {
+            background-color: #343a40;
+        }
+        .sidebar .dropdown-item:hover {
+            background-color: #495057;
+        }
+        .content {
+            margin-left: 270px;
+            padding: 20px;
+        }
+        .card {
+            margin: 20px 0;
+        }
+        .card-title {
+            font-weight: bold;
+        }
+        .alert {
+            margin: 20px 0;
+        }
+        footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: #343a40;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2 class="text-center">Menu</h2>
+        <ul class="list-group">
+            <li class="list-group-item bg-dark"><a href="{% url 'vendor_home' %}">Dashboard</a></li>
+            <li class="list-group-item bg-dark dropdown">
+                <a class="dropdown-toggle" data-toggle="dropdown" href="#" aria-haspopup="true" aria-expanded="false">Product Management</a>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href="{% url 'vendor_add_product' %}">Add Product</a>
+                    <a class="dropdown-item" href="{% url 'vendor_view_products' %}">View Products</a>
+                </div>
+            </li>
+            <li class="list-group-item bg-dark dropdown">
+                <a class="dropdown-toggle" data-toggle="dropdown" href="#" aria-haspopup="true" aria-expanded="false">Order Management</a>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href="{% url 'vendor_pending_orders' %}">Order Requests</a>
+                    <a class="dropdown-item" href="{% url 'vendor_order_history' %}">Order History</a>
+                    <a class="dropdown-item" href="{% url 'vendor_restock_requests' %}">Restock Requests</a>
+                    <a class="dropdown-item" href="{% url 'vendor_declined_orders' %}">Declined Orders</a>
+                    <a class="dropdown-item" href="{% url 'vendor_payment_details' %}">Payment Details</a>
+                </div>
+            </li>
+            <li class="list-group-item bg-dark"><a href="{% url 'logout' %}">Logout</a></li>
+        </ul>
+    </div>
+
+    <div class="content">
+        <h1>Welcome, {{ vendor.business_name }}!</h1>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card text-white bg-primary">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Orders</h5>
+                        <p class="card-text">{{ total_orders }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-white bg-success">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Customers</h5>
+                        <p class="card-text">{{ total_customers }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                {% if restock_requests %}
+                <div class="alert alert-warning" role="alert">
+                    You have {{ restock_requests.count }} restock requests pending!
+                    <a href="{% url 'vendor_pending_orders' %}" class="alert-link">Click here to view.</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; {{ current_year }} Your Company Name. All rights reserved.</p>
+    </footer>
+
+    <!-- Include jQuery and Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

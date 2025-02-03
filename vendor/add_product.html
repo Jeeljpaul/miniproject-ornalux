@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Product</title>
+    <script type="text/javascript">
+        // Function to disable the back button
+        function preventBack() {
+            history.pushState(null, null, location.href); // Add a new state to the history
+            window.addEventListener('popstate', function (event) {
+                history.pushState(null, null, location.href); // Keep adding a new state to block the back action
+            });
+        }
+
+        // Call the function to prevent back navigation
+        window.onload = preventBack;
+    </script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        body {
+            background-color: #e9ecef;
+            font-family: 'Poppins', sans-serif;
+        }
+        .container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            max-width: 700px;
+            margin: 60px auto;
+            transition: transform 0.2s;
+        }
+        .container:hover {
+            transform: scale(1.02);
+        }
+        h2 {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .form-group label {
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 10px;
+        }
+        .form-control {
+            border-radius: 10px;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            background-color: #f9f9f9;
+            height: 50px;
+        }
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+            background-color: #ffffff;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 25px;
+            font-weight: 500;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            width: 100%;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
+        .required {
+            color: red;
+        }
+        .error-message {
+            color: red;
+            font-size: 0.875rem;
+        }
+        #sidebar-wrapper {
+    min-height: 100vh;
+    margin-left: 0;
+    transition: margin 0.25s ease-out;
+    background-color: #343a40; /* Dark sidebar */
+}
+
+        #sidebar-wrapper .sidebar-heading {
+            padding: 1rem;
+            font-size: 1.5rem;
+            background-color: #212529; /* Darker heading for contrast */
+            color: #fff;
+            text-align: center;
+        }
+
+        .list-group-item {
+            border: none;
+            background-color: transparent;
+            color: #0a0a0a; /* Light text color */
+        }
+
+        .list-group-item:hover, .list-group-item:focus {
+            background-color: #495057; /* Darker hover effect */
+            color: #fff;
+        }
+
+        #page-content-wrapper {
+            width: 100vw;
+            padding: 20px;
+        }
+
+        .navbar {
+            padding-left: 0;
+        }
+
+        .navbar-light {
+            background-color: #e9ecef; /* Light navbar background */
+        }
+
+    </style>
+    <script>
+        function validateForm(event) {
+            let isValid = true;
+            const errors = [];
+
+            const productName = document.getElementById('id_product_name').value;
+            // const category = document.getElementById('id_category').value;
+            const description = document.getElementById('id_product_description').value;
+            // const deliveryOptions = document.getElementById('id_delivery_options').value;
+            const price = document.getElementById('id_price').value; // Keep as string for price validation
+            const stockQuantity = parseInt(document.getElementById('id_stock_quantity').value);
+            const weight = parseFloat(document.getElementById('id_weight').value);
+            // const metalType = document.getElementById('id_metal_type').value;
+            // const stoneType = document.getElementById('id_stone_type').value;
+            // const occasion = document.getElementById('id_occasion').value;
+            const gender = document.getElementById('id_gender').value;
+            const imageInput = document.getElementById('id_image');
+            const filePath = imageInput.value;
+            const allowedExtensions = /(\.jpg|\.jpeg|\.png)$/i;
+
+            // Validation for product name and category
+            const validateNameCategory = (value) => {
+    // Regular expression to check if the value contains only alphabetic characters
+            const alphabeticRegex = /^[A-Za-z\s]+$/;
+            return value[0].toUpperCase() === value[0] && 
+            value.length >= 3 && 
+            alphabeticRegex.test(value);
+};
+
+// Validation for product name
+            if (!validateNameCategory(productName)) {
+                errors.push("Product name must start with a capital letter, be at least 3 characters long, and contain only alphabetic characters.");
+                isValid = false;
+            }
+            // if (!validateNameCategory(category)) {
+            //     errors.push("Category must start with a capital letter and be at least 3 characters long.");
+            //     isValid = false;
+            // }
+
+
+
+            // Validation for description and delivery options
+            const validateDescriptionDelivery = (value) => {
+                return value[0].toUpperCase() === value[0] && value.endsWith('.') && value.length >= 10 && value.length <= 100;
+            };
+            if (!validateDescriptionDelivery(description)) {
+                errors.push("Description must start with a capital letter, end with a full stop, and be between 10 and 100 characters long.");
+                isValid = false;
+            }
+            // if (!validateDescriptionDelivery(deliveryOptions)) {
+            //     errors.push("Delivery options must start with a capital letter, end with a full stop, and be between 10 and 100 characters long.");
+            //     isValid = false;
+            // }
+
+
+
+           // Validation for price
+            const validatePrice = (value) => {
+                // Regular expression to allow numbers, commas, and periods only
+                const priceRegex = /^[0-9.,]+$/;
+                return priceRegex.test(value) && !isNaN(value.replace(/,/g, '')) && value >= 100 && value <= 10000000;
+            };
+
+            if (!validatePrice(price)) {
+                errors.push("Price must be a decimal value between 100 and 10,000,000 and can only include numbers, commas, and periods.");
+                isValid = false;
+            }
+
+
+            // Validation for stock quantity
+            if (stockQuantity < 0 || stockQuantity > 50) {
+                errors.push("Stock quantity must be between 0 and 50.");
+                isValid = false;
+            }
+
+            // Validation for weight
+            if (weight < 1 || weight > 100) {
+                errors.push("Weight must be between 1 and 100.");
+                isValid = false;
+            }
+
+            // Validation for metal type, stone type, and occasion
+            // const validateMetalStoneOccasion = (value) => {
+            //     return value[0].toUpperCase() === value[0] && value.length >= 3;
+            // };
+            // if (!validateMetalStoneOccasion(metalType)) {
+            //     errors.push("Metal type must start with a capital letter and be at least 3 characters long.");
+            //     isValid = false;
+            // }
+            // if (!validateMetalStoneOccasion(stoneType)) {
+            //     errors.push("Stone type must start with a capital letter and be at least 3 characters long.");
+            //     isValid = false;
+            // }
+            // if (!validateMetalStoneOccasion(occasion)) {
+            //     errors.push("Occasion must start with a capital letter and be at least 3 characters long.");
+            //     isValid = false;
+            // }
+
+
+            
+            // Validation for gender
+            const validGenders = ['Men', 'Women', 'Unisex', 'Kids', 'Baby'];
+            if (!validGenders.includes(gender)) {
+                errors.push("Gender must be either 'Men', 'Women', 'Unisex', 'Kids' or  'Baby'.");
+                isValid = false;
+            }
+
+            // Validation for image file type
+        if (imageInput.files.length > 0 && !allowedExtensions.exec(filePath)) {
+            errors.push("Please upload a valid image file (jpg, jpeg, or png).");
+            isValid = false;
+            imageInput.value = ''; // Clear the input field if the validation fails
+        }
+
+            // Display errors if any
+            const errorContainer = document.getElementById('error-messages');
+            errorContainer.innerHTML = '';
+            if (!isValid) {
+                errors.forEach(error => {
+                    const div = document.createElement('div');
+                    div.className = 'error-message';
+                    div.innerText = error;
+                    errorContainer.appendChild(div);
+                });
+                event.preventDefault();
+            }
+        }
+
+    
+            // Function to fetch category attributes when a category is selected
+function loadAttributes() {
+                const categoryId = document.getElementById('id_category').value;// Get the selected category ID
+                console.log("category",categoryId)
+                // Perform the AJAX request to fetch category attributes
+                if (!categoryId) {
+    console.error('Category ID is not defined.');
+    $('#attributes-container').html('<p style="color:red;">Invalid category ID. Please select a valid category.</p>');
+    return; // Exit the function if categoryId is not valid
+}
+
+$.ajax({
+    url: `/get_category_attributes/${categoryId}/`,
+    type: 'GET',
+    dataType: 'json',
+    success: function (response) {
+        console.log(response);
+        displayAttributes(response);
+    },
+    error: function (xhr, status, error) {
+        console.error('Error fetching category attributes:', error);
+        $('#attributes-container').html(`<p style="color:red;">Error fetching attributes. Please try again.</p>`);
+    }
+});
+
+            };
+
+            // Function to display category attributes on the page
+            function displayAttributes(data) {
+                const attributesContainer = $('#attributes-container'); // Select the attributes container
+                attributesContainer.empty(); // Clear previous attributes
+
+                if (data && data.attributes && data.attributes.length > 0) {
+                    let attributesHtml = '';
+                    data.attributes.forEach(function (attribute) {
+                        attributesHtml += `
+                            <div class="form-group">
+                                <label>${attribute.name}</label>
+                                <input type="text" class="form-control" name="attribute_${attribute.id}" value="${attribute.value || ''}" /> <!-- Assuming attribute.value holds the value -->
+                                <input type="hidden" name="attributes" value="${attribute.id}" /> <!-- Hidden input to store attribute ID -->
+                            </div>
+                        `; // Create a read-only input for each attribute
+                     });
+                     attributesContainer.html(attributesHtml); // Insert the generated HTML into the attributes container
+                } else {
+                    attributesContainer.html('<p>No attributes found for this category.</p>'); // Message when no attributes are found
+                }
+            }
+
+        
+    </script>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="{% url 'vendor_home' %}">Home</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <div class="d-flex" id="wrapper">
+        <div class="bg-light border-right" id="sidebar-wrapper">
+            <div class="sidebar-heading">Blue Dart</div>
+            <div class="list-group list-group-flush">
+                <!-- Manage Users -->
+                <!-- Manage Staff -->
+                <!-- Manage Products -->
+                <!-- View Order Details -->
+                <!-- View Payment Details -->
+                <!-- View Return Details -->
+                <!-- View Booking Schedule -->
+                <!-- Manage Feedback and Reviews -->
+            </div>
+        </div>
+
+        <!-- Page Content -->
+        <div class="container mt-5">
+            <h2>Add New Product</h2>
+            <div id="error-messages"></div>
+            <form method="POST" enctype="multipart/form-data" onsubmit="validateForm(event)">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="id_product_name">Product Name <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="id_product_name" name="product_name" required>
+                </div>
+                <div class="form-group">
+                    <label for="id_category">Category</label>
+                    <select class="form-control" id="id_category" name="id_category" onchange="loadAttributes()">
+                        <option value="">Select a category</option>
+                        {% for category in categories %}
+                            <option value="{{ category.category_id }}">{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div id="attributes-container" class="form-group"></div> <!-- Container for category attributes -->
+
+                <div class="form-group">
+                    <label for="id_product_description">Product Description <span class="required">*</span></label>
+                    <textarea class="form-control" id="id_product_description" name="product_description" rows="3" required></textarea>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="id_price">Price <span class="required">*</span></label>
+                    <input type="number" class="form-control" id="id_price" name="price" min="100" max="10000000" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="id_stock_quantity">Stock Quantity <span class="required">*</span></label>
+                    <input type="number" class="form-control" id="id_stock_quantity" name="stock_quantity" min="0" max="50" required>
+                </div>
+                <div class="form-group">
+                    <label for="id_weight">Weight (grams) <span class="required">*</span></label>
+                    <input type="number" class="form-control" id="id_weight" name="weight" min="1" max="100" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_metaltype">Metal Type </label>
+                    <select class="form-control" id="id_metaltype" name="metaltype">
+                        <option value="">Select Metal Type</option>
+                        {% for metaltype in metaltypes %}
+                        <option value="{{ metaltype.metaltype_id }}">{{ metaltype.name }}</option>
+                        {% endfor %}
+                    </select>
+                    
+                </div>
+
+
+                <div class="form-group">
+                    <label for="id_stonetype">Stone Type </label>
+                    <select class="form-control" id="id_stonetype" name="stonetype">
+                        <option value="">Select Stone Type</option>
+                        {% for stonetype in stonetypes %}
+                        <option value="{{ stonetype.stonetype_id }}">{{ stonetype.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                
+
+                <div class="form-group">
+                    <label for="id_gender">Gender <span class="required">*</span></label>
+                    <select class="form-control" id="id_gender" name="gender" required>
+                        <option value="">Select Gender</option>
+                        <option value="Men">Men</option>
+                        <option value="Women">Women</option>
+                        <option value="Unisex">Unisex</option>
+                        <option value="Kid">Kid</option>
+                        <option value="Baby">Baby</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_image">Product Image <span class="required">*</span></label>
+                    <input type="file" class="form-control-file" id="id_image" name="image" required>
+                </div>
+
+                <button type="submit">Add Product</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
